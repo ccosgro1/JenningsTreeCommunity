@@ -982,3 +982,12 @@ tiles=rank(rbind(res.vec,jac.edge.eff))
 goodness(jac.core.rda.ecosys)
 goodness(jac.edge.rda.ecosys)
 
+
+
+####Rank specialists by ecosystem####
+tree.ringsum=tree.ringsum[tree.ringsum$ecosys=="B",]
+tree.colsums=apply(tree.ringsum[,10:43],2,sum)
+plot(rank(tree.colsums),tree.colsums)
+print(tree.colsums)
+
+
