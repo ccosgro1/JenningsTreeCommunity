@@ -990,5 +990,15 @@ tree.colsums=apply(tree.ringsum[,10:43],2,sum)
 plot(rank(tree.colsums),tree.colsums)
 print(tree.colsums)
 
-
-
+tree.hel.soil=merge(tree.hel,soildata)
+dim(tree.hel.soil)
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+names(tree.hel.soil)
+dim(tree.hel.soil)
+rownames(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil = rda(tree.hel.soil[,10:43], tree.hel.soil[,45:78])
+anova(hel.rda.fulsoil)
+RsquareAdj(hel.rda.fulsoil)
+global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
