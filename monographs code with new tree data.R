@@ -6,7 +6,7 @@
 library(vegan)
 library(packfor)
 # Although the code below does not, you should use the better PCNM library if you can, to select significantly structured PCNMs before anything else with them
-#library(PCNM)
+library(PCNM)
 
 #### OLD DATA ######
 treedata=read.csv("C:/Users/Colleen/Dropbox/Jennings 2016/tree basal areas.csv")
@@ -989,8 +989,9 @@ tree.ringsum=tree.ringsum[tree.ringsum$ecosys=="B",]
 tree.colsums=apply(tree.ringsum[,10:43],2,sum)
 plot(rank(tree.colsums),tree.colsums)
 print(tree.colsums)
+ncol(tree.ringsum)
 
-tree.hel.soil=merge(tree.hel,soildata)
+tree.hel.soil=merge(tree.ringsum,soildata)
 dim(tree.hel.soil)
 rownames(tree.hel.soil)=tree.hel.soil[,1]
 tree.hel.soil=na.exclude(tree.hel.soil)
@@ -1002,3 +1003,4 @@ hel.rda.fulsoil = rda(tree.hel.soil[,10:43], tree.hel.soil[,45:78])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+
