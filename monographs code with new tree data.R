@@ -6,9 +6,9 @@
 library(vegan)
 library(packfor)
 # Although the code below does not, you should use the better PCNM library if you can, to select significantly structured PCNMs before anything else with them
-library(PCNM)
+#library(PCNM)
 
-#### OLD DATA ######
+#### OLD DATA 2008 ######
 treedata=read.csv("C:/Users/Colleen/Dropbox/Jennings 2016/tree basal areas.csv")
 soildata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
 names(treedata)
@@ -91,7 +91,7 @@ anova(hel.rda.all.partsoil)
 ### Can you try to run this on core only plots or core+edge plots and see how the importance of soil versus spatial structure shifts?
 
 
-###### Some Bonus tree code
+######Old Data 2008; Some Bonus tree code####
 # Here is a quick analysis to test for the edge effect on tree communities when Ecosystem type is the explanatory factor, just like we did before with soil data
 # First the core plots
 tree.hel.core=tree.hel[tree.hel$EP=="Core",]
@@ -159,13 +159,14 @@ goodness(jac.edge.rda.ecosys)
 
 
 
-######## NEW TREE DATA FROM 2016 ######
+######## NEW DATA 2016 ######
 treedata=read.csv("C:/Users/Colleen/Dropbox/Jennings 2016/New Adult Basal Area.csv")
 soildata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
 names(treedata)
 dim(treedata)
 names(soildata)
 dim(soildata)
+treedata$ecosys
 
 treedata[is.na(treedata)] <- 0
 
@@ -382,8 +383,6 @@ anova(hel.rda.all.partsoil)
 # Also yes.  But only by p-value; that is really not much variance explained anymore.
 
 
-
-##################################
 ###This is repeat code from up above - and is not actually helpful for any reason whatsoever right now.
 # Now that we have these parsimonious models, NOW WE CAN PERFORM VARIANCE PARTITIONING!  Hurray!
 varpart(tree.hel.all.pcnm[,10:43], tree.hel.all.pcnm[,c(77:81,83:86)], tree.hel.all.pcnm[,c(52,54,56,57,58)])
@@ -399,12 +398,7 @@ anova(hel.rda.all.partsoil)
 # Also yes.  But only by p-value; that is really not much variance explained anymore.
 
 
-
-############################################
-
-
-
-
+########new tree data 2016; bonus code########
 ###### Some Bonus tree code
 # Here is a quick analysis to test for the edge effect on tree communities when Ecosystem type is the explanatory factor, just like we did before with soil data
 # First the core plots
@@ -985,8 +979,34 @@ goodness(jac.edge.rda.ecosys)
 
 
 ####Rank specialists by ecosystem####
-tree.ringsum=tree.ringsum[tree.ringsum$ecosys=="B",]
-tree.colsums=apply(tree.ringsum[,10:43],2,sum)
+treedata=read.csv("C:/Users/Colleen/Dropbox/Jennings 2016/tree basal areas.csv")
+soildata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
+treedata[is.na(treedata)] <- 0
+treedata[,c(1,3)]
+
+tree.ringsum=treedata[1:80,]
+#This [1:80,] refers to all plots within the first ring.
+names(treedata)
+dim(tree.ringsum)
+for(i in 1:80) {
+    tree.ringsum[i,10:42]=treedata[i,10:42]+treedata[i+83,10:42]+treedata[i+166,10:42]}
+rownames(tree.ringsum)=tree.ringsum[,1]
+# Let's look at a rank abbundance plot for fun
+tree.colsums=apply(tree.ringsum[,10:42],2,sum)
+plot(rank(tree.colsums),tree.colsums)
+print(tree.colsums)
+
+
+# Perform Hellinger transformation on tree species data so that RDA is based on Hellinger distance
+tree.rowsums=apply(tree.ringsum[,10:42],1,sum)
+tree.hel=tree.ringsum
+tree.hel[,10:42]=tree.hel[,10:42]/tree.rowsums
+tree.hel[,10:42]=sqrt(tree.hel[,10:42])
+
+tree.ringsum=treedata[treedata$ecosys=="R",]
+treedata[,c(1,3)]
+tree.ringsum[,c(1,3)]
+tree.colsums=apply(tree.ringsum[,10:42],2,sum)
 plot(rank(tree.colsums),tree.colsums)
 print(tree.colsums)
 ncol(tree.ringsum)
@@ -998,9 +1018,13 @@ tree.hel.soil=na.exclude(tree.hel.soil)
 names(tree.hel.soil)
 dim(tree.hel.soil)
 rownames(tree.hel.soil)
+colnames(tree.hel.soil)
+tree.hel.soil$Plot
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil[,10:43], tree.hel.soil[,45:78])
+hel.rda.fulsoil = rda(tree.hel.soil[,10:42], tree.hel.soil[,52:76])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+
+apply(tree.hel.soil[,10:42],2,sum)
 
