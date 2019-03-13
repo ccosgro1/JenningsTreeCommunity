@@ -90,6 +90,129 @@ anova(hel.rda.all.partsoil)
 
 ### Can you try to run this on core only plots or core+edge plots and see how the importance of soil versus spatial structure shifts?
 
+### Can you try to run this on core only plots or core+edge plots and see how the importance of soil versus spatial structure shifts?
+
+#Core Plots
+tree.hel.soil=merge(tree.hel,soildata)
+tree.hel.soil=tree.hel.soil[tree.hel.soil$EP=="Core",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+colnames(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil = rda(tree.hel.soil[,10:43], tree.hel.soil[,52:76])
+anova(hel.rda.fulsoil)
+RsquareAdj(hel.rda.fulsoil)
+global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+
+# Here is the forward selection command and then constructing a model with selected variables.
+hel.rda.for=forward.sel(tree.hel.soil[,10:43], tree.hel.soil[,52:76], adjR2thresh=global.thresh)
+colnames(tree.hel.soil)
+hel.rda.for
+names(tree.hel.soil)
+hel.rda.selsoil = rda(tree.hel.soil[,10:42] ~ as.matrix(tree.hel.soil[,c(52,60)]))
+anova(hel.rda.selsoil)
+RsquareAdj(hel.rda.selsoil)
+plot(hel.rda.selsoil)
+# Cool analysis, but what a terrible plot.  Much better to get the scores and plot them in a real graphing program, or do some fancy graphing in R if that is your thing.
+
+#### Forward selection using PCNM vectors
+# First we perform PCNM to get the vectors
+all.geog.dist=vegdist(tree.hel.soil[,8:9],method="euclid")
+all.pcnm1=pcnm(all.geog.dist)
+all.pcnmvecs=all.pcnm1$vectors
+# If you can get the PCNM library to run, you could do the line below to select only significantly structured PCNMs
+#tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs[,which(all.pcnm1$Moran_I[,2]<0.05)])
+tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs)
+names(tree.hel.all.pcnm)
+# Now run step 1, global analysis
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:43], tree.hel.all.pcnm[,77:101])
+anova(hel.rda.all.fulpcnm)
+RsquareAdj(hel.rda.all.fulpcnm)
+global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
+# now run step 2, the selection part
+hel.rda.all.forpcnm=forward.sel(tree.hel.all.pcnm[,10:43], tree.hel.all.pcnm[,77:101], adjR2thresh=global.thresh)
+hel.rda.all.forpcnm
+# Let's store a model using the selected variables only
+names(tree.hel.all.pcnm)
+hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:43] ~ as.matrix(tree.hel.all.pcnm[,c(77,79,78,93,94)]))
+anova(hel.rda.all.selpcnm)
+RsquareAdj(hel.rda.all.selpcnm)
+
+# Now that we have these parsimonious models, NOW WE CAN PERFORM VARIANCE PARTITIONING!  Hurray!
+colnames(tree.hel.all.pcnm)
+varpart(tree.hel.all.pcnm[,10:43], tree.hel.all.pcnm[,c(80:92,94:101)], tree.hel.all.pcnm[,c(77,79,78,93,94)])
+# The variance explained by soil variables and spatial structure clearly overlap. 
+# It also appears that there is more independent spatial structure in the trees than independent structuring by soil.
+# Are the soil variables significant after accounting for spatial structure, and vice versa?
+# Let's see.
+hel.rda.all.partpcnm=rda(tree.hel.all.pcnm[,10:43], tree.hel.all.pcnm[,c(80:92,94:101)], tree.hel.all.pcnm[,c(77,79,78,93,94)])
+anova(hel.rda.all.partpcnm)
+# No.
+hel.rda.all.partsoil=rda(tree.hel.all.pcnm[,10:43], tree.hel.all.pcnm[,c(52,54,58,64,65)], tree.hel.all.pcnm[,c(77,79,78,93,94)])
+anova(hel.rda.all.partsoil)
+# Also yes.  But only by p-value; that is really not much variance explained anymore.
+
+
+#Core+Edge
+tree.hel.soil=merge(tree.hel,soildata)
+tree.hel.soil=tree.hel.soil[tree.hel.soil$EP=="Core"|tree.hel.soil$EP=="Edge",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+colnames(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil = rda(tree.hel.soil[,10:43], tree.hel.soil[,52:76])
+anova(hel.rda.fulsoil)
+RsquareAdj(hel.rda.fulsoil)
+global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+
+# Here is the forward selection command and then constructing a model with selected variables.
+hel.rda.for=forward.sel(tree.hel.soil[,10:43], tree.hel.soil[,52:76], adjR2thresh=global.thresh)
+colnames(tree.hel.soil)
+hel.rda.for
+names(tree.hel.soil)
+hel.rda.selsoil = rda(tree.hel.soil[,10:42] ~ as.matrix(tree.hel.soil[,c(60,52,69,62,58,75)]))
+anova(hel.rda.selsoil)
+RsquareAdj(hel.rda.selsoil)
+plot(hel.rda.selsoil)
+# Cool analysis, but what a terrible plot.  Much better to get the scores and plot them in a real graphing program, or do some fancy graphing in R if that is your thing.
+
+#### Forward selection using PCNM vectors
+# First we perform PCNM to get the vectors
+all.geog.dist=vegdist(tree.hel.soil[,8:9],method="euclid")
+all.pcnm1=pcnm(all.geog.dist)
+all.pcnmvecs=all.pcnm1$vectors
+# If you can get the PCNM library to run, you could do the line below to select only significantly structured PCNMs
+#tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs[,which(all.pcnm1$Moran_I[,2]<0.05)])
+tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs)
+names(tree.hel.all.pcnm)
+# Now run step 1, global analysis
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:43], tree.hel.all.pcnm[,77:115])
+anova(hel.rda.all.fulpcnm)
+RsquareAdj(hel.rda.all.fulpcnm)
+global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
+# now run step 2, the selection part
+hel.rda.all.forpcnm=forward.sel(tree.hel.all.pcnm[,10:43], tree.hel.all.pcnm[,77:115], adjR2thresh=global.thresh)
+hel.rda.all.forpcnm
+# Let's store a model using the selected variables only
+names(tree.hel.all.pcnm)
+hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:43] ~ as.matrix(tree.hel.all.pcnm[,c(78,79,82,97,108)]))
+anova(hel.rda.all.selpcnm)
+RsquareAdj(hel.rda.all.selpcnm)
+
+# Now that we have these parsimonious models, NOW WE CAN PERFORM VARIANCE PARTITIONING!  Hurray!
+colnames(tree.hel.all.pcnm)
+varpart(tree.hel.all.pcnm[,10:43], tree.hel.all.pcnm[,c(77:81,83:96,98:107,109:115)], tree.hel.all.pcnm[,c(78,79,82,97,108)])
+# The variance explained by soil variables and spatial structure clearly overlap. 
+# It also appears that there is more independent spatial structure in the trees than independent structuring by soil.
+# Are the soil variables significant after accounting for spatial structure, and vice versa?
+# Let's see.
+hel.rda.all.partpcnm=rda(tree.hel.all.pcnm[,10:43], tree.hel.all.pcnm[,c(77:81,83:96,98:107,109:115)], tree.hel.all.pcnm[,c(78,79,82,97,108)])
+anova(hel.rda.all.partpcnm)
+# No.
+hel.rda.all.partsoil=rda(tree.hel.all.pcnm[,10:43], tree.hel.all.pcnm[,c(78,79,82,97,108)], tree.hel.all.pcnm[,c(77:81,83:96,98:107,109:115)])
+anova(hel.rda.all.partsoil)
+# YES.  But only by p-value; that is really not much variance explained anymore.
+
 
 ######Old Data 2008; Some Bonus tree code####
 # Here is a quick analysis to test for the edge effect on tree communities when Ecosystem type is the explanatory factor, just like we did before with soil data
@@ -329,13 +452,13 @@ rownames(tree.hel.soil)=tree.hel.soil[,1]
 tree.hel.soil=na.exclude(tree.hel.soil)
 colnames(tree.hel.soil)
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil[,10:43], tree.hel.soil[,52:76])
+hel.rda.fulsoil = rda(tree.hel.soil[,10:43], tree.hel.soil[,55:76])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 
 # Here is the forward selection command and then constructing a model with selected variables.
-hel.rda.for=forward.sel(tree.hel.soil[,10:43], tree.hel.soil[,46:79], adjR2thresh=global.thresh)
+hel.rda.for=forward.sel(tree.hel.soil[,10:43], tree.hel.soil[,55:79], adjR2thresh=global.thresh)
 colnames(tree.hel.soil)
 hel.rda.for
 names(tree.hel.soil)
