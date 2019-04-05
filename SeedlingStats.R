@@ -68,7 +68,8 @@ barplot(scolsums)
 plot(rank(scolsums),scolsums, main="Seedling Rank Abundance") #This distribution is crazy!! 
 
 
-##Species Regressions
+####Species Regressions####
+#Juvenile Regression
 #FIRST: change names in juvies so that merging with adult dataset there aren't duplicate columns.
 dim(juvies)
 colnames(juvies)
@@ -82,8 +83,36 @@ juvies=merge(juvies[,c(1:4)], addseeds)
 juvies.tree=merge(juvies,tree.ringsum, by="Plot")
 head(juvies.tree)
 
-####COLLEEN COME BACK TO THIS####
-#seedling graphs
+##Linear Regression of seedling abundance by basal area proportion
+#Remove columns that don't have both juveniles and adult trees.
+colnames(juvies.tree)
+juvies.tree=juvies.tree[,c(1:4,6:12,15:18,20:24,26:30,31:45,48:50,52:60,62:63,66:70,73:76)]
+colnames(juvies.tree)
+tcolsums=apply(juvies.tree[,39:63],2,sum)
+#Remove columns==0 (found using tcolsums)
+juvies.tree=juvies.tree[,c(1:9,11:17,19:25,27,29,30:43,45:51,53:60,62)]
+
+#proportion basal area
+colnames(juvies.tree)
+tcolsums=apply(juvies.tree[,35:55],2,sum)
+propAS=(juvies.tree$ACESAC/tcolsums["ACESAC"])
+beginfor=lm(juvies.tree$ACESAC_seed~propAS)
+summary(beginfor)
+graph=plot(juvies.tree$ACESAC_seed~propAS, ylab="Juvenile Abundance", xlab="Proportion BA")
+abline(beginfor)
+
+
+colnames(juvies.tree)
+tcolsums
+for(i in 5:25){
+  propBA=(juvies.tree[,i+30]/tcolsums[i-4])
+  regBA=lm(juvies.tree[,i]~propBA)
+  summary(regBA)
+  graph=plot(juvies.tree[,i]~propBA, xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+30])
+  abline(regBA)
+}
+
+#Seedling Regression
 dim(seeds)
 colnames(seeds)
 addseeds=cbind(seeds[,c(1,5:38)])
@@ -121,14 +150,12 @@ for(i in 5:28){
   propBA=(seeds.tree[,i+32]/tcolsums[i-4])
   regBA=lm(seeds.tree[,i]~propBA)
   summary(regBA)
-  graph=plot(seeds.tree[,i]~propBA, xlab="Proportion BA", ylab="Seedling Abundance", main=colnames(seeds.tree)[i+29])
+  graph=plot(seeds.tree[,i]~propBA, xlab="Proportion BA", ylab="Seedling Abundance", main=colnames(seeds.tree)[i+32])
   abline(regBA)
   }
 
-#Seedling Regression
 
-
-##RDAs
+###RDAs####
 #####JUVENILE#####
 #Hellinger Transform data
 colnames(juvies1)
