@@ -28,7 +28,7 @@ juvies[is.na(juvies)]<-0
 seeds[is.na(seeds)]<-0
 treedata[is.na(treedata)]<-0
 
-#to use for later analyses, after things get messed up.
+#to use for later analyses, after things get messed up -- subsetted,etc..
 juvies1=juvies
 seeds1=seeds
 
@@ -85,14 +85,16 @@ head(juvies.tree)
 ##Linear Regression of seedling abundance by basal area proportion
 #Remove columns that don't have both juveniles and adult trees.
 juvies.tree=juvies.tree[,c(1:4,6:12,15:18,20:24,26:30,32:45,48:50,52:60,62:63,66:70,73:76,79)]
-
+colnames(juvies.tree)
+tcolsums=apply(juvies.tree[,38:62],2,sum)
+#Remove columns==0 (found using tcolsums)
+juvies.tree=juvies.tree[,c(1:9,11:17,19:26,28,30:42,44:50,52:59,61,63)]
 
 #proportion basal area
 colnames(juvies.tree)
-tcolsums=apply(juvies.tree[,38:62],2,sum)
+tcolsums=apply(juvies.tree[,34:54],2,sum)
 propAS=(juvies.tree$ACESAC/tcolsums["ACESAC"])
 beginfor=lm(juvies.tree$ACESAC_seed~propAS)
-plot(beginfor)
 summary(beginfor)
 graph=plot(juvies.tree$ACESAC_seed~propAS, ylab="Juvenile Abundance", xlab="Proportion BA")
 abline(beginfor)
@@ -100,11 +102,11 @@ abline(beginfor)
 
 colnames(juvies.tree)
 tcolsums
-for(i in 5:29){
-  propBA=(juvies.tree[,i+33]/tcolsums[i-4])
+for(i in 5:25){
+  propBA=(juvies.tree[,i+29]/tcolsums[i-4])
   regBA=lm(juvies.tree[,i]~propBA)
   summary(regBA)
-  graph=plot(juvies.tree[,i]~propBA, xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies[,i]))
+  graph=plot(juvies.tree[,i]~propBA, xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+29])
   abline(regBA)
   }
 
