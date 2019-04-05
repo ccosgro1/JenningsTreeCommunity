@@ -82,33 +82,50 @@ juvies=merge(juvies[,c(1:4)], addseeds)
 juvies.tree=merge(juvies,tree.ringsum, by="Plot")
 head(juvies.tree)
 
+####COLLEEN COME BACK TO THIS####
+#seedling graphs
+dim(seeds)
+colnames(seeds)
+addseeds=cbind(seeds[,c(1,5:38)])
+#add _seed to all of the juvenile species columns
+colnames(addseeds)=paste(colnames(addseeds), "seed", sep = "_")
+colnames(addseeds)[1]="Plot"
+colnames(addseeds)
+#put everything back together and then add the adult dataset
+seeds=merge(seeds[,c(1:4)], addseeds)
+seeds.tree=merge(seeds,tree.ringsum, by="Plot")
+head(seeds.tree)
+
 ##Linear Regression of seedling abundance by basal area proportion
 #Remove columns that don't have both juveniles and adult trees.
-juvies.tree=juvies.tree[,c(1:4,6:12,15:18,20:24,26:30,32:45,48:50,52:60,62:63,66:70,73:76,79)]
-colnames(juvies.tree)
-tcolsums=apply(juvies.tree[,38:62],2,sum)
+colnames(seeds.tree)
+seeds.tree=seeds.tree[,c(1:4,6:11,13,15,18:21,23:26,28:32,34:48,50:53,55:62,64:65,69:73,75:76,78:80)]
+colnames(seeds.tree)
+tcolsums=apply(seeds.tree[,39:64],2,sum)
 #Remove columns==0 (found using tcolsums)
-juvies.tree=juvies.tree[,c(1:9,11:17,19:26,28,30:42,44:50,52:59,61,63)]
+seeds.tree=seeds.tree[,c(1:10,12:28,30:44,46:62,64)]
 
 #proportion basal area
-colnames(juvies.tree)
-tcolsums=apply(juvies.tree[,34:54],2,sum)
-propAS=(juvies.tree$ACESAC/tcolsums["ACESAC"])
-beginfor=lm(juvies.tree$ACESAC_seed~propAS)
+colnames(seeds.tree)
+tcolsums=apply(seeds.tree[,37:60],2,sum)
+propAS=(seeds.tree$ACESAC/tcolsums["ACESAC"])
+beginfor=lm(seeds.tree$ACESAC_seed~propAS)
 summary(beginfor)
-graph=plot(juvies.tree$ACESAC_seed~propAS, ylab="Juvenile Abundance", xlab="Proportion BA")
+graph=plot(seeds.tree$ACESAC_seed~propAS, ylab="Juvenile Abundance", xlab="Proportion BA")
 abline(beginfor)
 
 
-colnames(juvies.tree)
+colnames(seeds.tree)
 tcolsums
-for(i in 5:25){
-  propBA=(juvies.tree[,i+29]/tcolsums[i-4])
-  regBA=lm(juvies.tree[,i]~propBA)
+for(i in 5:28){
+  propBA=(seeds.tree[,i+32]/tcolsums[i-4])
+  regBA=lm(seeds.tree[,i]~propBA)
   summary(regBA)
-  graph=plot(juvies.tree[,i]~propBA, xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+29])
+  graph=plot(seeds.tree[,i]~propBA, xlab="Proportion BA", ylab="Seedling Abundance", main=colnames(seeds.tree)[i+29])
   abline(regBA)
   }
+
+#Seedling Regression
 
 
 ##RDAs
