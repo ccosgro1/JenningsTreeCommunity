@@ -95,20 +95,24 @@ juvies.tree=juvies.tree[,c(1:9,11:17,19:25,27,29,30:43,45:51,53:60,62)]
 #proportion basal area
 colnames(juvies.tree)
 tcolsums=apply(juvies.tree[,35:55],2,sum)
-propAS=(juvies.tree$ACESAC/tcolsums["ACESAC"])
-beginfor=lm(juvies.tree$ACESAC_seed~propAS)
+propAS=(juvies.tree$ACESAC/tcolsums$ACESAC)
+beginfor=lm(juvies.tree$ACESAC_seed~tcolsums$ACESAC)
 summary(beginfor)
-graph=plot(juvies.tree$ACESAC_seed~propAS, ylab="Juvenile Abundance", xlab="Proportion BA")
+graph=plot(juvies.tree$ACESAC_seed~tcolsums$ACESAC, ylab="Juvenile Abundance", xlab="Proportion BA")
 abline(beginfor)
+rownames(juvies.tree)=juvies.tree[,1]
+trowsums=apply(juvies.tree[,35:55],1,sum)
 
-
+juvab=decostand(juvies.tree[,35:55],method = "total" ,MARGIN = 1)
 colnames(juvies.tree)
 tcolsums
+#####ADD PROPAB JUVENILES AND SEEDLINGS
 for(i in 5:25){
   propBA=(juvies.tree[,i+30]/tcolsums[i-4])
-  regBA=lm(juvies.tree[,i]~propBA)
+  #regBA=lm(juvies.tree[,i]~juvab[,i-4])
   summary(regBA)
-  graph=plot(juvies.tree[,i]~propBA, xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+30])
+  graph=plot(juvies.tree[,i]~tcolsums[i-4], xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+30])
+  #graph=plot(juvies.tree[,i]~juvab[,i-4], xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+30])
   abline(regBA)
 }
 
@@ -266,16 +270,20 @@ rownames(tree.hel.soil)=tree.hel.soil[,1]
 tree.hel.soil=na.exclude(tree.hel.soil)
 colnames(tree.hel.soil)
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil[,5:38], tree.hel.soil[,11:35])
-anova(hel.rda.fulsoil)
-RsquareAdj(hel.rda.fulsoil)
-global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+hel.rda.fulsoil_long = rda(tree.hel.soil[,5:38], tree.hel.soil[,c(49:56)]) #variables_long. significant: p=0.006
+anova(hel.rda.fulsoil_long)
+#hel.rda.fulsoil_nug = rda(tree.hel.soil[,5:38], tree.hel.soil[,c(57:65)]) #variables_nug. not significant.
+#anova(hel.rda.fulsoil_nug)
+#hel.rda.fulsoil_short = rda(tree.hel.soil[,5:38], tree.hel.soil[,c(66:73)]) #variables_long. significant: p=0.006
+#anova(hel.rda.fulsoil_short)
+RsquareAdj(hel.rda.fulsoil_long)
+global.thresh=RsquareAdj(hel.rda.fulsoil_long)$adj.r.squared
 
 # Here is the forward selection command and then constructing a model with selected variables.
-hel.rda.for=forward.sel(tree.hel.soil[,5:38], tree.hel.soil[,11:35], adjR2thresh=global.thresh)
+hel.rda.for=forward.sel(tree.hel.soil[,5:38], tree.hel.soil[,49:56], adjR2thresh=global.thresh)
 colnames(tree.hel.soil)
 hel.rda.for
-hel.rda.selsoil = rda(tree.hel.soil[,5:38] ~ as.matrix(tree.hel.soil[,c(18,13,31)]))
+hel.rda.selsoil = rda(tree.hel.soil[,5:38] ~ as.matrix(tree.hel.soil[,c(56,51)]))
 anova(hel.rda.selsoil)
 RsquareAdj(hel.rda.selsoil)
 plot(hel.rda.selsoil)
@@ -288,16 +296,18 @@ rownames(tree.hel.soil)=tree.hel.soil[,1]
 tree.hel.soil=na.exclude(tree.hel.soil)
 colnames(tree.hel.soil)
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil[,5:38], tree.hel.soil[,49:73])
-anova(hel.rda.fulsoil)
+hel.rda.fulsoil = rda(tree.hel.soil[,5:38], tree.hel.soil[,c(47,49:53,55,57:62,64,66:70)])
+anova(hel.rda.fulsoil) #not significant
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 
 # Here is the forward selection command and then constructing a model with selected variables.
-hel.rda.for=forward.sel(tree.hel.soil[,5:38], tree.hel.soil[,11:35], adjR2thresh=global.thresh)
-colnames(tree.hel.soil)
-hel.rda.for
-hel.rda.selsoil = rda(tree.hel.soil[,5:38] ~ as.matrix(tree.hel.soil[,c(18,13,31)]))
-anova(hel.rda.selsoil)
-RsquareAdj(hel.rda.selsoil)
-plot(hel.rda.selsoil)
+#hel.rda.for=forward.sel(tree.hel.soil[,5:38], tree.hel.soil[,11:35], adjR2thresh=global.thresh)
+#colnames(tree.hel.soil)
+#hel.rda.for
+#hel.rda.selsoil = rda(tree.hel.soil[,5:38] ~ as.matrix(tree.hel.soil[,c(18,13,31)]))
+#anova(hel.rda.selsoil)
+#RsquareAdj(hel.rda.selsoil)
+#plot(hel.rda.selsoil)
+
+
