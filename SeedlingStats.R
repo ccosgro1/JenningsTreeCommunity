@@ -312,4 +312,4 @@ global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 
 
 
-##TEST
+##TEST 2.0
