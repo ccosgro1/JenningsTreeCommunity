@@ -126,16 +126,16 @@ jcolsums=apply(juvies.tree[,5:25],2,sum)
 for(i in 5:25){
   propjuveniles=juvies.tree[,i]/jcolsums[i-4]
   propBA=(juvies.tree[,i+30]/tcolsums[i-4])
-  regBA=lm(propseedling~propBA)
+  regBA=lm(propjuveniles~propBA)
   summary(regBA)
-  graph=plot(propseedling~propBA, xlab="Proportion BA", ylab="Juvenile Proportion", main=colnames(juvies.tree)[i+30])
+  graph=plot(propjuveniles~propBA, xlab="Proportion BA", ylab="Juvenile Proportion", main=colnames(juvies.tree)[i+30])
   abline(regBA)
 }
 
 #Local Comparison WITH juvenile proportion
 for(i in 5:25){
   propjuveniles=juvies.tree[,i]/jcolsums[i-4]
-  regBA=lm(propseedling~juvab[,i-4])
+  regBA=lm(propjuveniles~juvab[,i-4])
   summary(regBA)
   graph=plot(propjuveniles~juvab[,i-4], xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+30])
   abline(regBA)
