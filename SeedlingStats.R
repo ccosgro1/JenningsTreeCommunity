@@ -95,24 +95,29 @@ juvies.tree=juvies.tree[,c(1:9,11:17,19:25,27,29,30:43,45:51,53:60,62)]
 #proportion basal area
 colnames(juvies.tree)
 tcolsums=apply(juvies.tree[,35:55],2,sum)
-propAS=(juvies.tree$ACESAC/tcolsums$ACESAC)
-beginfor=lm(juvies.tree$ACESAC_seed~tcolsums$ACESAC)
-summary(beginfor)
-graph=plot(juvies.tree$ACESAC_seed~tcolsums$ACESAC, ylab="Juvenile Abundance", xlab="Proportion BA")
-abline(beginfor)
 rownames(juvies.tree)=juvies.tree[,1]
 trowsums=apply(juvies.tree[,35:55],1,sum)
 
 juvab=decostand(juvies.tree[,35:55],method = "total" ,MARGIN = 1)
 colnames(juvies.tree)
 tcolsums
+trowsums
 #####ADD PROPAB JUVENILES AND SEEDLINGS
+#Global Comparison without proportion of juveniles.
 for(i in 5:25){
   propBA=(juvies.tree[,i+30]/tcolsums[i-4])
-  #regBA=lm(juvies.tree[,i]~juvab[,i-4])
+  regBA=lm(juvies.tree[,i]~propBA)
   summary(regBA)
-  graph=plot(juvies.tree[,i]~tcolsums[i-4], xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+30])
-  #graph=plot(juvies.tree[,i]~juvab[,i-4], xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+30])
+  graph=plot(juvies.tree[,i]~propBA, xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+30])
+  abline(regBA)
+}
+
+#Local comparison without proportion of juveniles
+for(i in 5:25){
+  propBA=(juvies.tree[,i+30]/tcolsums[i-4])
+  regBA=lm(juvies.tree[,i]~juvab[,i-4])
+  summary(regBA)
+  graph=plot(juvies.tree[,i]~juvab[,i-4], xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+30])
   abline(regBA)
 }
 
@@ -141,23 +146,27 @@ seeds.tree=seeds.tree[,c(1:10,12:28,30:44,46:62,64)]
 #proportion basal area
 colnames(seeds.tree)
 tcolsums=apply(seeds.tree[,37:60],2,sum)
-propAS=(seeds.tree$ACESAC/tcolsums["ACESAC"])
-beginfor=lm(seeds.tree$ACESAC_seed~propAS)
-summary(beginfor)
-graph=plot(seeds.tree$ACESAC_seed~propAS, ylab="Juvenile Abundance", xlab="Proportion BA")
-abline(beginfor)
-
 
 colnames(seeds.tree)
 tcolsums
+#Global Comparison with no proportion seedlings
 for(i in 5:28){
   propBA=(seeds.tree[,i+32]/tcolsums[i-4])
   regBA=lm(seeds.tree[,i]~propBA)
   summary(regBA)
   graph=plot(seeds.tree[,i]~propBA, xlab="Proportion BA", ylab="Seedling Abundance", main=colnames(seeds.tree)[i+32])
   abline(regBA)
-  }
+}
 
+seedab=decostand(seeds.tree[,37:60],method = "total" ,MARGIN = 1)
+#Local comparison with no proportion seedlings
+for(i in 5:28){
+  propBA=(seeds.tree[,i+32]/tcolsums[i-4])
+  regBA=lm(seeds.tree[,i]~seedab[,i-4])
+  summary(regBA)
+  graph=plot(seeds.tree[,i]~seedab[,i-4], xlab="Proportion BA", ylab="Seedling Abundance", main=colnames(seeds.tree)[i+32])
+  abline(regBA)
+}
 
 ###RDAs####
 #####JUVENILE#####
@@ -309,7 +318,3 @@ global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 #anova(hel.rda.selsoil)
 #RsquareAdj(hel.rda.selsoil)
 #plot(hel.rda.selsoil)
-
-
-
-##TEST 2.0
