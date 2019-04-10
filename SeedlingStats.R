@@ -121,6 +121,27 @@ for(i in 5:25){
   abline(regBA)
 }
 
+#Global Comparison WITH proportion juveniles
+jcolsums=apply(juvies.tree[,5:25],2,sum)
+for(i in 5:25){
+  propjuveniles=juvies.tree[,i]/jcolsums[i-4]
+  propBA=(juvies.tree[,i+30]/tcolsums[i-4])
+  regBA=lm(propseedling~propBA)
+  summary(regBA)
+  graph=plot(propseedling~propBA, xlab="Proportion BA", ylab="Juvenile Proportion", main=colnames(juvies.tree)[i+30])
+  abline(regBA)
+}
+
+#Local Comparison WITH juvenile proportion
+for(i in 5:25){
+  propjuveniles=juvies.tree[,i]/jcolsums[i-4]
+  regBA=lm(propseedling~juvab[,i-4])
+  summary(regBA)
+  graph=plot(propjuveniles~juvab[,i-4], xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+30])
+  abline(regBA)
+}
+
+
 #Seedling Regression
 dim(seeds)
 colnames(seeds)
@@ -161,10 +182,30 @@ for(i in 5:28){
 seedab=decostand(seeds.tree[,37:60],method = "total" ,MARGIN = 1)
 #Local comparison with no proportion seedlings
 for(i in 5:28){
-  propBA=(seeds.tree[,i+32]/tcolsums[i-4])
   regBA=lm(seeds.tree[,i]~seedab[,i-4])
   summary(regBA)
   graph=plot(seeds.tree[,i]~seedab[,i-4], xlab="Proportion BA", ylab="Seedling Abundance", main=colnames(seeds.tree)[i+32])
+  abline(regBA)
+}
+
+#Global comparison WITH proportion seedlings
+colnames(seeds.tree)
+scolsums=apply(seeds.tree[5:28],2,sum)
+for(i in 5:28){
+  propseedling=seeds.tree[,i]/scolsums[i-4]
+  propBA=(seeds.tree[,i+32]/tcolsums[i-4])
+  regBA=lm(propseedling~propBA)
+  summary(regBA)
+  graph=plot(propseedling~propBA, xlab="Proportion BA", ylab="Seedling Proportion", main=colnames(seeds.tree)[i+32])
+  abline(regBA)
+}
+
+#Local comparison WITH proportion seedlings
+for(i in 5:28){
+  propseedling=seeds.tree[,i]/scolsums[i-4]
+  regBA=lm(propseedling~seedab[,i-4])
+  summary(regBA)
+  graph=plot(propseedling~seedab[,i-4], xlab="Proportion BA", ylab="Seedling Proportion", main=colnames(seeds.tree)[i+32])
   abline(regBA)
 }
 
