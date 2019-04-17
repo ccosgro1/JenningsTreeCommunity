@@ -359,3 +359,6 @@ global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 #anova(hel.rda.selsoil)
 #RsquareAdj(hel.rda.selsoil)
 #plot(hel.rda.selsoil)
+
+
+#test.githubdesktop
