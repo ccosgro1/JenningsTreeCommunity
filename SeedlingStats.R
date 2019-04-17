@@ -28,14 +28,12 @@ juvies[is.na(juvies)]<-0
 seeds[is.na(seeds)]<-0
 treedata[is.na(treedata)]<-0
 
+
+
+
 #to use for later analyses, after things get messed up -- subsetted,etc..
 juvies1=juvies
 seeds1=seeds
-
-#Stats to do:
-#species by species way seedling to the adult and juvenile communities
-  #regression of seedling abundance/height(?) to adult basal area proportion by plot
-  #core v edge
 
 ##ANOVAs: Juvenile abundance by ecosystem then by core/edge BY PLOT
 dim(juvies)
@@ -66,6 +64,9 @@ barplot(jcolsums)
 scolsums=apply(seeds[,5:38],2,sum)
 barplot(scolsums)
 plot(rank(scolsums),scolsums, main="Seedling Rank Abundance") #This distribution is crazy!! 
+
+#Correlation between seedlings and juveniles
+cor(juvies.tree[,5:25], seeds.tree[,5:28], method="pearson")
 
 
 ####Species Regressions####
@@ -102,7 +103,6 @@ juvab=decostand(juvies.tree[,35:55],method = "total" ,MARGIN = 1)
 colnames(juvies.tree)
 tcolsums
 trowsums
-#####ADD PROPAB JUVENILES AND SEEDLINGS
 #Global Comparison without proportion of juveniles.
 for(i in 5:25){
   propBA=(juvies.tree[,i+30]/tcolsums[i-4])
