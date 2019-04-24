@@ -111,13 +111,16 @@ pdf(file=globabund_juv)
 for(i in 5:25){
   propBA=(juvies.tree[,i+30]/tcolsums[i-4])
   regBA=glm(juvies.tree[,i]~propBA, family="poisson")
-  summary(regBA)
+  welp=summary(regBA)
   graph=plot(juvies.tree[,i]~propBA, xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+30])
   abline(regBA)
+  mtext(side=3,padj=0,text=welp$coefficients[2,4])
 }
 dev.off()
 
 #Local comparison without proportion of juveniles
+localabund_juv="C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/JenningsTreeCommunity/localabund_juv.pdf"
+pdf(file=localabund_juv)
 for(i in 5:25){
   propBA=(juvies.tree[,i+30]/tcolsums[i-4])
   regBA=lm(juvies.tree[,i]~juvab[,i-4], family="poisson")
@@ -125,6 +128,7 @@ for(i in 5:25){
   graph=plot(juvies.tree[,i]~juvab[,i-4], xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+30])
   abline(regBA)
 }
+dev.off()
 
 #Global Comparison WITH proportion juveniles
 jcolsums=apply(juvies.tree[,5:25],2,sum)
