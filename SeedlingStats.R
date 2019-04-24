@@ -5,6 +5,7 @@ library(data.table)
 library(gtools)
 library(vegan)
 library(packfor)
+library(MASS)
 ##Load the Data
 juvies=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/JuvenileMatrix.csv")
 seeds=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/SeedlingMatrix.csv")
@@ -103,19 +104,23 @@ juvab=decostand(juvies.tree[,35:55],method = "total" ,MARGIN = 1)
 colnames(juvies.tree)
 tcolsums
 trowsums
+
 #Global Comparison without proportion of juveniles.
+globabund_juv="C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/JenningsTreeCommunity/globabund_juv.pdf"
+pdf(file=globabund_juv)
 for(i in 5:25){
   propBA=(juvies.tree[,i+30]/tcolsums[i-4])
-  regBA=lm(juvies.tree[,i]~propBA)
+  regBA=glm(juvies.tree[,i]~propBA, family="poisson")
   summary(regBA)
   graph=plot(juvies.tree[,i]~propBA, xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+30])
   abline(regBA)
 }
+dev.off()
 
 #Local comparison without proportion of juveniles
 for(i in 5:25){
   propBA=(juvies.tree[,i+30]/tcolsums[i-4])
-  regBA=lm(juvies.tree[,i]~juvab[,i-4])
+  regBA=lm(juvies.tree[,i]~juvab[,i-4], family="poisson")
   summary(regBA)
   graph=plot(juvies.tree[,i]~juvab[,i-4], xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+30])
   abline(regBA)
@@ -126,7 +131,7 @@ jcolsums=apply(juvies.tree[,5:25],2,sum)
 for(i in 5:25){
   propjuveniles=juvies.tree[,i]/jcolsums[i-4]
   propBA=(juvies.tree[,i+30]/tcolsums[i-4])
-  regBA=lm(propjuveniles~propBA)
+  regBA=glm(propjuveniles~propBA, family="poisson")
   summary(regBA)
   graph=plot(propjuveniles~propBA, xlab="Proportion BA", ylab="Juvenile Proportion", main=colnames(juvies.tree)[i+30])
   abline(regBA)
@@ -135,7 +140,7 @@ for(i in 5:25){
 #Local Comparison WITH juvenile proportion
 for(i in 5:25){
   propjuveniles=juvies.tree[,i]/jcolsums[i-4]
-  regBA=lm(propjuveniles~juvab[,i-4])
+  regBA=glm(propjuveniles~juvab[,i-4], family="poisson")
   summary(regBA)
   graph=plot(propjuveniles~juvab[,i-4], xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+30])
   abline(regBA)
@@ -360,6 +365,3 @@ global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 #RsquareAdj(hel.rda.selsoil)
 #plot(hel.rda.selsoil)
 
-#gelp
-
-#test.githubdesktop
