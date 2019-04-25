@@ -110,7 +110,7 @@ globabund_juv="C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/Je
 pdf(file=globabund_juv)
 for(i in 5:25){
   propBA=(juvies.tree[,i+30]/tcolsums[i-4])
-  regBA=glm(juvies.tree[,i]~propBA, family="poisson")
+  regBA=glm(juvies.tree[,i]~propBA, family="gaussian")
   welp=summary(regBA)
   graph=plot(juvies.tree[,i]~propBA, xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+30])
   abline(regBA)
