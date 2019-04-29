@@ -19,6 +19,7 @@ library(gtools)
 library(vegan)
 library(packfor)
 library(MASS)
+library(quantreg)
 ##Load the Data
 juvies=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/JuvenileMatrix.csv")
 seeds=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/SeedlingMatrix.csv")
@@ -53,9 +54,10 @@ colnames(addseeds)[1]="Plot"
 colnames(addseeds)
 
 ##Transform Data
-logjuvies=log1p(addseeds[,2:32])
-logjuvies=cbind(addseeds$Plot,logjuvies)
-colnames(logjuvies)[colnames(logjuvies)=="addseeds$Plot"]<-"Plot"
+#logjuvies=log1p(addseeds[,2:32])
+logjuvies=addseeds
+#logjuvies=cbind(addseeds$Plot,logjuvies)
+#colnames(logjuvies)[colnames(logjuvies)=="addseeds$Plot"]<-"Plot"
 #put everything back together and then add the adult dataset
 juvies=merge(juvies[,c(1:4)], logjuvies)
 juvies.tree=merge(juvies,tree.ringsum, by="Plot")
@@ -210,3 +212,20 @@ for(i in 5:28){
 
 ```
 
+```{r Quantile Regression}
+propBA=juvies.tree$ACERUB/tcolsums["ACERUB"]
+regBA=rq(juvies.tree$ACERUB~propBA, tau=0.1)
+summary(regBA)
+
+
+for(i in 5:25){
+  propBA=(juvies.tree[,i+30]/tcolsums[i-4])
+  regBA=glm(juvies.tree[,i]~propBA, family="gaussian")
+  welp=summary(regBA)
+  graph=plot(juvies.tree[,i]~propBA, xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+30])
+  abline(regBA)
+  mtext(side=3,padj=0,text=welp$coefficients[2,4])
+}
+
+```
+Can you really use quantile regression for this?
