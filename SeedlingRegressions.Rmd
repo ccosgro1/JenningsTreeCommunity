@@ -1,0 +1,212 @@
+---
+title: "Seedling Regressions"
+author: "Colleen Cosgrove"
+date: "April 29, 2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r load libraries and data}
+library(data.table)
+library(gtools)
+library(vegan)
+library(packfor)
+library(MASS)
+##Load the Data
+juvies=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/JuvenileMatrix.csv")
+seeds=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/SeedlingMatrix.csv")
+soildata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
+oldtreedata=read.csv("C:/Users/Colleen/Dropbox/Jennings 2016/tree basal areas.csv")
+treedata=read.csv("C:/Users/Colleen/Dropbox/Jennings 2016/New Adult Basal Area.csv")
+```
+
+```{r format data}
+dim(juvies)
+rownames(juvies)=juvies[,1]
+rownames(seeds)=seeds[,1]
+rownames(seeds)
+for(i in 1:83) {
+  tree.ringsum[i,10:42]=oldtreedata[i,10:42]+oldtreedata[i+83,10:42]+oldtreedata[i+166,10:42]  }
+rownames(tree.ringsum)=tree.ringsum[,1]
+tree.ringsum
+
+#Set NAs to 0 in seedling/juvenile datasets
+juvies[is.na(juvies)]<-0
+seeds[is.na(seeds)]<-0
+treedata[is.na(treedata)]<-0
+```
+
+```{r Juvenile Regressions: Set up dataset}
+dim(juvies)
+colnames(juvies)
+addseeds=cbind(juvies[,c(1,5:35)])
+#add _seed to all of the juvenile species columns
+colnames(addseeds)=paste(colnames(addseeds), "juv", sep = "_")
+colnames(addseeds)[1]="Plot"
+colnames(addseeds)
+
+##Transform Data
+logjuvies=log1p(addseeds[,2:32])
+logjuvies=cbind(addseeds$Plot,logjuvies)
+colnames(logjuvies)[colnames(logjuvies)=="addseeds$Plot"]<-"Plot"
+#put everything back together and then add the adult dataset
+juvies=merge(juvies[,c(1:4)], logjuvies)
+juvies.tree=merge(juvies,tree.ringsum, by="Plot")
+head(juvies.tree)
+
+##Linear Regression of seedling abundance by basal area proportion
+#Remove columns that don't have both juveniles and adult trees.
+colnames(juvies.tree)
+juvies.tree=juvies.tree[,c(1:4,6:12,15:18,20:24,26:30,31:45,48:50,52:60,62:63,66:70,73:76)]
+colnames(juvies.tree)
+tcolsums=apply(juvies.tree[,39:63],2,sum)
+#Remove columns==0 (found using tcolsums)
+juvies.tree=juvies.tree[,c(1:9,11:17,19:25,27,29,30:43,45:51,53:60,62)]
+
+#proportion basal area
+colnames(juvies.tree)
+tcolsums=apply(juvies.tree[,35:55],2,sum)
+rownames(juvies.tree)=juvies.tree[,1]
+trowsums=apply(juvies.tree[,35:55],1,sum)
+
+juvab=decostand(juvies.tree[,35:55],method = "total" ,MARGIN = 1)
+colnames(juvies.tree)
+tcolsums
+trowsums
+
+```
+
+
+```{r Juvenile Regressions}
+#Global Comparison without proportion of juveniles.
+globabund_juv="C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/JenningsTreeCommunity/globabund_juv.pdf"
+pdf(file=globabund_juv)
+for(i in 5:25){
+  propBA=(juvies.tree[,i+30]/tcolsums[i-4])
+  regBA=glm(juvies.tree[,i]~propBA, family="gaussian")
+  welp=summary(regBA)
+  graph=plot(juvies.tree[,i]~propBA, xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+30])
+  abline(regBA)
+  mtext(side=3,padj=0,text=welp$coefficients[2,4])
+}
+dev.off()
+
+#Local comparison without proportion of juveniles
+localabund_juv="C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/JenningsTreeCommunity/localabund_juv.pdf"
+pdf(file=localabund_juv)
+for(i in 5:25){
+  propBA=(juvies.tree[,i+30]/tcolsums[i-4])
+  regBA=lm(juvies.tree[,i]~juvab[,i-4], family="poisson")
+  summary(regBA)
+  graph=plot(juvies.tree[,i]~juvab[,i-4], xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+30])
+  abline(regBA)
+}
+dev.off()
+
+#Global Comparison WITH proportion juveniles
+jcolsums=apply(juvies.tree[,5:25],2,sum)
+for(i in 5:25){
+  propjuveniles=juvies.tree[,i]/jcolsums[i-4]
+  propBA=(juvies.tree[,i+30]/tcolsums[i-4])
+  regBA=glm(propjuveniles~propBA, family="poisson")
+  summary(regBA)
+  graph=plot(propjuveniles~propBA, xlab="Proportion BA", ylab="Juvenile Proportion", main=colnames(juvies.tree)[i+30])
+  abline(regBA)
+}
+
+#Local Comparison WITH juvenile proportion
+for(i in 5:25){
+  propjuveniles=juvies.tree[,i]/jcolsums[i-4]
+  regBA=glm(propjuveniles~juvab[,i-4], family="poisson")
+  summary(regBA)
+  graph=plot(propjuveniles~juvab[,i-4], xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+30])
+  abline(regBA)
+}
+```
+
+
+```{r Seedling Regression: Set up dataset}
+dim(seeds)
+colnames(seeds)
+addseeds=cbind(seeds[,c(1,5:38)])
+#add _seed to all of the juvenile species columns
+colnames(addseeds)=paste(colnames(addseeds), "seed", sep = "_")
+colnames(addseeds)[1]="Plot"
+colnames(addseeds)
+
+#Log+1 transform data
+logseeds=log1p(addseeds[,2:35])
+logseeds=cbind(addseeds$Plot,logseeds)
+colnames(logseeds)[colnames(logseeds)=="addseeds$Plot"]<-"Plot"
+#put everything back together and then add the adult dataset
+seeds=merge(seeds[,c(1:4)], logseeds)
+seeds.tree=merge(seeds,tree.ringsum, by="Plot")
+head(seeds.tree)
+
+##Linear Regression of seedling abundance by basal area proportion
+#Remove columns that don't have both juveniles and adult trees.
+colnames(seeds.tree)
+seeds.tree=seeds.tree[,c(1:4,6:11,13,15,18:21,23:26,28:32,34:48,50:53,55:62,64:65,69:73,75:76,78:80)]
+colnames(seeds.tree)
+tcolsums=apply(seeds.tree[,39:64],2,sum)
+#Remove columns==0 (found using tcolsums)
+seeds.tree=seeds.tree[,c(1:10,12:28,30:44,46:62,64)]
+
+#proportion basal area
+colnames(seeds.tree)
+tcolsums=apply(seeds.tree[,37:60],2,sum)
+
+colnames(seeds.tree)
+tcolsums
+```
+
+
+```{r Seedling Regressions}
+#Global Comparison with no proportion seedlings
+for(i in 5:28){
+  propBA=(seeds.tree[,i+32]/tcolsums[i-4])
+  regBA=lm(seeds.tree[,i]~propBA)
+  summary(regBA)
+  graph=plot(seeds.tree[,i]~propBA, xlab="Proportion BA", ylab="Seedling Abundance", main=colnames(seeds.tree)[i+32])
+  abline(regBA)
+}
+
+seedab=decostand(seeds.tree[,37:60],method = "total" ,MARGIN = 1)
+#Local comparison with no proportion seedlings
+for(i in 5:28){
+  regBA=lm(seeds.tree[,i]~seedab[,i-4])
+  summary(regBA)
+  graph=plot(seeds.tree[,i]~seedab[,i-4], xlab="Proportion BA", ylab="Seedling Abundance", main=colnames(seeds.tree)[i+32])
+  abline(regBA)
+}
+
+#Global comparison WITH proportion seedlings
+colnames(seeds.tree)
+scolsums=apply(seeds.tree[5:28],2,sum)
+for(i in 5:28){
+  propseedling=seeds.tree[,i]/scolsums[i-4]
+  propBA=(seeds.tree[,i+32]/tcolsums[i-4])
+  regBA=lm(propseedling~propBA)
+  summary(regBA)
+  graph=plot(propseedling~propBA, xlab="Proportion BA", ylab="Seedling Proportion", main=colnames(seeds.tree)[i+32])
+  abline(regBA)
+}
+
+#Local comparison WITH proportion seedlings
+for(i in 5:28){
+  propseedling=seeds.tree[,i]/scolsums[i-4]
+  regBA=lm(propseedling~seedab[,i-4])
+  summary(regBA)
+  graph=plot(propseedling~seedab[,i-4], xlab="Proportion BA", ylab="Seedling Proportion", main=colnames(seeds.tree)[i+32])
+  abline(regBA)
+}
+
+```
+
