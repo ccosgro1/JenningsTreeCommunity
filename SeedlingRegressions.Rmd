@@ -72,6 +72,9 @@ tcolsums=apply(juvies.tree[,39:63],2,sum)
 #Remove columns==0 (found using tcolsums)
 juvies.tree=juvies.tree[,c(1:9,11:17,19:25,27,29,30:43,45:51,53:60,62)]
 
+#Remove taxa with fewer than 10 samples
+juvies.tree=juvies.tree[,c(1:9,11:13,17:19,23:39,41:43,47:49,53:55)]
+
 #proportion basal area
 colnames(juvies.tree)
 tcolsums=apply(juvies.tree[,35:55],2,sum)
@@ -90,45 +93,44 @@ trowsums
 #Global Comparison without proportion of juveniles.
 globabund_juv="C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/JenningsTreeCommunity/globabund_juv.pdf"
 pdf(file=globabund_juv)
-for(i in 5:25){
-  propBA=(juvies.tree[,i+30]/tcolsums[i-4])
-  regBA=glm(juvies.tree[,i]~propBA, family="gaussian")
+for(i in 5:18){
+  propBA=(juvies.tree[,i+23]/tcolsums[i-4])
+  regBA=lm(juvies.tree[,i]~propBA)
   welp=summary(regBA)
-  graph=plot(juvies.tree[,i]~propBA, xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+30])
+  graph=plot(juvies.tree[,i]~propBA, xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+23])
   abline(regBA)
-  mtext(side=3,padj=0,text=welp$coefficients[2,4])
 }
 dev.off()
 
 #Local comparison without proportion of juveniles
 localabund_juv="C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/JenningsTreeCommunity/localabund_juv.pdf"
 pdf(file=localabund_juv)
-for(i in 5:25){
-  propBA=(juvies.tree[,i+30]/tcolsums[i-4])
-  regBA=lm(juvies.tree[,i]~juvab[,i-4], family="poisson")
+for(i in 5:18){
+  propBA=(juvies.tree[,i+23]/tcolsums[i-4])
+  regBA=lm(juvies.tree[,i]~juvab[,i-4])
   summary(regBA)
-  graph=plot(juvies.tree[,i]~juvab[,i-4], xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+30])
+  graph=plot(juvies.tree[,i]~juvab[,i-4], xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+23])
   abline(regBA)
 }
 dev.off()
 
 #Global Comparison WITH proportion juveniles
-jcolsums=apply(juvies.tree[,5:25],2,sum)
-for(i in 5:25){
+jcolsums=apply(juvies.tree[,5:18],2,sum)
+for(i in 5:18){
   propjuveniles=juvies.tree[,i]/jcolsums[i-4]
-  propBA=(juvies.tree[,i+30]/tcolsums[i-4])
+  propBA=(juvies.tree[,i+23]/tcolsums[i-4])
   regBA=glm(propjuveniles~propBA, family="poisson")
   summary(regBA)
-  graph=plot(propjuveniles~propBA, xlab="Proportion BA", ylab="Juvenile Proportion", main=colnames(juvies.tree)[i+30])
+  graph=plot(propjuveniles~propBA, xlab="Proportion BA", ylab="Juvenile Proportion", main=colnames(juvies.tree)[i+23])
   abline(regBA)
 }
 
 #Local Comparison WITH juvenile proportion
-for(i in 5:25){
+for(i in 5:18){
   propjuveniles=juvies.tree[,i]/jcolsums[i-4]
   regBA=glm(propjuveniles~juvab[,i-4], family="poisson")
   summary(regBA)
-  graph=plot(propjuveniles~juvab[,i-4], xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+30])
+  graph=plot(propjuveniles~juvab[,i-4], xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+23])
   abline(regBA)
 }
 ```
@@ -161,9 +163,11 @@ tcolsums=apply(seeds.tree[,39:64],2,sum)
 #Remove columns==0 (found using tcolsums)
 seeds.tree=seeds.tree[,c(1:10,12:28,30:44,46:62,64)]
 
+#Remove taxa with less than 10 samples
+seeds.tree=seeds.tree[,c(1:6,8:10,12:14,20,24,26:38,40:42,44:46,52,56,58:60)]
 #proportion basal area
 colnames(seeds.tree)
-tcolsums=apply(seeds.tree[,37:60],2,sum)
+tcolsums=apply(seeds.tree[,26:38],2,sum)
 
 colnames(seeds.tree)
 tcolsums
@@ -172,41 +176,41 @@ tcolsums
 
 ```{r Seedling Regressions}
 #Global Comparison with no proportion seedlings
-for(i in 5:28){
-  propBA=(seeds.tree[,i+32]/tcolsums[i-4])
+for(i in 5:17){
+  propBA=(seeds.tree[,i+21]/tcolsums[i-4])
   regBA=lm(seeds.tree[,i]~propBA)
   summary(regBA)
-  graph=plot(seeds.tree[,i]~propBA, xlab="Proportion BA", ylab="Seedling Abundance", main=colnames(seeds.tree)[i+32])
+  graph=plot(seeds.tree[,i]~propBA, xlab="Proportion BA", ylab="Seedling Abundance", main=colnames(seeds.tree)[i+21])
   abline(regBA)
 }
 
-seedab=decostand(seeds.tree[,37:60],method = "total" ,MARGIN = 1)
+seedab=decostand(seeds.tree[,26:38],method = "total" ,MARGIN = 1)
 #Local comparison with no proportion seedlings
-for(i in 5:28){
+for(i in 5:17){
   regBA=lm(seeds.tree[,i]~seedab[,i-4])
   summary(regBA)
-  graph=plot(seeds.tree[,i]~seedab[,i-4], xlab="Proportion BA", ylab="Seedling Abundance", main=colnames(seeds.tree)[i+32])
+  graph=plot(seeds.tree[,i]~seedab[,i-4], xlab="Proportion BA", ylab="Seedling Abundance", main=colnames(seeds.tree)[i+21])
   abline(regBA)
 }
 
 #Global comparison WITH proportion seedlings
 colnames(seeds.tree)
-scolsums=apply(seeds.tree[5:28],2,sum)
-for(i in 5:28){
+scolsums=apply(seeds.tree[5:17],2,sum)
+for(i in 5:17){
   propseedling=seeds.tree[,i]/scolsums[i-4]
-  propBA=(seeds.tree[,i+32]/tcolsums[i-4])
+  propBA=(seeds.tree[,i+21]/tcolsums[i-4])
   regBA=lm(propseedling~propBA)
   summary(regBA)
-  graph=plot(propseedling~propBA, xlab="Proportion BA", ylab="Seedling Proportion", main=colnames(seeds.tree)[i+32])
+  graph=plot(propseedling~propBA, xlab="Proportion BA", ylab="Seedling Proportion", main=colnames(seeds.tree)[i+21])
   abline(regBA)
 }
 
 #Local comparison WITH proportion seedlings
-for(i in 5:28){
+for(i in 5:17){
   propseedling=seeds.tree[,i]/scolsums[i-4]
   regBA=lm(propseedling~seedab[,i-4])
   summary(regBA)
-  graph=plot(propseedling~seedab[,i-4], xlab="Proportion BA", ylab="Seedling Proportion", main=colnames(seeds.tree)[i+32])
+  graph=plot(propseedling~seedab[,i-4], xlab="Proportion BA", ylab="Seedling Proportion", main=colnames(seeds.tree)[i+21])
   abline(regBA)
 }
 
@@ -214,17 +218,18 @@ for(i in 5:28){
 
 ```{r Quantile Regression}
 propBA=juvies.tree$ACERUB/tcolsums["ACERUB"]
-regBA=rq(juvies.tree$ACERUB~propBA, tau=0.1)
+regBA=rq(juvies.tree$ACERUB~propBA)
 summary(regBA)
+graph=plot(juvies.tree$ACERUB~propBA,xlab="Proportion BA", ylab="Juvenile Abundance", main="ACERUB")
+abline(regBA)
 
 
-for(i in 5:25){
-  propBA=(juvies.tree[,i+30]/tcolsums[i-4])
-  regBA=glm(juvies.tree[,i]~propBA, family="gaussian")
+for(i in 5:18){
+  propBA=(juvies.tree[,i+23]/tcolsums[i-4])
+  regBA=rq(juvies.tree[,i]~propBA)
   welp=summary(regBA)
-  graph=plot(juvies.tree[,i]~propBA, xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+30])
+  graph=plot(juvies.tree[,i]~propBA, xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+23])
   abline(regBA)
-  mtext(side=3,padj=0,text=welp$coefficients[2,4])
 }
 
 ```
