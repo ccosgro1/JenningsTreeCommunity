@@ -12,7 +12,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-
 ```{r load libraries and data}
 library(data.table)
 library(gtools)
@@ -53,13 +52,8 @@ colnames(addseeds)=paste(colnames(addseeds), "juv", sep = "_")
 colnames(addseeds)[1]="Plot"
 colnames(addseeds)
 
-##Transform Data
-#logjuvies=log1p(addseeds[,2:32])
-logjuvies=addseeds
-#logjuvies=cbind(addseeds$Plot,logjuvies)
-#colnames(logjuvies)[colnames(logjuvies)=="addseeds$Plot"]<-"Plot"
 #put everything back together and then add the adult dataset
-juvies=merge(juvies[,c(1:4)], logjuvies)
+juvies=merge(juvies[,c(1:4)], addseeds)
 juvies.tree=merge(juvies,tree.ringsum, by="Plot")
 head(juvies.tree)
 
@@ -77,11 +71,11 @@ juvies.tree=juvies.tree[,c(1:9,11:13,17:19,23:39,41:43,47:49,53:55)]
 
 #proportion basal area
 colnames(juvies.tree)
-tcolsums=apply(juvies.tree[,35:55],2,sum)
+tcolsums=apply(juvies.tree[,28:41],2,sum)
 rownames(juvies.tree)=juvies.tree[,1]
-trowsums=apply(juvies.tree[,35:55],1,sum)
+trowsums=apply(juvies.tree[,28:41],1,sum)
 
-juvab=decostand(juvies.tree[,35:55],method = "total" ,MARGIN = 1)
+juvab=decostand(juvies.tree[,26:41],method = "total" ,MARGIN = 1)
 colnames(juvies.tree)
 tcolsums
 trowsums
@@ -90,6 +84,11 @@ trowsums
 
 
 ```{r Juvenile Regressions}
+##Transform Data
+colnames(juvies.tree)
+log(juvies.tree[,5:18])
+
+
 #Global Comparison without proportion of juveniles.
 globabund_juv="C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/JenningsTreeCommunity/globabund_juv.pdf"
 pdf(file=globabund_juv)
@@ -121,7 +120,7 @@ for(i in 5:18){
   propBA=(juvies.tree[,i+23]/tcolsums[i-4])
   regBA=glm(propjuveniles~propBA, family="poisson")
   summary(regBA)
-  graph=plot(propjuveniles~propBA, xlab="Proportion BA", ylab="Juvenile Proportion", main=colnames(juvies.tree)[i+23])
+  graph=plot(propjuveniles~propBA, xlab="Proportion BA", ylab="Global Juvenile Proportion", main=colnames(juvies.tree)[i+23])
   abline(regBA)
 }
 
@@ -130,7 +129,7 @@ for(i in 5:18){
   propjuveniles=juvies.tree[,i]/jcolsums[i-4]
   regBA=glm(propjuveniles~juvab[,i-4], family="poisson")
   summary(regBA)
-  graph=plot(propjuveniles~juvab[,i-4], xlab="Proportion BA", ylab="Juvenile Abundance", main=colnames(juvies.tree)[i+23])
+  graph=plot(propjuveniles~juvab[,i-4], xlab="Proportion BA", ylab="Local Juvenile Abundance", main=colnames(juvies.tree)[i+23])
   abline(regBA)
 }
 ```
@@ -150,6 +149,7 @@ logseeds=log1p(addseeds[,2:35])
 logseeds=cbind(addseeds$Plot,logseeds)
 colnames(logseeds)[colnames(logseeds)=="addseeds$Plot"]<-"Plot"
 #put everything back together and then add the adult dataset
+#logseeds=addseeds
 seeds=merge(seeds[,c(1:4)], logseeds)
 seeds.tree=merge(seeds,tree.ringsum, by="Plot")
 head(seeds.tree)
@@ -234,3 +234,36 @@ for(i in 5:18){
 
 ```
 Can you really use quantile regression for this?
+
+
+
+```{r all species regressed}
+propBA=juvies.tree[,28:41]/sum(tcolsums)
+propba=unlist(propBA)
+as.numeric(propba)
+propjuv=juvies.tree[5:18]/sum(jcolsums)
+propjuv=unlist(propjuv)
+as.numeric(propjuv)
+plot(propjuv~propba, xlab="Proportion BA", ylab="Proportion Juveniles", main="All Juveniles")
+
+try=rq.fit(propjuv~propba)
+summary(try)
+abline(try)
+
+
+
+#Seedlings
+propBA=seeds.tree[,26:38]/sum(tcolsums)
+propba=unlist(propBA)
+as.numeric(propba)
+propseed=seeds.tree[,5:17]/sum(scolsums)
+propseed=unlist(propseed)
+as.numeric(propseed)
+plot(propseed~propba, xlab="Proportion BA", ylab="Proportion Seedlings", main="All Seedlings")
+
+effthis=asin(sqrt(propseed))
+
+qr=rq(propba~propseed, tau=0.9)
+summary(qr)
+abline(qr)
+```

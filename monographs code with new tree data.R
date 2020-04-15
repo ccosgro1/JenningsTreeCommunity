@@ -315,6 +315,11 @@ tree.hel=tree.ringsum
 tree.hel[,10:43]=tree.hel[,10:43]/tree.rowsums
 tree.hel[,10:43]=sqrt(tree.hel[,10:43])
 
+#ecosyseff=rda(tree.hel[,10:43],tree.hel$ecosys)
+#anova(ecosyseff)
+#RsquareAdj(ecosyseff)
+#tree.hel=tree.hel[tree.hel$EP!="Trans",]
+#tree.hel=tree.hel[tree.hel$EP=="Core",]
 
 #### Forward selection using regionalized soil variables
 # First we have to merge the datasets
@@ -1153,3 +1158,14 @@ global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 
 apply(tree.hel.soil[,10:42],2,sum)
 
+
+##NEW forward selection
+hel.rda.fulsoil.none = rda(tree.hel.soil[,10:44]~1)
+hel.rda.fulsoil = rda(tree.hel.soil[,10:44], tree.hel.soil[,55:79])
+
+hel.rda.fulsoil.full=rda(tree.hel.soil[,10:44]~tree.hel.soil$Ptot_long+tree.hel.soil$Po_long+tree.hel.soil$pH_long+tree.hel.soil$moist_long +tree.hel.soil$ps1_long+tree.hel.soil$ps2_long+tree.hel.soil$percc_long+tree.hel.soil$cton_long+tree.hel.soil$Ptot_nug+tree.hel.soil$Po_nug+tree.hel.soil$pH_nug+tree.hel.soil$moist_nug+tree.hel.soil$ps1_nug+tree.hel.soil$ps2_nug+tree.hel.soil$percc_nug+tree.hel.soil$pomc_nug+tree.hel.soil$cton_nug+tree.hel.soil$Ptot_short+tree.hel.soil$Po_short+tree.hel.soil$pH_short+tree.hel.soil$moist_short+tree.hel.soil$ps1_short+tree.hel.soil$percc_short+tree.hel.soil$pomc_short+tree.hel.soil$cton_short)
+
+tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
+tree.sel
+
+#write.csv(tree.hel.soil,"tree.hel.soil.csv")
