@@ -1,0 +1,1241 @@
+---
+title: "OptimalTreeParameters"
+author: "Colleen Cosgrove"
+date: "November 6, 2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, load data}
+library(vegan)
+library(packfor)
+library(ggplot2)
+
+
+##NEW DATA 2016 
+treedata=read.csv("C:/Users/Colleen/Dropbox/Jennings 2016/New Adult Basal Area.csv")
+soildata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
+
+names(treedata)
+dim(treedata)
+names(soildata)
+dim(soildata)
+treedata$ecosys
+
+treedata[is.na(treedata)] <- 0
+treedata=treedata[c(1:265,267:289),]
+
+# The tree data was collected in three rings for each plot
+# We are going to exclude stream plots (no soil data) and then sum the three rings
+treedata=treedata[treedata$ecosys!="S",]
+newtree.ringsum=treedata[1:83,]
+#This [1:80,] refers to all plots within the first ring.
+
+colnames(treedata)
+for(i in 1:83) {
+  newtree.ringsum[i,10:44]=treedata[i,10:44]+treedata[i+83,10:44]+treedata[i+166,10:44]  }
+rownames(newtree.ringsum)=newtree.ringsum[,1]
+# Let's look at a rank abbundance plot for fun
+tree.colsums=apply(newtree.ringsum[,10:43],2,sum)
+plot(rank(tree.colsums),tree.colsums)
+print(tree.colsums)
+```
+```{r, determine optimal traits}
+# Perform Hellinger transformation on tree species data so that RDA is based on Hellinger distance
+tree.rowsums=apply(tree.ringsum[,10:43],1,sum)
+tree.hel=newtree.ringsum
+tree.hel[,10:43]=tree.hel[,10:43]/tree.rowsums
+tree.hel[,10:43]=sqrt(tree.hel[,10:43])
+#combine treedata with soil data
+tree.hel.soil=merge(tree.hel,soildata)
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+colnames(tree.hel.soil)
+##for later analyses since we're gonna fool around and change tree.hel.soil a bunch
+adulttrees2=tree.hel.soil
+
+#Pull out tree species that are not abundant.
+tree.hel.soil=tree.hel.soil[,c(1:11,13:15,20:22,24,29:30,32,35:36,39,43,45:79)]
+colnames(tree.hel.soil)
+
+for(i in 1:16){
+  soilselec=rda(tree.hel.soil[,c(i+9)]~tree.hel.soil$Ptot_long+tree.hel.soil$Po_long+tree.hel.soil$pH_long+tree.hel.soil$moist_long+tree.hel.soil$ps1_long+tree.hel.soil$ps2_long+tree.hel.soil$percc_long+tree.hel.soil$cton_long+tree.hel.soil$Ptot_nug+tree.hel.soil$Po_nug+tree.hel.soil$pH_nug+tree.hel.soil$moist_nug+tree.hel.soil$moist_nug+tree.hel.soil$ps1_nug+tree.hel.soil$ps2_nug+tree.hel.soil$percc_nug+tree.hel.soil$pomc_nug+tree.hel.soil$cton_nug+tree.hel.soil$Ptot_short+tree.hel.soil$Po_short+tree.hel.soil$pH_short+tree.hel.soil$moist_short+tree.hel.soil$ps1_short+tree.hel.soil$percc_short+tree.hel.soil$pomc_short+tree.hel.soil$cton_short)
+  nosoilselec=rda(tree.hel.soil[,c(i+9)]~1)
+  anova(soilselec)
+  RsquareAdj(soilselec)
+  global.thresh=RsquareAdj(soilselec)$adj.r.squared
+ for.sel=ordiR2step(nosoilselec,scope=formula(soilselec), direction="forward", R2scope=TRUE, trace=FALSE)
+  print(colnames(tree.hel.soil[c(i+9)]))
+  print(for.sel)
+  print(RsquareAdj(soilselec)$adj.r.squared)
+}
+
+carovatest=rda(tree.hel.soil$CAROVA,tree.hel.soil[,55:79])
+anova(carovatest)
+RsquareAdj(carovatest)
+gt=RsquareAdj(carovatest)$adj.r.squared
+forsel=forward.sel(tree.hel.soil$CAROVA,tree.hel.soil[,55:79])
+```
+
+
+```{r, optimal traits CORE plots}
+tree.hel.soil=merge(tree.hel,soildata)
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+colnames(tree.hel.soil)
+#Limit dataset to core plots only
+tree.hel.soil=tree.hel.soil[tree.hel.soil$EP=="Core",]
+
+tree.hel.soil=tree.hel.soil[,c(1:11,13:16,22,29,32,35:36,39,43,45:79)]
+
+for(i in 1:13){
+  soilselec=rda(tree.hel.soil[,c(i+9)]~tree.hel.soil$Ptot_long+tree.hel.soil$Po_long+tree.hel.soil$pH_long+tree.hel.soil$moist_long+tree.hel.soil$ps1_long+tree.hel.soil$ps2_long+tree.hel.soil$percc_long+tree.hel.soil$cton_long+tree.hel.soil$Ptot_nug+tree.hel.soil$Po_nug+tree.hel.soil$pH_nug+tree.hel.soil$moist_nug+tree.hel.soil$moist_nug+tree.hel.soil$ps1_nug+tree.hel.soil$ps2_nug+tree.hel.soil$percc_nug+tree.hel.soil$pomc_nug+tree.hel.soil$cton_nug+tree.hel.soil$Ptot_short+tree.hel.soil$Po_short+tree.hel.soil$pH_short+tree.hel.soil$moist_short+tree.hel.soil$ps1_short+tree.hel.soil$percc_short+tree.hel.soil$pomc_short+tree.hel.soil$cton_short)
+  nosoilselec=rda(tree.hel.soil[,c(i+9)]~1)
+  #anova(soilselec)
+  RsquareAdj(soilselec)
+  global.thresh=RsquareAdj(soilselec)$adj.r.squared
+  for.sel=ordiR2step(nosoilselec,scope=formula(soilselec), direction="forward", R2scope=TRUE, trace=FALSE)
+  print(colnames(tree.hel.soil[c(i+9)]))
+  print(for.sel$call)
+  print(RsquareAdj(soilselec)$adj.r.squared)
+}
+
+#check fr ones that didn't run in the for loop
+carovatest=rda(tree.hel.soil$MAGACU,tree.hel.soil[,55:79])
+anova(carovatest)
+RsquareAdj(carovatest)
+gt=RsquareAdj(carovatest)$adj.r.squared
+forsel=forward.sel(tree.hel.soil$MAGACU,tree.hel.soil[,55:79])
+forsel
+
+```
+
+```{r, scatterplots: load datasets}
+#initially, we're looking at the spp with 1 variable selected by the above forward.sel() code.
+#Those species are: ACERUB, CARCOR, CAROVA, PRUSER, QUERUB.
+#For total list of species and correlated variables, see Optimal Tree Parameters.xslx
+##Load the Data
+juvies=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/JuvenileMatrix.csv")
+seeds=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/SeedlingMatrix.csv")
+soildata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
+oldtreedata=read.csv("C:/Users/Colleen/Dropbox/Jennings 2016/tree basal areas.csv")
+treedata=read.csv("C:/Users/Colleen/Dropbox/Jennings 2016/New Adult Basal Area.csv")
+mortdata=read.csv("SeedlingMortalityMatrix.csv", header=T)
+adultgrowth=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/Species Growth Matrix.csv")
+adultmort=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/Species Mortality Matrix.csv")
+
+rownames(soildata)=soildata[,1]
+
+
+#sum rings
+tree.ringsum=oldtreedata[1:83,]
+for(i in 1:83) {
+  tree.ringsum[i,10:42]=oldtreedata[i,10:42]+oldtreedata[i+83,10:42]+oldtreedata[i+166,10:42]  }
+rownames(tree.ringsum)=tree.ringsum[,1]
+tree.ringsum
+
+#add the name _juv to name for differentation from adult columns
+addseeds=cbind(juvies[,c(1,5:35)])
+#add _seed to all of the juvenile species columns
+colnames(addseeds)=paste(colnames(addseeds), "juv", sep = "_")
+colnames(addseeds)[1]="Plot"
+colnames(addseeds)
+
+#put everything back together and then add the adult dataset
+juvies=merge(juvies[,c(1:4)], addseeds)
+juvies[is.na(juvies)]<-0
+juvies.tree=merge(juvies,soildata, by="Plot")
+rownames(juvies.tree)=juvies.tree[,1]
+head(juvies.tree)
+juvies.tree=merge(juvies.tree,newtree.ringsum,by="Plot")
+
+colnames(seeds)
+addseeds=cbind(seeds[,c(1,5:38)])
+#add _seed to all of the juvenile species columns
+colnames(addseeds)=paste(colnames(addseeds), "seed", sep = "_")
+colnames(addseeds)[1]="Plot"
+colnames(addseeds)
+
+#put everything back together and then add the adult dataset
+seeds=merge(seeds[,c(1:4)], addseeds)
+seeds[is.na(seeds)]<-0
+dim(seeds)
+seeds=merge(seeds,soildata)
+dim(seeds)
+seeds.tree=merge(seeds,newtree.ringsum, by="Plot")
+head(seeds.tree)
+
+#merge mort data with soil data
+rownames(mortdata)=mortdata[,1]
+seedmort=merge(mortdata,soildata)
+
+
+rownames(adultmort)=adultmort[,1]
+rownames(adultgrowth)=adultgrowth[,1]
+adultmort=merge(adultmort,soildata)
+adultgrow=merge(adultgrowth,soildata)
+adulttrees=tree.hel.soil
+
+#List of new datasets
+colnames(seeds)
+colnames(juvies.tree)
+colnames(adulttrees)
+colnames(seedmort)
+colnames(adultgrow)
+colnames(adultmort)
+#####NEED ADULT RECRUITMENT STILL#######
+```
+
+```{r, scatterplots}
+##NEED TO DOUBLE CHECK THESE *DONE*##
+#ACERUB: ptot_long
+#CARCOR: ptot_long
+#CAROVA: pH_long 
+#PRUSER: pH_short
+#QUERUB: pomc_short
+
+#ACERUB
+plot(seeds$ACERUB_seed~seeds$Ptot_long, main="ACERUB: Seedling x Ptot_long")
+abline(lm(seeds$ACERUB_seed~seeds$Ptot_long), col=c("red","blue"))
+
+plot(juvies.tree$ACERUB_juv~juvies.tree$Ptot_long, main="ACERUB: Juvenile x Ptot_long")
+abline(lm(juvies.tree$ACERUB_juv~juvies.tree$Ptot_long), col="red")
+
+plot(adulttrees$ACERUB~adulttrees$Ptot_long, main="ACERUB: Adult Abund x Ptot_long")
+abline(lm(adulttrees$ACERUB~adulttrees$Ptot_long), col="red")
+
+plot(seedmort$ACERUB~seedmort$Ptot_long, main="ACERUB: Seed Mort x Ptot_long")
+abline(lm(seedmort$ACERUB~seedmort$Ptot_long), col="red")
+
+plot(adultgrow$ACERUB~adultgrow$Ptot_long, main="ACERUB: Adult Grow x Ptot_long")
+abline(lm(adultgrow$ACERUB~adultgrow$Ptot_long), col="red")
+
+plot(adultmort$ACERUB~adultmort$Ptot_long, main="ACERUB: Adult Mort x Ptot_long")
+abline(lm(adultmort$ACERUB~adultmort$Ptot_long), col="red")
+
+
+#CARCOR
+plot(seeds$CARCOR_seed~seeds$Ptot_long, main="CARCOR: Seedling x Ptot_long")
+abline(lm(seeds$CARCOR_seed~seeds$Ptot_long), col="red")
+
+plot(juvies.tree$CARCOR_juv~juvies.tree$Ptot_long, main="CARCOR: Juvenile x Ptot_long")
+abline(lm(juvies.tree$CARCOR_juv~juvies.tree$Ptot_long), col="red")
+
+plot(adulttrees$CARCOR~adulttrees$Ptot_long, main="CARCOR: Adult Abund x Ptot_long")
+abline(lm(adulttrees$CARCOR~adulttrees$Ptot_long), col="red")
+
+plot(seedmort$CARCOR~seedmort$Ptot_long, main="CARCOR: Seed Mort x Ptot_long")
+abline(lm(seedmort$CARCOR~seedmort$Ptot_long), col="red")
+
+plot(adultgrow$CARCOR~adultgrow$Ptot_long, main="CARCOR: Adult Grow x Ptot_long")
+abline(lm(adultgrow$CARCOR~adultgrow$Ptot_long), col="red")
+
+plot(adultmort$CARCOR~adultmort$Ptot_long, main="CARCOR: Adult Mort x Ptot_long")
+abline(lm(adultmort$CARCOR~adultmort$Ptot_long), col="red")
+
+#CAROVA
+plot(seeds$CAROVA_seed~seeds$pH_long, main="CAROVA: Seedling x pH_long")
+abline(lm(seeds$CAROVA_seed~seeds$pH_long), col="red")
+
+plot(juvies.tree$CAROVA_juv~juvies.tree$pH_long, main="CAROVA: Juvenile x pH_long")
+abline(lm(juvies.tree$CAROVA_juv~juvies.tree$pH_long), col="red")
+
+plot(adulttrees$CAROVA~adulttrees$pH_long, main="CAROVA: Adult Abund x pH_long")
+abline(lm(adulttrees$CAROVA~adulttrees$pH_long), col="red")
+
+plot(seedmort$CAROVA~seedmort$pH_long, main="CAROVA: Seed Mort x pH_long")
+abline(lm(seedmort$CAROVA~seedmort$pH_long), col="red")
+
+plot(adultgrow$CAROVA~adultgrow$pH_long, main="CAROVA: Adult Grow x pH_long")
+abline(lm(adultgrow$CAROVA~adultgrow$pH_long), col="red")
+
+plot(adultmort$CAROVA~adultmort$pH_long, main="CAROVA: Adult Mort x pH_long")
+abline(lm(adultmort$CAROVA~adultmort$pH_long), col="red")
+
+#PRUSER
+plot(seeds$PRUSER_seed~seeds$pH_short, main="PRUSER: Seedling x pH_short")
+abline(lm(seeds$PRUSER_seed~seeds$pH_short), col="red")
+
+plot(juvies.tree$PRUSER_juv~juvies.tree$pH_short, main="PRUSER: Juvenile x pH_short")
+abline(lm(juvies.tree$PRUSER_juv~juvies.tree$pH_short), col="red")
+
+plot(adulttrees$PRUSER~adulttrees$pH_short, main="PRUSER: Adult Abund x pH_short")
+abline(lm(adulttrees$PRUSER~adulttrees$pH_short), col="red")
+
+plot(seedmort$PRUSER~seedmort$pH_short, main="PRUSER: Seed Mort x pH_short")
+abline(lm(seedmort$PRUSER~seedmort$pH_short), col="red")
+
+plot(adultgrow$PRUSER~adultgrow$pH_short, main="PRUSER: Adult Grow x pH_short")
+abline(lm(adultgrow$PRUSER~adultgrow$pH_short), col="red")
+
+plot(adultmort$PRUSER~adultmort$pH_short, main="PRUSER: Adult Mort x pH_short")
+abline(lm(adultmort$PRUSER~adultmort$pH_short), col="red")
+
+#QUERUB
+plot(seeds$QUERUB_seed~seeds$pomc_short, main="QUERUB: Seedling x pomc_short")
+abline(lm(seeds$QUERUB_seed~seeds$pomc_short), col="red")
+
+plot(juvies.tree$QUERUB_juv~juvies.tree$pomc_short, main="QUERUB: Juvenile x pomc_short")
+abline(lm(juvies.tree$QUERUB_juv~juvies.tree$pomc_short), col="red")
+
+plot(adulttrees$QUERUB~adulttrees$pomc_short, main="QUERUB: Adult Abund x pomc_short")
+abline(lm(adulttrees$QUERUB~adulttrees$pomc_short), col="red")
+
+plot(seedmort$QUERUB~seedmort$pomc_short, main="QUERUB: Seed Mort x pomc_short")
+abline(lm(seedmort$QUERUB~seedmort$pomc_short), col="red")
+
+plot(adultgrow$QUERUB~adultgrow$pomc_short, main="QUERUB: Adult Grow x pomc_short")
+abline(lm(adultgrow$QUERUB~adultgrow$pomc_short), col="red")
+
+plot(adultmort$QUERUB~adultmort$pomc_short, main="QUERUB: Adult Mort x pomc_short")
+abline(lm(adultmort$QUERUB~adultmort$pomc_short), col="red")
+
+```
+
+```{r, R2 values}
+rsqadult=rda(adultmort$QUERUB~adultmort$pomc_short)
+RsquareAdj(rsqadult)
+
+```
+
+```{r, scatterplots in ggplot}
+###ACERUB
+ggplot(data=seeds,aes(x=Ptot_long,y=ACERUB_seed, color=seeds$Transect))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "ACERUB Seed Abund")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=juvies.tree,aes(x=Ptot_long,y=ACERUB_juv, color=juvies.tree$Transect.x))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "ACERUB Juv Abund")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=seedmort,aes(x=Ptot_long,y=ACERUB, color=seedmort$Transect))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "ACERUB Seed Mort")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=adulttrees,aes(x=Ptot_long,y=ACERUB, color=adulttrees$EP))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "ACERUB Adult Abund")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=adultgrow,aes(x=Ptot_long,y=ACERUB, color=adultgrow$EP))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "ACERUB Adult Grow")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=adultmort,aes(x=Ptot_long,y=ACERUB, color=adultmort$EP))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "ACERUB Adult Mort")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+
+###CARCOR
+ggplot(data=seeds,aes(x=Ptot_long,y=CARCOR_seed, color=seeds$Transect))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "CARCOR Seed Abund")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=juvies.tree,aes(x=Ptot_long,y=CARCOR_juv, color=juvies.tree$Transect.x))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "CARCOR Juv Abund")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=seedmort,aes(x=Ptot_long,y=CARCOR, color=seedmort$Transect))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "CARCOR Seed Mort")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=adulttrees,aes(x=Ptot_long,y=CARCOR, color=adulttrees$EP))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "CARCOR Adult Abund")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=adultgrow,aes(x=Ptot_long,y=CARCOR, color=adultgrow$EP))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "CARCOR Adult Grow")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=adultmort,aes(x=Ptot_long,y=CARCOR, color=adultmort$EP))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "CARCOR Adult Mort")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+###CAROVA
+ggplot(data=seeds,aes(x=pH_long,y=CAROVA_seed, color=seeds$Transect))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "CAROVA Seed Abund")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=juvies.tree,aes(x=pH_long,y=CAROVA_juv, color=juvies.tree$Transect.x))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "CAROVA Juv Abund")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=seedmort,aes(x=pH_long,y=CAROVA, color=seedmort$Transect))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "CAROVA Seed Mort")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=adulttrees,aes(x=pH_long,y=CAROVA, color=adulttrees$EP))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "CAROVA Adult Abund")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=adultgrow,aes(x=pH_long,y=CAROVA, color=adultgrow$EP))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "CAROVA Adult Grow")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=adultmort,aes(x=pH_long,y=CAROVA, color=adultmort$EP))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "CAROVA Adult Mort")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+
+###PRUSER
+ggplot(data=seeds,aes(x=pH_short,y=PRUSER_seed, color=seeds$Transect))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "PRUSER Seed Abund")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=juvies.tree,aes(x=pH_short,y=PRUSER_juv, color=juvies.tree$Transect.x))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "PRUSER Juv Abund")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=seedmort,aes(x=pH_short,y=PRUSER, color=seedmort$Transect))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "PRUSER Seed Mort")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=adulttrees,aes(x=pH_short,y=PRUSER, color=adulttrees$EP))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "PRUSER Adult Abund")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=adultgrow,aes(x=pH_short,y=PRUSER, color=adultgrow$EP))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "PRUSER Adult Grow")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=adultmort,aes(x=pH_short,y=PRUSER, color=adultmort$EP))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "PRUSER Adult Mort")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+
+###QUERUB
+ggplot(data=seeds,aes(x=pomc_short,y=QUERUB_seed, color=seeds$Transect))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "QUERUB Seed Abund")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=juvies.tree,aes(x=pomc_short,y=QUERUB_juv, color=juvies.tree$Transect.x))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "QUERUB Juv Abund")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=seedmort,aes(x=pomc_short,y=QUERUB, color=seedmort$Transect))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "QUERUB Seed Mort")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=adulttrees,aes(x=pomc_short,y=QUERUB, color=adulttrees$EP))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "QUERUB Adult Abund")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=adultgrow,aes(x=pomc_short,y=QUERUB, color=adultgrow$EP))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "QUERUB Adult Grow")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+ggplot(data=adultmort,aes(x=pomc_short,y=QUERUB, color=adultmort$EP))+
+  geom_point()+
+  geom_smooth(method='lm', se=FALSE)+
+  labs(title = "QUERUB Adult Mort")+
+  theme_bw()+
+  theme(panel.grid = element_blank())
+
+```
+
+```{r tree by transition and soil parameters}
+#colnames(seeds)
+#colnames(juvies.tree)
+#colnames(adulttrees)
+#colnames(seedmort)
+#colnames(adultgrow)
+#colnames(adultmort)
+
+####Make averages for total soil variable across all plots, NOT just the ones with species in it####
+ptotlongave=aggregate(adulttrees$Ptot_long~adulttrees$ecosys, FUN=mean)
+colnames(ptotlongave)=c("Ecosystem","Ptot_long")
+phshortave=aggregate(adulttrees$pH_short~adulttrees$ecosys, FUN=mean)
+colnames(phshortave)=c("Ecosystem","pH_short")
+phlongave=aggregate(adulttrees$pH_long~adulttrees$ecosys, FUN=mean)
+colnames(phlongave)=c("Ecosystem","pH_long")
+pomcshortave=aggregate(adulttrees$pomc_short~adulttrees$ecosys, FUN=mean)
+colnames(pomcshortave)=c("Ecosystem","pomc_short")
+
+####Aggregate averages by TerrType and not Ecosystem so we have all the approprate data.####
+ptotlongterr=aggregate(adulttrees$Ptot_long~adulttrees$TerrType, FUN=mean)
+colnames(ptotlongterr)=c("TerrType","Ptot_long")
+ptotorder=factor(ptotlongterr$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+phshortterr=aggregate(adulttrees$pH_short~adulttrees$TerrType, FUN=mean)
+colnames(phshortterr)=c("TerrType","pH_short")
+phsorder=factor(phshortterr$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+phlongterr=aggregate(adulttrees$pH_long~adulttrees$TerrType, FUN=mean)
+colnames(phlongterr)=c("TerrType","pH_long")
+phlorder=factor(phlongterr$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+pomcshortterr=aggregate(adulttrees$pomc_short~adulttrees$TerrType, FUN=mean)
+colnames(pomcshortterr)=c("TerrType","pomc_short")
+pomcorder=factor(pomcshortterr$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+
+#### ADULT MORTALITY####
+###ACERUB###
+ACERUBmort=adultmort[,c(1,3,5,6,10,52)]
+dim(ACERUBmort)
+ACERUBmort=na.exclude(ACERUBmort)
+#ptotave=aggregate(ACERUBmort$Ptot_long~ACERUBmort$Ecosystem, FUN=mean)
+#colnames(ptotave)=c("Ecosystem","Ptot_long")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(ACERUBmort, plot(ACERUBmort$ACERUB~ACERUBmort$Ecosystem, ylim=c(0,1),ylab="Prop Mort",xlab="Ecosystem",main="ACERUB"))
+xorder=factor(ACERUBmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(ACERUBmort, plot(ACERUBmort$ACERUB~xorder, ylim=c(0,1),ylab="Prop Mort",xlab="Ecosystem",main="ACERUB"))
+##add second axis
+par(new=TRUE)
+#with(ptotlongave, points(ptotlongave$Ecosystem,ptotlongave$Ptot_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+#with(ptotave, points(ptotave$Ecosystem,ptotave$Ptot_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(ptotlongterr, points(ptotorder,ptotlongterr$Ptot_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'Ptot_long')
+
+###CARCOR###
+CARCORmort=adultmort[,c(1,3,5,6,15,52)]
+dim(CARCORmort)
+CARCORmort=na.exclude(CARCORmort)
+#ptotave=aggregate(CARCORmort$Ptot_long~CARCORmort$Ecosystem, FUN=mean)
+#colnames(ptotave)=c("Ecosystem","Ptot_long")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(CARCORmort, plot(CARCORmort$CARCOR~CARCORmort$Ecosystem, ylim=c(0,1),ylab="Prop Mort",xlab="Ecosystem",main="CARCOR"))
+xorder=factor(CARCORmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(CARCORmort, plot(CARCORmort$CARCOR~xorder, ylim=c(0,1),ylab="Prop Mort",xlab="Ecosystem",main="CARCOR"))
+##add second axis
+par(new=TRUE)
+#with(ptotave, points(ptotave$Ecosystem,ptotave$Ptot_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+#with(ptotlongave, points(ptotlongave$Ecosystem,ptotlongave$Ptot_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(ptotlongterr, points(ptotorder,ptotlongterr$Ptot_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'Ptot_long')
+
+
+###CAROVA###
+CAROVAmort=adultmort[,c(1,3,5,6,16,54)]
+dim(CAROVAmort)
+CAROVAmort=na.exclude(CAROVAmort)
+#phave=aggregate(CAROVAmort$pH_long~CAROVAmort$Ecosystem, FUN=mean)
+#colnames(phave)=c("Ecosystem","pH_long")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(CAROVAmort, plot(CAROVAmort$CAROVA~CAROVAmort$Ecosystem, ylim=c(0,1),tck=0.08,ylab="Prop Mort",xlab="Ecosystem",main="CAROVA"))
+xorder=factor(CAROVAmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(CAROVAmort, plot(CAROVAmort$CAROVA~xorder, ylim=c(0,1),ylab="Prop Mort",xlab="Ecosystem",main="CAROVA"))
+##add second axis
+par(new=TRUE)
+#with(phave, points(phave$Ecosystem,phave$pH_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+#with(phlongave, points(phlongave$Ecosystem,phlongave$pH_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(phlongterr, points(phlorder,ptotlongterr$Ptot_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'ph_long')
+
+###PRUSER###
+PRUSERmort=adultmort[,c(1,3,5,6,32,71)]
+dim(PRUSERmort)
+PRUSERmort=na.exclude(PRUSERmort)
+#phave=aggregate(PRUSERmort$pH_short~PRUSERmort$Ecosystem, FUN=mean)
+#colnames(phave)=c("Ecosystem","pH_short")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(PRUSERmort, plot(PRUSERmort$PRUSER~PRUSERmort$Ecosystem, ylim=c(0,1),tck=-0.08,ylab="Prop Mort",xlab="Ecosystem",main="PRUSER"))
+xorder=factor(PRUSERmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(PRUSERmort, plot(PRUSERmort$PRUSER~xorder, ylim=c(0,1),ylab="Prop Mort",xlab="Ecosystem",main="PRUSER"))
+##add second axis
+par(new=TRUE)
+#with(phave, points(phave$Ecosystem,phave$pH_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+#with(phshortave, points(phshortave$Ecosystem,phshortave$pH_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(phshortterr, points(phsorder,phshortterr$pH_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'ph_short')
+
+###QUERUB###
+QUERUBmort=adultmort[,c(1,3,5,6,36,75)]
+dim(QUERUBmort)
+QUERUBmort=na.exclude(QUERUBmort)
+#pomcave=aggregate(QUERUBmort$pomc_short~QUERUBmort$Ecosystem, FUN=mean)
+#colnames(pomcave)=c("Ecosystem","pomc_short")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(QUERUBmort, plot(QUERUBmort$QUERUB~QUERUBmort$Ecosystem, ylim=c(0,1),tck=-0.08,ylab="Prop Mort",xlab="Ecosystem",main="QUERUB"))
+xorder=factor(QUERUBmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(QUERUBmort, plot(QUERUBmort$QUERUB~xorder, ylim=c(0,1),ylab="Prop Mort",xlab="Ecosystem",main="QUERUB"))
+##add second axis
+par(new=TRUE)
+#with(pomcave, points(pomcave$Ecosystem,pomcave$pomc_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+#with(pomcshortave, points(pomcshortave$Ecosystem,pomcshortave$pomc_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(pomcshortterr, points(pomcorder,pomcshortterr$pomc_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'pomc_short')
+
+
+####ADULT GROWTH####
+###ACERUB###
+ACERUBgrow=adultgrow[,c(1,3,5,6,10,54)]
+dim(ACERUBgrow)
+ACERUBgrow=na.exclude(ACERUBgrow)
+#ptotave=aggregate(ACERUBgrow$Ptot_long~ACERUBgrow$ecosys, FUN=mean)
+#colnames(ptotave)=c("Ecosystem","Ptot_long")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(ACERUBgrow, plot(ACERUBgrow$ACERUB~ACERUBgrow$ecosys, ylim=c(0,1),ylab="Prop grow",xlab="Ecosystem",main="ACERUB"))
+xorder=factor(ACERUBgrow$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(ACERUBgrow, plot(ACERUBgrow$ACERUB~xorder, ylim=c(0,0.3),ylab="Prop Grow",xlab="Ecosystem",main="ACERUB"))
+##add second axis
+par(new=TRUE)
+#with(ptotave, points(ptotave$Ecosystem,ptotave$Ptot_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+#with(ptotlongave, points(ptotlongave$Ecosystem,ptotlongave$Ptot_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(ptotlongterr, points(ptotorder,ptotlongterr$Ptot_long/3+0.1,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,0.3,by=0.03),tck=0.05)
+mtext(side = 4, line = 3, 'Ptot_long')
+
+###CARCOR###
+CARCORgrow=adultgrow[,c(1,3,5,6,15,54)]
+dim(CARCORgrow)
+CARCORgrow=na.exclude(CARCORgrow)
+#ptotave=aggregate(CARCORgrow$Ptot_long~CARCORgrow$ecosys, FUN=mean)
+#colnames(ptotave)=c("Ecosystem","Ptot_long")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(CARCORgrow, plot(CARCORgrow$CARCOR~CARCORgrow$ecosys, ylim=c(0,1),ylab="Prop grow",xlab="Ecosystem",main="CARCOR"))
+xorder=factor(CARCORgrow$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(CARCORgrow, plot(CARCORgrow$CARCOR~xorder, ylim=c(0,0.3),ylab="Prop growth",xlab="Ecosystem",main="CARCOR"))
+##add second axis
+par(new=TRUE)
+#with(ptotave, points(ptotave$Ecosystem,ptotave$Ptot_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+#with(ptotlongave, points(ptotlongave$Ecosystem,ptotlongave$Ptot_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(ptotlongterr, points(ptotorder,ptotlongterr$Ptot_long/3+.1,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,0.3,by=0.03),tck=0.05)
+mtext(side = 4, line = 3, 'Ptot_long')
+
+###CAROVA###
+CAROVAgrow=adultgrow[,c(1,3,5,6,16,56)]
+dim(CAROVAgrow)
+CAROVAgrow=na.exclude(CAROVAgrow)
+#phave=aggregate(CAROVAgrow$pH_long~CAROVAgrow$ecosys, FUN=mean)
+#colnames(phave)=c("Ecosystem","pH_long")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(CAROVAgrow, plot(CAROVAgrow$CAROVA~CAROVAgrow$ecosys, ylim=c(0,1),tck=-0.08,ylab="Prop grow",xlab="Ecosystem",main="CAROVA"))
+xorder=factor(CAROVAgrow$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(CAROVAgrow, plot(CAROVAgrow$CAROVA~xorder, ylim=c(0,0.3),ylab="Prop Growth",xlab="Ecosystem",main="CAROVA"))
+##add second axis
+par(new=TRUE)
+#with(phave, points(phave$Ecosystem,phave$pH_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+#with(phlongave, points(phlongave$Ecosystem,phlongave$pH_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(phlongterr, points(phlorder,ptotlongterr$Ptot_long/3+0.1,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,0.3,by=0.03),tck=0.05)
+mtext(side = 4, line = 3, 'ph_long')
+
+###PRUSER###
+PRUSERgrow=adultgrow[,c(1,3,5,6,31,73)]
+dim(PRUSERgrow)
+PRUSERgrow=na.exclude(PRUSERgrow)
+#phave=aggregate(PRUSERgrow$pH_short~PRUSERgrow$ecosys, FUN=mean)
+#colnames(phave)=c("Ecosystem","pH_short")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(PRUSERgrow, plot(PRUSERgrow$PRUSER~PRUSERgrow$ecosys, ylim=c(0,1),tck=-0.08,ylab="Prop grow",xlab="Ecosystem",main="PRUSER"))
+xorder=factor(PRUSERgrow$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(PRUSERgrow, plot(PRUSERgrow$PRUSER~xorder, ylim=c(0,0.3),ylab="Prop Growth",xlab="Ecosystem",main="PRUSER"))
+##add second axis
+par(new=TRUE)
+#with(phave, points(phave$Ecosystem,phave$pH_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+#with(phshortave, points(phshortave$Ecosystem,phshortave$pH_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(phshortterr, points(phsorder,phshortterr$pH_short/3+0.1,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,0.3,by=0.03),tck=0.05)
+mtext(side = 4, line = 3, 'ph_short')
+
+###QUERUB###
+QUERUBgrow=adultgrow[,c(1,3,5,6,35,77)]
+dim(QUERUBgrow)
+QUERUBgrow=na.exclude(QUERUBgrow)
+#pomcave=aggregate(QUERUBgrow$pomc_short~QUERUBgrow$ecosys, FUN=mean)
+#colnames(pomcave)=c("Ecosystem","pomc_short")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(QUERUBgrow, plot(QUERUBgrow$QUERUB~QUERUBgrow$ecosys, ylim=c(0,1),tck=-0.08,ylab="Prop grow",xlab="Ecosystem",main="QUERUB"))
+xorder=factor(QUERUBgrow$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(QUERUBgrow, plot(QUERUBgrow$QUERUB~xorder, ylim=c(0,0.3),ylab="Prop Growth",xlab="Ecosystem",main="QUERUB"))
+##add second axis
+par(new=TRUE)
+#with(pomcave, points(pomcave$Ecosystem,pomcave$pomc_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+#with(pomcshortave, points(pomcshortave$Ecosystem,pomcshortave$pomc_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(pomcshortterr, points(pomcorder,pomcshortterr$pomc_short/3+0.1,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,0.3,by=0.03),tck=0.05)
+mtext(side = 4, line = 3, 'pomc_short')
+
+
+####ADULT ABUNDANCE####
+adulttrees=adulttrees2
+###ACERUB###
+ACERUBtrees=adulttrees[,c(1,3,5,6,10,55)]
+dim(ACERUBtrees)
+ACERUBtrees=na.exclude(ACERUBtrees)
+#ptotave=aggregate(ACERUBtrees$Ptot_long~ACERUBtrees$ecosys, FUN=mean)
+#colnames(ptotave)=c("Ecosystem","Ptot_long")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(ACERUBtrees, plot(ACERUBtrees$ACERUB~ACERUBtrees$ecosys, ylim=c(0,1),ylab="Prop trees",xlab="Ecosystem",main="ACERUB"))
+xorder=factor(ACERUBtrees$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(ACERUBtrees, plot(ACERUBtrees$ACERUB~xorder, ylim=c(0,1),ylab="Prop Grow",xlab="Ecosystem",main="ACERUB"))
+##add second axis
+par(new=TRUE)
+#with(ptotave, points(ptotave$Ecosystem,ptotave$Ptot_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+#with(ptotlongave, points(ptotlongave$Ecosystem,ptotlongave$Ptot_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(ptotlongterr, points(ptotorder,ptotlongterr$Ptot_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'Ptot_long')
+
+###CARCOR###
+CARCORtrees=adulttrees[,c(1,3,5,6,15,55)]
+dim(CARCORtrees)
+CARCORtrees=na.exclude(CARCORtrees)
+#ptotave=aggregate(CARCORtrees$Ptot_long~CARCORtrees$ecosys, FUN=mean)
+#colnames(ptotave)=c("Ecosystem","Ptot_long")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(CARCORtrees, plot(CARCORtrees$CARCOR~CARCORtrees$ecosys, ylim=c(0,1),ylab="Prop trees",xlab="Ecosystem",main="CARCOR"))
+xorder=factor(CARCORtrees$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(CARCORtrees, plot(CARCORtrees$CARCOR~xorder, ylim=c(0,1),ylab="Prop Adults",xlab="Ecosystem",main="CARCOR"))
+##add second axis
+par(new=TRUE)
+#with(ptotave, points(ptotave$Ecosystem,ptotave$Ptot_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+#with(ptotlongave, points(ptotlongave$Ecosystem,ptotlongave$Ptot_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(ptotlongterr, points(ptotorder,ptotlongterr$Ptot_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'Ptot_long')
+
+###CAROVA###
+CAROVAtrees=adulttrees[,c(1,3,5,6,16,57)]
+dim(CAROVAtrees)
+CAROVAtrees=na.exclude(CAROVAtrees)
+#phave=aggregate(CAROVAtrees$pH_long~CAROVAtrees$ecosys, FUN=mean)
+#colnames(phave)=c("Ecosystem","pH_long")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(CAROVAtrees, plot(CAROVAtrees$CAROVA~CAROVAtrees$ecosys, ylim=c(0,1),tck=-0.08,ylab="Prop trees",xlab="Ecosystem",main="CAROVA"))
+xorder=factor(CAROVAtrees$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(CAROVAtrees, plot(CAROVAtrees$CAROVA~xorder, ylim=c(0,1),ylab="Prop Adults",xlab="Ecosystem",main="CAROVA"))
+##add second axis
+par(new=TRUE)
+#with(phave, points(phave$Ecosystem,phave$pH_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+#with(phlongave, points(phlongave$Ecosystem,phlongave$pH_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(phlongterr, points(phlorder,ptotlongterr$Ptot_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'ph_long')
+
+###PRUSER###
+PRUSERtrees=adulttrees[,c(1,3,5,6,32,74)]
+dim(PRUSERtrees)
+PRUSERtrees=na.exclude(PRUSERtrees)
+#phave=aggregate(PRUSERtrees$pH_short~PRUSERtrees$ecosys, FUN=mean)
+#colnames(phave)=c("Ecosystem","pH_short")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#(PRUSERtrees, plot(PRUSERtrees$PRUSER~PRUSERtrees$ecosys, ylim=c(0,1),tck=0.08,ylab="Prop trees",xlab="Ecosystem",main="PRUSER"))
+xorder=factor(PRUSERtrees$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(PRUSERtrees, plot(PRUSERtrees$PRUSER~xorder, ylim=c(0,1),ylab="Prop Trees",xlab="Ecosystem",main="PRUSER"))
+##add second axis
+par(new=TRUE)
+#with(phave, points(phave$Ecosystem,phave$pH_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+#with(phshortave, points(phshortave$Ecosystem,phshortave$pH_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(phshortterr, points(phsorder,phshortterr$pH_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'ph_short')
+
+###QUERUB###
+QUERUBtrees=adulttrees[,c(1,3,5,6,36,78)]
+dim(QUERUBtrees)
+QUERUBtrees=na.exclude(QUERUBtrees)
+#pomcave=aggregate(QUERUBtrees$pomc_short~QUERUBtrees$ecosys, FUN=mean)
+#colnames(pomcave)=c("Ecosystem","pomc_short")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(QUERUBtrees, plot(QUERUBtrees$QUERUB~QUERUBtrees$ecosys, ylim=c(0,1),tck=0.08,ylab="Prop trees",xlab="Ecosystem",main="QUERUB"))
+xorder=factor(QUERUBtrees$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(QUERUBtrees, plot(QUERUBtrees$QUERUB~xorder, ylim=c(0,1),ylab="Prop Adults",xlab="Ecosystem",main="QUERUB"))
+##add second axis
+par(new=TRUE)
+#with(pomcave, points(pomcave$Ecosystem,pomcave$pomc_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+#with(pomcshortave, points(pomcshortave$Ecosystem,pomcshortave$pomc_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(pomcshortterr, points(pomcorder,pomcshortterr$pomc_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'pomc_short')
+
+####SEEDLING ABUNDANCE####
+###ACERUB###
+ACERUBseeds=seeds[,c(1,2,4,6,48)]
+dim(ACERUBseeds)
+ACERUBseeds=na.exclude(ACERUBseeds)
+#ptotave=aggregate(ACERUBseeds$Ptot_long~ACERUBseeds$Ecosystem, FUN=mean)
+#colnames(ptotave)=c("Ecosystem","Ptot_long")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(ACERUBseeds, plot(ACERUBseeds$ACERUB~ACERUBseeds$Ecosystem, ylim=c(0,12),ylab="Count seeds",xlab="Ecosystem",main="ACERUB"))
+xorder=factor(ACERUBseeds$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(ACERUBseeds, plot(ACERUBseeds$ACERUB~xorder, ylim=c(0,12),ylab="Prop Grow",xlab="Ecosystem",main="ACERUB"))
+##add second axis
+par(new=TRUE)
+#with(ptotave, points(ptotave$Ecosystem,ptotave$Ptot_long/0.1+6,pch=16,col="red",ylab=NA,xlab=NA))
+#with(ptotlongave, points(ptotlongave$Ecosystem,ptotlongave$Ptot_long/0.1+6,pch=16,col="red",ylab=NA,xlab=NA))
+with(ptotlongterr, points(ptotorder,ptotlongterr$Ptot_long/0.1+6,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,12,by=1.2),tck=0.05)
+mtext(side = 4, line = 3, 'Ptot_long')
+
+###CARCOR###
+CARCORseeds=seeds[,c(1,2,4,10,48)]
+dim(CARCORseeds)
+CARCORseeds=na.exclude(CARCORseeds)
+#ptotave=aggregate(CARCORseeds$Ptot_long~CARCORseeds$Ecosystem, FUN=mean)
+#colnames(ptotave)=c("Ecosystem","Ptot_long")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(CARCORseeds, plot(CARCORseeds$CARCOR~CARCORseeds$Ecosystem, ylim=c(0,11),ylab="Count seeds",xlab="Ecosystem",main="CARCOR"))
+xorder=factor(CARCORseeds$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(CARCORseeds, plot(CARCORseeds$CARCOR~xorder, ylim=c(0,11),ylab="Prop Seeds",xlab="Ecosystem",main="CARCOR"))
+##add second axis
+par(new=TRUE)
+#with(ptotave, points(ptotave$Ecosystem,ptotave$Ptot_long/0.1+6,pch=16,col="red",ylab=NA,xlab=NA))
+#with(ptotlongave, points(ptotlongave$Ecosystem,ptotlongave$Ptot_long/0.1+6,pch=16,col="red",ylab=NA,xlab=NA))
+with(ptotlongterr, points(ptotorder,ptotlongterr$Ptot_long/0.1+6,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,11,by=1.1),tck=0.05)
+mtext(side = 4, line = 3, 'Ptot_long')
+
+###CAROVA###
+CAROVAseeds=seeds[,c(1,2,4,11,50)]
+dim(CAROVAseeds)
+CAROVAseeds=na.exclude(CAROVAseeds)
+#phave=aggregate(CAROVAseeds$pH_long~CAROVAseeds$Ecosystem, FUN=mean)
+#colnames(phave)=c("Ecosystem","pH_long")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(CAROVAseeds, plot(CAROVAseeds$CAROVA~CAROVAseeds$Ecosystem, ylim=c(0,20),tck=-0.08,ylab="Count seeds",xlab="Ecosystem",main="CAROVA"))
+xorder=factor(CAROVAseeds$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(CAROVAseeds, plot(CAROVAseeds$CAROVA~xorder, ylim=c(0,20),ylab="Prop Seeds",xlab="Ecosystem",main="CAROVA"))
+##add second axis
+par(new=TRUE)
+#with(phave, points(phave$Ecosystem,phave$pH_long/0.075+10,pch=16,col="red",ylab=NA,xlab=NA))
+#with(phlongave, points(phlongave$Ecosystem,phlongave$pH_long/0.075+10,pch=16,col="red",ylab=NA,xlab=NA))
+with(phlongterr, points(phlorder,ptotlongterr$Ptot_long/0.075+10,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,20,by=1.82),tck=0.05)
+mtext(side = 4, line = 3, 'ph_long')
+
+###PRUSER###
+PRUSERseeds=seeds[,c(1,2,4,28,67)]
+dim(PRUSERseeds)
+PRUSERseeds=na.exclude(PRUSERseeds)
+#phave=aggregate(PRUSERseeds$pH_short~PRUSERseeds$Ecosystem, FUN=mean)
+#colnames(phave)=c("Ecosystem","pH_short")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(PRUSERseeds, plot(PRUSERseeds$PRUSER~PRUSERseeds$Ecosystem, ylim=c(0,50),tck=-0.08,ylab="Count seeds",xlab="Ecosystem",main="PRUSER"))
+xorder=factor(PRUSERseeds$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(PRUSERseeds, plot(PRUSERseeds$PRUSER~xorder, ylim=c(0,50),ylab="Seed Count",xlab="Ecosystem",main="PRUSER"))
+##add second axis
+par(new=TRUE)
+#with(phave, points(phave$Ecosystem,phave$pH_short/0.025+25,pch=16,col="red",ylab=NA,xlab=NA))
+#with(phshortave, points(phshortave$Ecosystem,phshortave$pH_short/0.025+25,pch=16,col="red",ylab=NA,xlab=NA))
+with(phshortterr, points(phsorder,phshortterr$pH_short/0.025+25,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,50,by=4.55),tck=0.05)
+mtext(side = 4, line = 3, 'ph_short')
+
+###QUERUB###
+QUERUBseeds=seeds[,c(1,2,4,32,71)]
+dim(QUERUBseeds)
+QUERUBseeds=na.exclude(QUERUBseeds)
+#pomcave=aggregate(QUERUBseeds$pomc_short~QUERUBseeds$Ecosystem, FUN=mean)
+#colnames(pomcave)=c("Ecosystem","pomc_short")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(QUERUBseeds, plot(QUERUBseeds$QUERUB~QUERUBseeds$Ecosystem, ylim=c(0,40),tck=-0.08,ylab="Count seeds",xlab="Ecosystem",main="QUERUB"))
+xorder=factor(QUERUBseeds$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(QUERUBseeds, plot(QUERUBseeds$QUERUB~xorder, ylim=c(0,40),ylab="Seed Count",xlab="Ecosystem",main="QUERUB"))
+##add second axis
+par(new=TRUE)
+#with(pomcave, points(pomcave$Ecosystem,pomcave$pomc_short/0.02+20,pch=16,col="red",ylab=NA,xlab=NA))
+#with(pomcshortave, points(pomcshortave$Ecosystem,pomcshortave$pomc_short/0.02+20,pch=16,col="red",ylab=NA,xlab=NA))
+with(pomcshortterr, points(pomcorder,pomcshortterr$pomc_short/0.02+20,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,40,by=3.65),tck=0.05)
+mtext(side = 4, line = 3, 'pomc_short')
+
+####Seedling Mortality####
+###ACERUB###
+ACERUBseedmort=seedmort[,c(1,2,4,5,42)]
+dim(ACERUBseedmort)
+ACERUBseedmort=na.exclude(ACERUBseedmort)
+#ptotave=aggregate(ACERUBseedmort$Ptot_long~ACERUBseedmort$Ecosystem, FUN=mean)
+#colnames(ptotave)=c("Ecosystem","Ptot_long")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(ACERUBseedmort, plot(ACERUBseedmort$ACERUB~ACERUBseedmort$TerrType, ylim=c(0,1),ylab="Prop seedmort",xlab="Ecosystem",main="ACERUB"))
+xorder=factor(ACERUBseedmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(ACERUBseedmort, plot(ACERUBseedmort$ACERUB~xorder, ylim=c(0,1),ylab="Prop Seed Mort",xlab="Ecosystem",main="ACERUB"))
+##add second axis
+par(new=TRUE)
+#with(ptotave, points(ptotave$Ecosystem,ptotave$Ptot_long+0.5,pch=16,col="green",ylab=NA,xlab=NA))
+#with(ptotlongave, points(ptotlongave$Ecosystem,ptotlongave$Ptot_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+#with(ptotterry, points(ptotterry$TerrType,ptotterry$Ptot_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(ptotlongterr, points(ptotorder,ptotlongterr$Ptot_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'Ptot_long')
+
+###CARCOR###
+CARCORseedmort=seedmort[,c(1,2,4,9,42)]
+dim(CARCORseedmort)
+CARCORseedmort=na.exclude(CARCORseedmort)
+#ptotave=aggregate(CARCORseedmort$Ptot_long~CARCORseedmort$Ecosystem, FUN=mean)
+#colnames(ptotave)=c("Ecosystem","Ptot_long")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(CARCORseedmort, plot(CARCORseedmort$CARCOR~CARCORseedmort$Ecosystem, ylim=c(0,1),ylab="Prop seedmort",xlab="Ecosystem",main="CARCOR"))
+xorder=factor(CARCORseedmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(CARCORseedmort, plot(CARCORseedmort$CARCOR~xorder, ylim=c(0,1),ylab="Prop Seed Mort",xlab="Ecosystem",main="CARCOR"))
+##add second axis
+par(new=TRUE)
+#with(ptotave, points(ptotave$Ecosystem,ptotave$Ptot_long+0.58,pch=16,col="red",ylab=NA,xlab=NA))
+#with(ptotlongave, points(ptotlongave$Ecosystem,ptotlongave$Ptot_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(ptotlongterr, points(ptotorder,ptotlongterr$Ptot_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.6,by=0.1),at=seq(0,1.1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'Ptot_long')
+
+###CAROVA###
+CAROVAseedmort=seedmort[,c(1,2,4,10,44)]
+dim(CAROVAseedmort)
+CAROVAseedmort=na.exclude(CAROVAseedmort)
+#phave=aggregate(CAROVAseedmort$pH_long~CAROVAseedmort$Ecosystem, FUN=mean)
+#colnames(phave)=c("Ecosystem","pH_long")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(CAROVAseedmort, plot(CAROVAseedmort$CAROVA~CAROVAseedmort$Ecosystem, ylim=c(0,1),tck=0.08,ylab="Prop seedmort",xlab="Ecosystem",main="CAROVA"))
+xorder=factor(CAROVAseedmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(CAROVAseedmort, plot(CAROVAseedmort$CAROVA~xorder, ylim=c(0,1),ylab="Prop Seed Mort",xlab="Ecosystem",main="CAROVA"))
+##add second axis
+par(new=TRUE)
+#with(phave, points(phave$Ecosystem,phave$pH_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+#with(phlongave, points(phlongave$Ecosystem,phlongave$pH_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(phlongterr, points(phlorder,ptotlongterr$Ptot_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'ph_long')
+
+###PRUSER###
+PRUSERseedmort=seedmort[,c(1,2,4,24,61)]
+dim(PRUSERseedmort)
+PRUSERseedmort=na.exclude(PRUSERseedmort)
+#phave=aggregate(PRUSERseedmort$pH_short~PRUSERseedmort$Ecosystem, FUN=mean)
+#colnames(phave)=c("Ecosystem","pH_short")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(PRUSERseedmort, plot(PRUSERseedmort$PRUSER~PRUSERseedmort$Ecosystem, ylim=c(0,1),tck=0.08,ylab="Prop seedmort",xlab="Ecosystem",main="PRUSER"))
+xorder=factor(PRUSERseedmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(PRUSERseedmort, plot(PRUSERseedmort$PRUSER~xorder, ylim=c(0,1),ylab="Prop Seed Mort",xlab="Ecosystem",main="PRUSER"))
+##add second axis
+par(new=TRUE)
+#with(phave, points(phave$Ecosystem,phave$pH_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+#with(phshortave, points(phshortave$Ecosystem,phshortave$pH_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(phshortterr, points(phsorder,phshortterr$pH_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'ph_short')
+
+###QUERUB###
+QUERUBseedmort=seedmort[,c(1,2,4,28,65)]
+dim(QUERUBseedmort)
+QUERUBseedmort=na.exclude(QUERUBseedmort)
+#pomcave=aggregate(QUERUBseedmort$pomc_short~QUERUBseedmort$Ecosystem, FUN=mean)
+#colnames(pomcave)=c("Ecosystem","pomc_short")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(QUERUBseedmort, plot(QUERUBseedmort$QUERUB~QUERUBseedmort$Ecosystem, ylim=c(0,1),tck=-0.08,ylab="Prop seedmort",xlab="Ecosystem",main="QUERUB"))
+xorder=factor(QUERUBseedmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(QUERUBseedmort, plot(QUERUBseedmort$QUERUB~xorder, ylim=c(0,1),ylab="Prop Seed Mort",xlab="Ecosystem",main="QUERUB"))
+##add second axis
+par(new=TRUE)
+#with(pomcave, points(pomcave$Ecosystem,pomcave$pomc_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+#with(pomcshortave, points(pomcshortave$Ecosystem,pomcshortave$pomc_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(pomcshortterr, points(pomcorder,pomcshortterr$pomc_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'pomc_short')
+
+####JUVENILE ABUNDANCE####
+###ACERUB###
+ACERUBjuvies.tree=juvies.tree[,c(1,2,4,6,45)]
+dim(ACERUBjuvies.tree)
+ACERUBjuvies.tree=na.exclude(ACERUBjuvies.tree)
+#ptotave=aggregate(ACERUBjuvies.tree$Ptot_long~ACERUBjuvies.tree$Ecosystem, FUN=mean)
+#colnames(ptotave)=c("Ecosystem","Ptot_long")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(ACERUBjuvies.tree, plot(ACERUBjuvies.tree$ACERUB~ACERUBjuvies.tree$Ecosystem, ylim=c(0,6),ylab="Count Juveniles",xlab="Ecosystem",main="ACERUB"))
+xorder=factor(ACERUBjuvies.tree$TerrType.x, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(ACERUBjuvies.tree, plot(ACERUBjuvies.tree$ACERUB~xorder, ylim=c(0,6),ylab="Count Juveniles",xlab="Ecosystem",main="ACERUB"))
+##add second axis
+par(new=TRUE)
+#with(ptotave, points(ptotave$Ecosystem,ptotave$Ptot_long/0.25+3,pch=16,col="red",ylab=NA,xlab=NA))
+#with(ptotlongave, points(ptotlongave$Ecosystem,ptotlongave$Ptot_long/0.25+3,pch=16,col="red",ylab=NA,xlab=NA))
+with(ptotlongterr, points(ptotorder,ptotlongterr$Ptot_long/0.25+3,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.6,by=0.1),at=seq(0.5,6,by=0.5),tck=0.05)
+mtext(side = 4, line = 3, 'Ptot_long')
+
+###CARCOR###
+CARCORjuvies.tree=juvies.tree[,c(1,2,4,9,45)]
+dim(CARCORjuvies.tree)
+CARCORjuvies.tree=na.exclude(CARCORjuvies.tree)
+#ptotave=aggregate(CARCORjuvies.tree$Ptot_long~CARCORjuvies.tree$Ecosystem, FUN=mean)
+#colnames(ptotave)=c("Ecosystem","Ptot_long")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(CARCORjuvies.tree, plot(CARCORjuvies.tree$CARCOR~CARCORjuvies.tree$Ecosystem, ylim=c(0,5),ylab="Count Juveniles",xlab="Ecosystem",main="CARCOR"))
+xorder=factor(CARCORjuvies.tree$TerrType.x, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(CARCORjuvies.tree, plot(CARCORjuvies.tree$CARCOR~xorder, ylim=c(0,5),ylab="Count Juveniles",xlab="Ecosystem",main="CARCOR"))
+##add second axis
+par(new=TRUE)
+#with(ptotave, points(ptotave$Ecosystem,ptotave$Ptot_long/0.25+2.5,pch=16,col="red",ylab=NA,xlab=NA))
+#with(ptotlongave, points(ptotlongave$Ecosystem,ptotlongave$Ptot_long/0.25+3,pch=16,col="red",ylab=NA,xlab=NA))
+with(ptotlongterr, points(ptotorder,ptotlongterr$Ptot_long/0.25+3,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,5,by=0.5),tck=0.05)
+mtext(side = 4, line = 3, 'Ptot_long')
+
+###CAROVA###
+CAROVAjuvies.tree=juvies.tree[,c(1,2,4,10,47)]
+dim(CAROVAjuvies.tree)
+CAROVAjuvies.tree=na.exclude(CAROVAjuvies.tree)
+#phave=aggregate(CAROVAjuvies.tree$pH_long~CAROVAjuvies.tree$Ecosystem, FUN=mean)
+#colnames(phave)=c("Ecosystem","pH_long")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(CAROVAjuvies.tree, plot(CAROVAjuvies.tree$CAROVA~CAROVAjuvies.tree$Ecosystem, ylim=c(0,5),tck=0.05,las=1, ylab="Count Juveniles",xlab="Ecosystem",main="CAROVA"))
+xorder=factor(CAROVAjuvies.tree$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(CAROVAjuvies.tree, plot(CAROVAjuvies.tree$CAROVA~xorder, ylim=c(0,5),ylab="Count Juveniles",xlab="Ecosystem",main="CAROVA"))
+##add second axis
+par(new=TRUE)
+#with(phave, points(phave$Ecosystem,phave$pH_long/0.25+2.5,pch=16,col="red",ylab=NA,xlab=NA))
+#with(phlongave, points(phlongave$Ecosystem,phlongave$pH_long/0.25+2.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(phlongterr, points(phlorder,ptotlongterr$Ptot_long/0.25+2.5,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,5,by=0.5),tck=0.05)
+mtext(side = 4, line = 3, 'ph_long')
+
+###PRUSER###
+PRUSERjuvies.tree=juvies.tree[,c(1,2,4,26,64)]
+dim(PRUSERjuvies.tree)
+PRUSERjuvies.tree=na.exclude(PRUSERjuvies.tree)
+#phave=aggregate(PRUSERjuvies.tree$pH_short~PRUSERjuvies.tree$Ecosystem, FUN=mean)
+#colnames(phave)=c("Ecosystem","pH_short")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(PRUSERjuvies.tree, plot(PRUSERjuvies.tree$PRUSER~PRUSERjuvies.tree$Ecosystem, ylim=c(0,2),tck=0.05,ylab="Count Juveniles",xlab="Ecosystem",main="PRUSER"))
+xorder=factor(PRUSERjuvies.tree$TerrType.x, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(PRUSERjuvies.tree, plot(PRUSERjuvies.tree$PRUSER~xorder, ylim=c(0,2),ylab="Juvenile count",xlab="Ecosystem",main="PRUSER"))
+##add second axis
+par(new=TRUE)
+#with(phave, points(phave$Ecosystem,phave$pH_short/0.5+1,pch=16,col="red",ylab=NA,xlab=NA))
+#with(phshortave, points(phshortave$Ecosystem,phshortave$pH_short/0.5+1,pch=16,col="red",ylab=NA,xlab=NA))
+with(phshortterr, points(phsorder,phshortterr$pH_short/0.5+1,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,2,by=0.2),tck=0.05)
+mtext(side = 4, line = 3, 'ph_short')
+
+###QUERUB###
+QUERUBjuvies.tree=juvies.tree[,c(1,2,4,30,68)]
+dim(QUERUBjuvies.tree)
+QUERUBjuvies.tree=na.exclude(QUERUBjuvies.tree)
+#pomcave=aggregate(QUERUBjuvies.tree$pomc_short~QUERUBjuvies.tree$Ecosystem, FUN=mean)
+#colnames(pomcave)=c("Ecosystem","pomc_short")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(QUERUBjuvies.tree, plot(QUERUBjuvies.tree$QUERUB~QUERUBjuvies.tree$Ecosystem, ylim=c(0,5),tck=-0.05,ylab="Count Juveniles",xlab="Ecosystem",main="QUERUB"))
+xorder=factor(QUERUBjuvies.tree$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(QUERUBjuvies.tree, plot(QUERUBjuvies.tree$QUERUB~xorder, ylim=c(0,5),ylab="Juvenile Count",xlab="Ecosystem",main="QUERUB"))
+##add second axis
+par(new=TRUE)
+#with(pomcave, points(pomcave$Ecosystem,pomcave$pomc_short/0.25+2.55,pch=16,col="green",ylab=NA,xlab=NA))
+#with(pomcshortave, points(pomcshortave$Ecosystem,pomcshortave$pomc_short/0.25+2.55,pch=16,col="red",ylab=NA,xlab=NA))
+with(pomcshortterr, points(pomcorder,pomcshortterr$pomc_short/0.5+2.55,pch=16,col="red",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,5,by=0.5),tck=0.05)
+mtext(side = 4, line = 3, 'pomc_short')
+```
+
+```{R Ranked Scatterplots}
+tree.hel.soil=merge(tree.hel,soildata)
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+plot(QUERUBjuvies.tree$QUERUB~QUERUBjuvies.tree$pomc_short, xlab = "Ecosystem", ylab = "Juvenile Count")
+
+plot(ACERUBtrees$ACERUB~ACERUBtrees$Ptot_long, xaxt = "n", xlab = "Ecosystem", ylab = "Adult Trees", main = "ACERUB Adults")
+## manually add "x-axis", with "labels" and "las"
+axis(1, at = 1:20, labels = rep.int(-1.5:1.5, 5), las = 2)
+
+##Remove non-transect ecosystem types e.g. UDF
+ACERUBtrees=ACERUBtrees[ACERUBtrees$TerrType=="B"|ACERUBtrees$TerrType=="BU"|ACERUBtrees$TerrType=="T-UB"|ACERUBtrees$TerrType=="UB"|ACERUBtrees$TerrType=="U"|ACERUBtrees$TerrType=="UR"|ACERUBtrees$TerrType=="T-UR"|ACERUBtrees$TerrType=="RU"|ACERUBtrees$TerrType=="R"|ACERUBtrees$TerrType=="RB"|ACERUBtrees$TerrType=="T-RB"|ACERUBtrees$TerrType=="BR",]
+
+##THE following needs work. For "Pretty" graphs of ranked scatterplots. xy plot code works relatively well for the time being.
+#df1=gather(ACERUBtrees,id.vars="Ptot_long",variable.name="TerrType",value.name="ACERUB")
+##???NEED to make ew column with location and soil as one variable to rank and then add overlaying axis of bad>good and second axis of habitat type or whatever???
+#df1=structure(list(TerrType="B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+#ggplot(ACERUBtrees, aes(x=Ptot_long, y=ACERUB, fill=TerrType)) + 
+    #geom_point(size=2) + 
+    #scale_x_continuous() + 
+    #theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+##Shitty XYplots, but they'll do for now.
+##Subset tree.hel.soil to remove all terrtypes we don't want.
+tree.hel.soil=tree.hel.soil[tree.hel.soil$TerrType=="B"|tree.hel.soil$TerrType=="BU"|tree.hel.soil$TerrType=="T-UB"|tree.hel.soil$TerrType=="UB"|tree.hel.soil$TerrType=="U"|tree.hel.soil$TerrType=="UR"|tree.hel.soil$TerrType=="T-UR"|tree.hel.soil$TerrType=="RU"|tree.hel.soil$TerrType=="R"|tree.hel.soil$TerrType=="RB"|tree.hel.soil$TerrType=="T-RB"|tree.hel.soil$TerrType=="BR",]
+adultgrow=adultgrow[adultgrow$TerrType=="B"|adultgrow$TerrType=="BU"|adultgrow$TerrType=="T-UB"|adultgrow$TerrType=="UB"|adultgrow$TerrType=="U"|adultgrow$TerrType=="UR"|adultgrow$TerrType=="T-UR"|adultgrow$TerrType=="RU"|adultgrow$TerrType=="R"|adultgrow$TerrType=="RB"|adultgrow$TerrType=="T-RB"|adultgrow$TerrType=="BR",]
+adultmort=adultmort[adultmort$TerrType=="B"|adultmort$TerrType=="BU"|adultmort$TerrType=="T-UB"|adultmort$TerrType=="UB"|adultmort$TerrType=="U"|adultmort$TerrType=="UR"|adultmort$TerrType=="T-UR"|adultmort$TerrType=="RU"|adultmort$TerrType=="R"|adultmort$TerrType=="RB"|adultmort$TerrType=="T-RB"|adultmort$TerrType=="BR",]
+seeds=seeds[seeds$TerrType=="B"|seeds$TerrType=="BU"|seeds$TerrType=="T-UB"|seeds$TerrType=="UB"|seeds$TerrType=="U"|seeds$TerrType=="UR"|seeds$TerrType=="T-UR"|seeds$TerrType=="RU"|seeds$TerrType=="R"|seeds$TerrType=="RB"|seeds$TerrType=="T-RB"|seeds$TerrType=="BR",]
+juvies.tree=juvies.tree[juvies.tree$TerrType.x=="B"|juvies.tree$TerrType.x=="BU"|juvies.tree$TerrType.x=="T-UB"|juvies.tree$TerrType.x=="UB"|juvies.tree$TerrType.x=="U"|juvies.tree$TerrType.x=="UR"|juvies.tree$TerrType.x=="T-UR"|juvies.tree$TerrType.x=="RU"|juvies.tree$TerrType.x=="R"|juvies.tree$TerrType.x=="RB"|juvies.tree$TerrType.x=="T-RB"|juvies.tree$TerrType.x=="BR",]
+seedmort=seedmort[seedmort$TerrType=="B"|seedmort$TerrType=="BU"|seedmort$TerrType=="T-UB"|seedmort$TerrType=="UB"|seedmort$TerrType=="U"|seedmort$TerrType=="UR"|seedmort$TerrType=="T-UR"|seedmort$TerrType=="RU"|seedmort$TerrType=="R"|seedmort$TerrType=="RB"|seedmort$TerrType=="T-RB"|seedmort$TerrType=="BR",]
+
+##plot ACERUB plots
+ACERUBadults=xyplot(ACERUB~Ptot_long|TerrType,data=tree.hel.soil,main="ACERUB Adults",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),as.table=TRUE)
+ACERUBadults
+ACERUBag=xyplot(ACERUB~Ptot_long|TerrType,data=adultgrow,main="ACERUB A.Growth",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),as.table=TRUE)
+ACERUBag
+ACERUBamort=xyplot(ACERUB~Ptot_long|TerrType,data=adultmort,main="ACERUB A.Mortality",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),as.table=TRUE)
+ACERUBamort
+ACERUBseeds=xyplot(ACERUB_seed~Ptot_long|TerrType,data=seeds,main="ACERUB Seedling",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),as.table=TRUE)
+ACERUBseeds
+ACERUBsmort=xyplot(ACERUB~Ptot_long|TerrType,data=seedmort,main="ACERUB S.Mortality",index.cond=list(c(1,3,6,9,8,8,10,7,5,4,4,11,12,2,1)),as.table=TRUE)
+ACERUBsmort
+ACERUBjuv=xyplot(ACERUB~Ptot_long|TerrType.x,data=juvies.tree,main="ACERUB Juveniles",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),as.table=TRUE)
+ACERUBjuv
+
+#plot CARCOR plots
+CARCORadults=xyplot(CARCOR~Ptot_long|TerrType,data=tree.hel.soil,main="CARCOR",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),as.table=TRUE)
+CARCORadults
+CARCORag=xyplot(CARCOR~Ptot_long|TerrType,data=adultgrow,main="CARCOR A.Growth",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),as.table=TRUE)
+CARCORag
+CARCORamort=xyplot(CARCOR~Ptot_long|TerrType,data=adultmort,main="CARCOR A.Mortality",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),as.table=TRUE)
+CARCORamort
+CARCORseeds=xyplot(CARCOR_seed~Ptot_long|TerrType,data=seeds,main="CARCOR Seedling",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),as.table=TRUE)
+CARCORseeds
+CARCORsmort=xyplot(CARCOR~Ptot_long|TerrType,data=seedmort,main="CARCOR S.Mortality",index.cond=list(c(1,3,6,9,8,8,10,7,5,4,4,11,12,2,1)),as.table=TRUE)
+CARCORsmort
+CARCORjuv=xyplot(CARCOR~Ptot_long|TerrType.x,data=juvies.tree,main="CARCOR Juveniles",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),as.table=TRUE)
+CARCORjuv
+
+##plot CAROVA plots
+CAROVAadults=xyplot(CAROVA~pH_long|TerrType,data=tree.hel.soil,main="CAROVA",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),as.table=TRUE)
+CAROVAadults
+CAROVAag=xyplot(CAROVA~pH_long|TerrType,data=adultgrow,main="CAROVA A.Growth",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),as.table=TRUE)
+CAROVAag
+CAROVAamort=xyplot(CAROVA~pH_long|TerrType,data=adultmort,main="CAROVA A.Mortality",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),as.table=TRUE)
+CAROVAamort
+CAROVAseeds=xyplot(CAROVA_seed~pH_long|TerrType,data=seeds,main="CAROVA Seedling",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),as.table=TRUE)
+CAROVAseeds
+CAROVAsmort=xyplot(CAROVA~pH_long|TerrType,data=seedmort,main="CAROVA S.Mortality",index.cond=list(c(1,3,6,9,8,8,10,7,5,4,4,11,12,2,1)),as.table=TRUE)
+CAROVAsmort
+CAROVAjuv=xyplot(CAROVA~pH_long|TerrType.x,data=juvies.tree,main="CAROVA Juveniles",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),as.table=TRUE)
+CAROVAjuv
+
+##plot PRUSER plots
+PRUSERadults=xyplot(PRUSER~pH_short|TerrType,data=tree.hel.soil,main="PRUSER Adults",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),as.table=TRUE)
+PRUSERadults
+PRUSERag=xyplot(PRUSER~pH_short|TerrType,data=adultgrow,main="PRUSER A.Growth",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),as.table=TRUE)
+PRUSERag
+PRUSERamort=xyplot(PRUSER~pH_short|TerrType,data=adultmort,main="PRUSER A.Mortality",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),as.table=TRUE)
+PRUSERamort
+PRUSERseeds=xyplot(PRUSER_seed~pH_short|TerrType,data=seeds,main="PRUSER Seedling",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),as.table=TRUE)
+PRUSERseeds
+PRUSERsmort=xyplot(PRUSER~pH_short|TerrType,data=seedmort,main="PRUSER S.Mortality",index.cond=list(c(1,3,6,9,8,8,10,7,5,4,4,11,12,2,1)),as.table=TRUE)
+PRUSERsmort
+PRUSERjuv=xyplot(PRUSER~pH_short|TerrType.x,data=juvies.tree,main="PRUSER Juveniles",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),as.table=TRUE)
+PRUSERjuv
+
+##plot QUERUB plots
+QUERUBadults=xyplot(QUERUB~pomc_short|TerrType,data=tree.hel.soil,main="QUERUB Adults",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),as.table=TRUE)
+QUERUBadults
+QUERUBag=xyplot(QUERUB~pomc_short|TerrType,data=adultgrow,main="QUERUB A.Growth",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),as.table=TRUE)
+QUERUBag
+QUERUBamort=xyplot(QUERUB~pomc_short|TerrType,data=adultmort,main="QUERUB A.Mortality",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),as.table=TRUE)
+QUERUBamort
+QUERUBseeds=xyplot(QUERUB_seed~pomc_short|TerrType,data=seeds,main="QUERUB Seedling",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),as.table=TRUE)
+QUERUBseeds
+QUERUBsmort=xyplot(QUERUB~pomc_short|TerrType,data=seedmort,main="QUERUB S.Mortality",index.cond=list(c(1,3,6,9,8,8,10,7,5,4,4,11,12,2,1)),as.table=TRUE)
+QUERUBsmort
+QUERUBjuv=xyplot(QUERUB~pomc_short|TerrType.x,data=juvies.tree,main="QUERUB Juveniles",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),as.table=TRUE)
+QUERUBjuv
+```
