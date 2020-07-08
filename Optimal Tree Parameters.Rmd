@@ -544,7 +544,7 @@ colnames(pomcshortave)=c("Ecosystem","pomc_short")
 
 ####Aggregate averages by TerrType and not Ecosystem so we have all the approprate data.####
 ptotlongterr=aggregate(adulttrees$Ptot_long~adulttrees$TerrType, FUN=mean)
-colnames(ptotlongterr)=c("TerrType","Ptot_long")
+colnames(ptotlongterr)=c("TerrType","ptot_long")
 ptotorder=factor(ptotlongterr$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
 phshortterr=aggregate(adulttrees$pH_short~adulttrees$TerrType, FUN=mean)
 colnames(phshortterr)=c("TerrType","pH_short")
@@ -555,6 +555,25 @@ phlorder=factor(phlongterr$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-U
 pomcshortterr=aggregate(adulttrees$pomc_short~adulttrees$TerrType, FUN=mean)
 colnames(pomcshortterr)=c("TerrType","pomc_short")
 pomcorder=factor(pomcshortterr$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+perccshortterr=aggregate(adulttrees$percc_short~adulttrees$TerrType, FUN=mean)
+colnames(perccshortterr)=c("TerrType","percc_short")
+perccorder=factor(perccshortterr$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+moistshortterr=aggregate(adulttrees$moist_short~adulttrees$TerrType, FUN=mean)
+colnames(moistshortterr)=c("TerrType","moist_short")
+moistorder=factor(moistshortterr$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+percclongterr=aggregate(adulttrees$percc_long~adulttrees$TerrType, FUN=mean)
+colnames(percclongterr)=c("TerrType","percc_long")
+percclongorder=factor(percclongterr$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+moistlongterr=aggregate(adulttrees$moist_long~adulttrees$TerrType, FUN=mean)
+colnames(moistlongterr)=c("TerrType","moist_long")
+moistlongorder=factor(moistlongterr$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+poshortterr=aggregate(adulttrees$Po_short~adulttrees$TerrType, FUN=mean)
+colnames(poshortterr)=c("TerrType","Po_short")
+poorder=factor(poshortterr$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+ctonshortterr=aggregate(adulttrees$cton_short~adulttrees$TerrType, FUN=mean)
+colnames(ctonshortterr)=c("TerrType","cton_short")
+ctonorder=factor(ctonshortterr$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+
 
 #### ADULT MORTALITY####
 ###ACERUB###
@@ -1238,4 +1257,350 @@ QUERUBsmort=xyplot(QUERUB~pomc_short|TerrType,data=seedmort,main="QUERUB S.Morta
 QUERUBsmort
 QUERUBjuv=xyplot(QUERUB~pomc_short|TerrType.x,data=juvies.tree,main="QUERUB Juveniles",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),as.table=TRUE)
 QUERUBjuv
+```
+
+```{r transition plots 2 variable trees}
+#### FAGAME####
+###Abundance###
+#ptotave=aggregate(FAGAMEtrees$Ptot_long~FAGAMEtrees$ecosys, FUN=mean)
+#colnames(ptotave)=c("Ecosystem","Ptot_long")
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+xorder=factor(adulttrees$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adulttrees, plot(adulttrees$FAGAME~xorder, ylim=c(0,1),ylab="Adult Abundance",xlab="Ecosystem",main="FAGAME"))
+##add second axis
+with(phlongterr, points(phlorder,phlongterr$pH_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(ptotlongterr, points(ptotorder,ptotlongterr$ptot_long+0.5,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("pH long","ptot long"),col=c("red","blue"),pch=19,cex=0.8)
+
+###Mortality###
+##construct plot with two axes!
+par(mar=c(5,5,5,5),xpd=TRUE)
+#with(FAGAMEmort, plot(FAGAMEmort$FAGAME~FAGAMEmort$Ecosystem, ylim=c(0,1),ylab="Prop Mort",xlab="Ecosystem",main="FAGAME"))
+xorder=factor(adultmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adultmort, plot(adultmort$FAGAME~xorder, ylim=c(0,1),ylab="Prop Mort",xlab="Ecosystem",main="FAGAME"))
+##add second axis
+par(new=TRUE)
+with(phlongterr, points(phlorder,phlongterr$pH_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(ptotlongterr, points(ptotorder,ptotlongterr$ptot_long+0.5,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("pH long","ptot long"),col=c("red","blue"),pch=19,cex=0.8)
+
+###Growth###
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(FAGAMEgrow, plot(FAGAMEgrow$FAGAME~FAGAMEgrow$ecosys, ylim=c(0,1),ylab="Prop grow",xlab="Ecosystem",main="FAGAME"))
+xorder=factor(adultgrow$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adultgrow, plot(adultgrow$FAGAME~xorder, ylim=c(0,0.3),ylab="Prop Grow",xlab="Ecosystem",main="FAGAME"))
+##add second axis
+par(new=TRUE)
+with(phlongterr, points(phlorder,phlongterr$pH_long/3+0.1,pch=16,col="red",ylab=NA,xlab=NA))
+with(ptotlongterr, points(ptotorder,ptotlongterr$ptot_long/3+0.1,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,0.3,by=0.03),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("pH long","ptot long"),col=c("red","blue"),pch=19,cex=0.8)
+
+###Seedling Abundance###
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(FAGAMEseeds, plot(FAGAMEseeds$FAGAME~FAGAMEseeds$Ecosystem, ylim=c(0,12),ylab="Count seeds",xlab="Ecosystem",main="FAGAME"))
+xorder=factor(seeds$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(seeds, plot(seeds$FAGAME_seed~xorder, ylim=c(0,50),ylab="Seed Abund",xlab="Ecosystem",main="FAGAME"))
+##add second axis
+par(new=TRUE)
+with(phlongterr, points(phlorder,phlongterr$pH_long/0.02+20,pch=16,col="red",ylab=NA,xlab=NA))
+with(ptotlongterr, points(ptotorder,ptotlongterr$ptot_long/0.02+20,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,50,by=5),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("pH long","ptot long"),col=c("red","blue"),pch=19,cex=0.8)
+
+###Seedling mortality###
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+xorder=factor(seedmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(seedmort, plot(seedmort$FAGAME~xorder, ylim=c(0,1),ylab="Prop Seed Mort",xlab="Ecosystem",main="FAGAME"))
+##add second axis
+par(new=TRUE)
+with(phlongterr, points(phlorder,phlongterr$pH_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(ptotlongterr, points(ptotorder,ptotlongterr$ptot_long+0.5,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("pH long","ptot long"),col=c("red","blue"),pch=19,cex=0.8)
+
+###Juvenile Abundance###
+par(mar=c(5,5,5,5))
+xorder=factor(juvies.tree$TerrType.x, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(juvies.tree, plot(juvies.tree$FAGAME_juv~xorder, ylim=c(0,150),ylab="Count Juveniles",xlab="Ecosystem",main="FAGAME"))
+##add second axis
+par(new=TRUE)
+with(phlongterr, points(phlorder,phlongterr$pH_long/0.01+75,pch=16,col="red",ylab=NA,xlab=NA))
+with(ptotlongterr, points(ptotorder,ptotlongterr$ptot_long/0.01+75,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,150,by=13.64),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("pH long","ptot long"),col=c("red","blue"),pch=19,cex=0.8)
+
+#### LIRTUP####
+###Abundance###
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+xorder=factor(adulttrees$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adulttrees, plot(adulttrees$LIRTUP~xorder, ylim=c(0,1),ylab="Adult Abundance",xlab="Ecosystem",main="LIRTUP"))
+##add second axis
+with(perccshortterr, points(perccorder,perccshortterr$percc_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(moistshortterr, points(moistorder,moistshortterr$moist_short+0.5,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("percc short","moist short"),col=c("red","blue"),pch=19,cex=0.8)
+
+###Mortality###
+##construct plot with two axes!
+par(mar=c(5,5,5,5),xpd=TRUE)
+#with(LIRTUPmort, plot(LIRTUPmort$LIRTUP~LIRTUPmort$Ecosystem, ylim=c(0,1),ylab="Prop Mort",xlab="Ecosystem",main="LIRTUP"))
+xorder=factor(adultmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adultmort, plot(adultmort$LIRTUP~xorder, ylim=c(0,1),ylab="Prop Mort",xlab="Ecosystem",main="LIRTUP"))
+##add second axis
+par(new=TRUE)
+with(perccshortterr, points(perccorder,perccshortterr$percc_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(moistshortterr, points(moistorder,moistshortterr$moist_short+0.5,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("percc short","moist short"),col=c("red","blue"),pch=19,cex=0.8)
+
+###Growth###
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(LIRTUPgrow, plot(LIRTUPgrow$LIRTUP~LIRTUPgrow$ecosys, ylim=c(0,1),ylab="Prop grow",xlab="Ecosystem",main="LIRTUP"))
+xorder=factor(adultgrow$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adultgrow, plot(adultgrow$LIRTUP~xorder, ylim=c(0,0.1),ylab="Prop Grow",xlab="Ecosystem",main="LIRTUP"))
+##add second axis
+par(new=TRUE)
+with(perccshortterr, points(perccorder,perccshortterr$percc_short/10+0.05,pch=16,col="red",ylab=NA,xlab=NA))
+with(moistshortterr, points(moistorder,moistshortterr$moist_short/10+0.05,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,0.1,by=0.01),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("percc short","moist short"),col=c("red","blue"),pch=19,cex=0.8)
+
+###Seedling Abundance###
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(LIRTUPseeds, plot(LIRTUPseeds$LIRTUP~LIRTUPseeds$Ecosystem, ylim=c(0,12),ylab="Count seeds",xlab="Ecosystem",main="LIRTUP"))
+xorder=factor(seeds$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(seeds, plot(seeds$LIRTUP_seed~xorder, ylim=c(0,1),ylab="Seed Abund",xlab="Ecosystem",main="LIRTUP"))
+##add second axis
+par(new=TRUE)
+with(perccshortterr, points(perccorder,perccshortterr$percc_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(moistshortterr, points(moistorder,moistshortterr$moist_short+0.5,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("percc short","moist short"),col=c("red","blue"),pch=19,cex=0.8)
+
+###Seedling mortality###
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+xorder=factor(seedmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(seedmort, plot(seedmort$LIRTUP~xorder, ylim=c(0,1),ylab="Prop Seed Mort",xlab="Ecosystem",main="LIRTUP"))
+##add second axis
+par(new=TRUE)
+with(perccshortterr, points(perccorder,perccshortterr$percc_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(moistshortterr, points(moistorder,moistshortterr$moist_short+0.5,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("percc short","moist short"),col=c("red","blue"),pch=19,cex=0.8)
+
+###Juvenile Abundance###
+par(mar=c(5,5,5,5))
+xorder=factor(juvies.tree$TerrType.x, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(juvies.tree, plot(juvies.tree$LIRTUP_juv~xorder, ylim=c(0,1),ylab="Count Juveniles",xlab="Ecosystem",main="LIRTUP"))
+##add second axis
+par(new=TRUE)
+with(perccshortterr, points(perccorder,perccshortterr$percc_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(moistshortterr, points(moistorder,moistshortterr$moist_short+0.5,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("percc short","moist short"),col=c("red","blue"),pch=19,cex=0.8)
+
+#### PLAOCC####
+###Abundance###
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+xorder=factor(adulttrees$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adulttrees, plot(adulttrees$PLAOCC~xorder, ylim=c(0,1),ylab="Adult Abundance",xlab="Ecosystem",main="PLAOCC"))
+##add second axis
+with(percclongterr, points(percclongorder,percclongterr$percc_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(phshortterr, points(phsorder,phshortterr$pH_short+0.5,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("percc long","pH short"),col=c("red","blue"),pch=19,cex=0.8)
+
+###Mortality###
+##construct plot with two axes!
+par(mar=c(5,5,5,5),xpd=TRUE)
+#with(PLAOCCmort, plot(PLAOCCmort$PLAOCC~PLAOCCmort$Ecosystem, ylim=c(0,1),ylab="Prop Mort",xlab="Ecosystem",main="PLAOCC"))
+xorder=factor(adultmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adultmort, plot(adultmort$PLAOCC~xorder, ylim=c(0,1),ylab="Prop Mort",xlab="Ecosystem",main="PLAOCC"))
+##add second axis
+par(new=TRUE)
+with(percclongterr, points(percclongorder,percclongterr$percc_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(phshortterr, points(phsorder,phshortterr$pH_short+0.5,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("percc long","pH short"),col=c("red","blue"),pch=19,cex=0.8)
+
+###Growth###
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+#with(PLAOCCgrow, plot(PLAOCCgrow$PLAOCC~PLAOCCgrow$ecosys, ylim=c(0,1),ylab="Prop grow",xlab="Ecosystem",main="PLAOCC"))
+xorder=factor(adultgrow$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adultgrow, plot(adultgrow$PLAOCC~xorder, ylim=c(0,0.1),ylab="Prop Grow",xlab="Ecosystem",main="PLAOCC"))
+##add second axis
+par(new=TRUE)
+with(percclongterr, points(percclongorder,percclongterr$percc_long/10+0.05,pch=16,col="red",ylab=NA,xlab=NA))
+with(phshortterr, points(phsorder,phshortterr$pH_short/10+0.05,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,0.1,by=0.01),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("percc long","pH short"),col=c("red","blue"),pch=19,cex=0.8)
+
+###Juvenile Abundance###
+par(mar=c(5,5,5,5))
+xorder=factor(juvies.tree$TerrType.x, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(juvies.tree, plot(juvies.tree$PLAOCC_juv~xorder, ylim=c(0,2),ylab="Count Juveniles",xlab="Ecosystem",main="PLAOCC"))
+##add second axis
+par(new=TRUE)
+with(percclongterr, points(percclongorder,percclongterr$percc_long/0.5+1,pch=16,col="red",ylab=NA,xlab=NA))
+with(phshortterr, points(phsorder,phshortterr$pH_short/0.5+1,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,2,by=0.2),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("percc long","pH short"),col=c("red","blue"),pch=19,cex=0.8)
+
+#### QUEPAL####
+###Abundance###
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+xorder=factor(adulttrees$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adulttrees, plot(adulttrees$QUEPAL~xorder, ylim=c(0,1),ylab="Adult Abundance",xlab="Ecosystem",main="QUEPAL"))
+##add second axis
+with(moistlongterr, points(moistlongorder,moistlongterr$moist_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(phlongterr, points(phlorder,phlongterr$pH_long+0.5,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("moist long","pH long"),col=c("red","blue"),pch=19,cex=0.8)
+
+###Mortality###
+##construct plot with two axes!
+par(mar=c(5,5,5,5),xpd=TRUE)
+xorder=factor(adultmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adultmort, plot(adultmort$QUEPAL~xorder, ylim=c(0,1),ylab="Prop Mort",xlab="Ecosystem",main="QUEPAL"))
+##add second axis
+par(new=TRUE)
+with(moistlongterr, points(moistlongorder,moistlongterr$moist_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(phlongterr, points(phlorder,phlongterr$pH_long+0.5,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("moist long","pH long"),col=c("red","blue"),pch=19,cex=0.8)
+
+###Growth###
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+xorder=factor(adultgrow$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adultgrow, plot(adultgrow$QUEPAL~xorder, ylim=c(0,0.3),ylab="Prop Grow",xlab="Ecosystem",main="QUEPAL"))
+##add second axis
+par(new=TRUE)
+with(moistlongterr, points(moistlongorder,moistlongterr$moist_long/3+0.1,pch=16,col="red",ylab=NA,xlab=NA))
+with(phlongterr, points(phlorder,phlongterr$pH_long/3+0.1,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,0.3,by=0.03),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("moist long","pH long"),col=c("red","blue"),pch=19,cex=0.8)
+
+###Seedling Abundance###
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+xorder=factor(seeds$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(seeds, plot(seeds$QUEPAL_seed~xorder, ylim=c(0,1),ylab="Seed Abund",xlab="Ecosystem",main="QUEPAL"))
+##add second axis
+par(new=TRUE)
+with(moistlongterr, points(moistlongorder,moistlongterr$moist_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(phlongterr, points(phlorder,phlongterr$pH_long+0.5,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("moist long","pH long"),col=c("red","blue"),pch=19,cex=0.8)
+
+###Seedling mortality###
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+xorder=factor(seedmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(seedmort, plot(seedmort$QUEPAL~xorder, ylim=c(0,1),ylab="Prop Seed Mort",xlab="Ecosystem",main="QUEPAL"))
+##add second axis
+par(new=TRUE)
+with(moistlongterr, points(moistlongorder,moistlongterr$moist_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(phlongterr, points(phlorder,phlongterr$pH_long+0.5,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("moist long","pH long"),col=c("red","blue"),pch=19,cex=0.8)
+
+###Juvenile Abundance###
+par(mar=c(5,5,5,5))
+xorder=factor(juvies.tree$TerrType.x, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(juvies.tree, plot(juvies.tree$QUEPAL_juv~xorder, ylim=c(0,2),ylab="Count Juveniles",xlab="Ecosystem",main="QUEPAL"))
+##add second axis
+par(new=TRUE)
+with(moistlongterr, points(moistlongorder,moistlongterr$moist_long/0.5+1,pch=16,col="red",ylab=NA,xlab=NA))
+with(phlongterr, points(phlorder,phlongterr$pH_long/0.5+1,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,2,by=0.2),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("moist long","pH long"),col=c("red","blue"),pch=19,cex=0.8)
+
+#### ULMSP####
+###Abundance###
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+xorder=factor(adulttrees$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adulttrees, plot(adulttrees$ULMSP~xorder, ylim=c(0,1),ylab="Adult Abundance",xlab="Ecosystem",main="ULMSP"))
+##add second axis
+with(poshortterr, points(poorder,poshortterr$Po_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(ctonshortterr, points(ctonorder,ctonshortterr$cton_short+0.5,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("po short","cton short"),col=c("red","blue"),pch=19,cex=0.8)
+
+###Mortality###
+##construct plot with two axes!
+par(mar=c(5,5,5,5),xpd=TRUE)
+xorder=factor(adultmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adultmort, plot(adultmort$ULMSP~xorder, ylim=c(0,1),ylab="Prop Mort",xlab="Ecosystem",main="ULMSP"))
+##add second axis
+par(new=TRUE)
+with(poshortterr, points(poorder,poshortterr$Po_short+0.5,pch=16,col="red",ylab=NA,xlab=NA))
+with(ctonshortterr, points(ctonorder,ctonshortterr$cton_short+0.5,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("po short","cton short"),col=c("red","blue"),pch=19,cex=0.8)
+
+###Growth###
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+xorder=factor(adultgrow$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adultgrow, plot(adultgrow$ULMSP~xorder, ylim=c(0,0.3),ylab="Prop Grow",xlab="Ecosystem",main="ULMSP"))
+##add second axis
+par(new=TRUE)
+with(poshortterr, points(poorder,poshortterr$Po_short/3+0.1,pch=16,col="red",ylab=NA,xlab=NA))
+with(ctonshortterr, points(ctonorder,ctonshortterr$cton_short/3+0.1,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,0.3,by=0.03),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("po short","cton short"),col=c("red","blue"),pch=19,cex=0.8)
+
+###Seedling Abundance###
+##construct plot with two axes!
+par(mar=c(5,5,5,5))
+xorder=factor(seeds$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(seeds, plot(seeds$ULMSP_seed~xorder, ylim=c(0,2),ylab="Seed Abund",xlab="Ecosystem",main="ULMSP"))
+##add second axis
+par(new=TRUE)
+with(poshortterr, points(poorder,poshortterr$Po_short/0.5+1,pch=16,col="red",ylab=NA,xlab=NA))
+with(ctonshortterr, points(ctonorder,ctonshortterr$cton_short/0.5+1,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,2,by=0.2),tck=0.05)
+mtext(side = 4, line = 3, 'Soil Variable')
+legend("topright",inset=c(1,1),legend=c("po short","cton short"),col=c("red","blue"),pch=19,cex=0.8)
 ```
