@@ -1157,7 +1157,7 @@ axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,5,by=0.5),tck=0.05)
 mtext(side = 4, line = 3, 'pomc_short')
 ```
 
-```{R Ranked Scatterplots}
+```{r Ranked Scatterplots}
 tree.hel.soil=merge(tree.hel,soildata)
 rownames(tree.hel.soil)=tree.hel.soil[,1]
 tree.hel.soil=na.exclude(tree.hel.soil)
@@ -1603,4 +1603,153 @@ with(ctonshortterr, points(ctonorder,ctonshortterr$cton_short/0.5+1,pch=16,col="
 axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,2,by=0.2),tck=0.05)
 mtext(side = 4, line = 3, 'Soil Variable')
 legend("topright",inset=c(1,1),legend=c("po short","cton short"),col=c("red","blue"),pch=19,cex=0.8)
+```
+
+```{r Raked Scatter plots 2 ariable trees}
+rbl=colorRampPalette(c('red','blue'))
+#### FAGAME plots ####
+FAGAMEadults=xyplot(FAGAME~pH_long|TerrType,data=tree.hel.soil,main="FAGAME Adults",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$Ptot_long,breaks=10))],as.table=TRUE)
+FAGAMEadults
+FAGAMEag=xyplot(FAGAME~pH_long|TerrType,data=adultgrow,main="FAGAME A.Growth",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$Ptot_long,breaks=10))],as.table=TRUE)
+FAGAMEag
+FAGAMEamort=xyplot(FAGAME~pH_long|TerrType,data=adultmort,main="FAGAME A.Mortality",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$Ptot_long,breaks=10))],as.table=TRUE)
+FAGAMEamort
+FAGAMEseeds=xyplot(FAGAME_seed~pH_long|TerrType,data=seeds,main="FAGAME Seedling",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$Ptot_long,breaks=10))],as.table=TRUE)
+FAGAMEseeds
+FAGAMEsmort=xyplot(FAGAME~pH_long|TerrType,data=seedmort,main="FAGAME S.Mortality",index.cond=list(c(1,3,6,9,8,8,10,7,5,4,4,11,12,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$Ptot_long,breaks=10))],as.table=TRUE)
+FAGAMEsmort
+FAGAMEjuv=xyplot(FAGAME~pH_long|TerrType.x,data=juvies.tree,main="FAGAME Juveniles",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$Ptot_long,breaks=10))],as.table=TRUE)
+FAGAMEjuv
+
+#### LIRTUP plots ####
+LIRTUPadults=xyplot(LIRTUP~percc_short|TerrType,data=tree.hel.soil,main="LIRTUP Adults",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$moist_short,breaks=10))],as.table=TRUE)
+LIRTUPadults
+LIRTUPag=xyplot(LIRTUP~percc_short|TerrType,data=adultgrow,main="LIRTUP A.Growth",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$moist_short,breaks=10))],as.table=TRUE)
+LIRTUPag
+LIRTUPamort=xyplot(LIRTUP~percc_short|TerrType,data=adultmort,main="LIRTUP A.Mortality",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$moist_short,breaks=10))],as.table=TRUE)
+LIRTUPamort
+LIRTUPseeds=xyplot(LIRTUP_seed~percc_short|TerrType,data=seeds,main="LIRTUP Seedling",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$moist_short,breaks=10))],as.table=TRUE)
+LIRTUPseeds
+LIRTUPsmort=xyplot(LIRTUP~percc_short|TerrType,data=seedmort,main="LIRTUP S.Mortality",index.cond=list(c(1,3,6,9,8,8,10,7,5,4,4,11,12,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$moist_short,breaks=10))],as.table=TRUE)
+LIRTUPsmort
+LIRTUPjuv=xyplot(LIRTUP~percc_short|TerrType.x,data=juvies.tree,main="LIRTUP Juveniles",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$moist_short,breaks=10))],as.table=TRUE)
+LIRTUPjuv
+
+
+
+#### PLAOCC plots ####
+PLAOCCadults=xyplot(PLAOCC~percc_long|TerrType,data=tree.hel.soil,main="PLAOCC Adults",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$pH_short,breaks=10))],as.table=TRUE)
+PLAOCCadults
+PLAOCCag=xyplot(PLAOCC~percc_long|TerrType,data=adultgrow,main="PLAOCC A.Growth",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$pH_short,breaks=10))],as.table=TRUE)
+PLAOCCag
+PLAOCCamort=xyplot(PLAOCC~percc_long|TerrType,data=adultmort,main="PLAOCC A.Mortality",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$pH_short,breaks=10))],as.table=TRUE)
+PLAOCCamort
+#PLAOCCseeds=xyplot(PLAOCC_seed~percc_long|TerrType,data=seeds,main="PLAOCC Seedling",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$pH_short,breaks=10))],as.table=TRUE)
+#PLAOCCseeds
+#PLAOCCsmort=xyplot(PLAOCC~percc_long|TerrType,data=seedmort,main="PLAOCC S.Mortality",index.cond=list(c(1,3,6,9,8,8,10,7,5,4,4,11,12,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$pH_short,breaks=10))],as.table=TRUE)
+#PLAOCCsmort
+PLAOCCjuv=xyplot(PLAOCC~percc_long|TerrType.x,data=juvies.tree,main="PLAOCC Juveniles",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$pH_short,breaks=10))],as.table=TRUE)
+PLAOCCjuv
+
+#### QUEPAL plots ####
+QUEPALadults=xyplot(QUEPAL~moist_long|TerrType,data=tree.hel.soil,main="QUEPAL Adults",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$pH_long,breaks=10))],as.table=TRUE)
+QUEPALadults
+QUEPALag=xyplot(QUEPAL~moist_long|TerrType,data=adultgrow,main="QUEPAL A.Growth",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$pH_long,breaks=10))],as.table=TRUE)
+QUEPALag
+QUEPALamort=xyplot(QUEPAL~moist_long|TerrType,data=adultmort,main="QUEPAL A.Mortality",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$pH_long,breaks=10))],as.table=TRUE)
+QUEPALamort
+QUEPALseeds=xyplot(QUEPAL_seed~moist_long|TerrType,data=seeds,main="QUEPAL Seedling",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$pH_long,breaks=10))],as.table=TRUE)
+QUEPALseeds
+QUEPALsmort=xyplot(QUEPAL~moist_long|TerrType,data=seedmort,main="QUEPAL S.Mortality",index.cond=list(c(1,3,6,9,8,8,10,7,5,4,4,11,12,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$pH_long,breaks=10))],as.table=TRUE)
+QUEPALsmort
+QUEPALjuv=xyplot(QUEPAL~moist_long|TerrType.x,data=juvies.tree,main="QUEPAL Juveniles",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$pH_long,breaks=10))],as.table=TRUE)
+QUEPALjuv
+
+#### ULMSP plots ####
+ULMSPadults=xyplot(ULMSP~Po_short|TerrType,data=tree.hel.soil,main="ULMSP Adults",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$cton_short,breaks=10))],as.table=TRUE)
+ULMSPadults
+ULMSPag=xyplot(ULMSP~Po_short|TerrType,data=adultgrow,main="ULMSP A.Growth",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$cton_short,breaks=10))],as.table=TRUE)
+ULMSPag
+ULMSPamort=xyplot(ULMSP~Po_short|TerrType,data=adultmort,main="ULMSP A.Mortality",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$cton_short,breaks=10))],as.table=TRUE)
+ULMSPamort
+#ULMSPseeds=xyplot(ULMSP_seed~Po_short|TerrType,data=seeds,main="ULMSP Seedling",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$cton_short,breaks=10))],as.table=TRUE)
+#ULMSPseeds
+#ULMSPsmort=xyplot(ULMSP~Po_short|TerrType,data=seedmort,main="ULMSP S.Mortality",index.cond=list(c(1,3,6,9,8,8,10,7,5,4,4,11,12,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$cton_short,breaks=10))],as.table=TRUE)
+#ULMSPsmort
+ULMSPjuv=xyplot(ULMSP~Po_short|TerrType.x,data=juvies.tree,main="ULMSP Juveniles",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$cton_short,breaks=10))],as.table=TRUE)
+ULMSPjuv
+```
+
+```{r ranked scatterplots 2 variable trees symbol size}
+#### FAGAME plots ####
+FAGAMEadults=xyplot(FAGAME~pH_long|TerrType,data=tree.hel.soil,main="FAGAME Adults",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),cex=abs(2*tree.hel.soil$Ptot_long),as.table=TRUE)
+FAGAMEadults
+FAGAMEag=xyplot(FAGAME~pH_long|TerrType,data=adultgrow,main="FAGAME A.Growth",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),cex=abs(2*tree.hel.soil$Ptot_long),as.table=TRUE)
+FAGAMEag
+FAGAMEamort=xyplot(FAGAME~pH_long|TerrType,data=adultmort,main="FAGAME A.Mortality",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),cex=abs(2*tree.hel.soil$Ptot_long),as.table=TRUE)
+FAGAMEamort
+FAGAMEseeds=xyplot(FAGAME_seed~pH_long|TerrType,data=seeds,main="FAGAME Seedling",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),cex=abs(2*tree.hel.soil$Ptot_long),as.table=TRUE)
+FAGAMEseeds
+FAGAMEsmort=xyplot(FAGAME~pH_long|TerrType,data=seedmort,main="FAGAME S.Mortality",index.cond=list(c(1,3,6,9,8,8,10,7,5,4,4,11,12,2,1)),cex=abs(2*tree.hel.soil$Ptot_long),as.table=TRUE)
+FAGAMEsmort
+FAGAMEjuv=xyplot(FAGAME~pH_long|TerrType.x,data=juvies.tree,main="FAGAME Juveniles",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),cex=abs(2*tree.hel.soil$Ptot_long),as.table=TRUE)
+FAGAMEjuv
+
+#### LIRTUP plots ####
+LIRTUPadults=xyplot(LIRTUP~percc_short|TerrType,data=tree.hel.soil,main="LIRTUP Adults",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),cex=abs(20*tree.hel.soil$moist_short),as.table=TRUE)
+LIRTUPadults
+LIRTUPag=xyplot(LIRTUP~percc_short|TerrType,data=adultgrow,main="LIRTUP A.Growth",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),cex=abs(50*tree.hel.soil$moist_short),as.table=TRUE)
+LIRTUPag
+LIRTUPamort=xyplot(LIRTUP~percc_short|TerrType,data=adultmort,main="LIRTUP A.Mortality",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),cex=abs(20*tree.hel.soil$moist_short),as.table=TRUE)
+LIRTUPamort
+LIRTUPseeds=xyplot(LIRTUP_seed~percc_short|TerrType,data=seeds,main="LIRTUP Seedling",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),cex=abs(20*tree.hel.soil$moist_short),as.table=TRUE)
+LIRTUPseeds
+LIRTUPsmort=xyplot(LIRTUP~percc_short|TerrType,data=seedmort,main="LIRTUP S.Mortality",index.cond=list(c(1,3,6,9,8,8,10,7,5,4,4,11,12,2,1)),cex=abs(20*tree.hel.soil$moist_short),as.table=TRUE)
+LIRTUPsmort
+LIRTUPjuv=xyplot(LIRTUP~percc_short|TerrType.x,data=juvies.tree,main="LIRTUP Juveniles",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),cex=abs(20*tree.hel.soil$moist_short),as.table=TRUE)
+LIRTUPjuv
+
+
+
+#### PLAOCC plots ####
+PLAOCCadults=xyplot(PLAOCC~percc_long|TerrType,data=tree.hel.soil,main="PLAOCC Adults",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),cex=abs(2*tree.hel.soil$pH_short),as.table=TRUE)
+PLAOCCadults
+PLAOCCag=xyplot(PLAOCC~percc_long|TerrType,data=adultgrow,main="PLAOCC A.Growth",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),cex=abs(2*tree.hel.soil$pH_short),as.table=TRUE)
+PLAOCCag
+PLAOCCamort=xyplot(PLAOCC~percc_long|TerrType,data=adultmort,main="PLAOCC A.Mortality",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),cex=abs(2*tree.hel.soil$pH_short),as.table=TRUE)
+PLAOCCamort
+#PLAOCCseeds=xyplot(PLAOCC_seed~percc_long|TerrType,data=seeds,main="PLAOCC Seedling",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),cex=abs(2*tree.hel.soil$pH_short),as.table=TRUE)
+#PLAOCCseeds
+#PLAOCCsmort=xyplot(PLAOCC~percc_long|TerrType,data=seedmort,main="PLAOCC S.Mortality",index.cond=list(c(1,3,6,9,8,8,10,7,5,4,4,11,12,2,1)),cex=abs(2*tree.hel.soil$pH_short),as.table=TRUE)
+#PLAOCCsmort
+PLAOCCjuv=xyplot(PLAOCC~percc_long|TerrType.x,data=juvies.tree,main="PLAOCC Juveniles",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),cex=abs(2*tree.hel.soil$pH_short),as.table=TRUE)
+PLAOCCjuv
+
+#### QUEPAL plots ####
+QUEPALadults=xyplot(QUEPAL~moist_long|TerrType,data=tree.hel.soil,main="QUEPAL Adults",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),cex=abs(2*tree.hel.soil$pH_long),as.table=TRUE)
+QUEPALadults
+QUEPALag=xyplot(QUEPAL~moist_long|TerrType,data=adultgrow,main="QUEPAL A.Growth",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),cex=abs(2*tree.hel.soil$pH_long),as.table=TRUE)
+QUEPALag
+QUEPALamort=xyplot(QUEPAL~moist_long|TerrType,data=adultmort,main="QUEPAL A.Mortality",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),cex=abs(2*tree.hel.soil$pH_long),as.table=TRUE)
+QUEPALamort
+QUEPALseeds=xyplot(QUEPAL_seed~moist_long|TerrType,data=seeds,main="QUEPAL Seedling",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),cex=abs(2*tree.hel.soil$pH_long),as.table=TRUE)
+QUEPALseeds
+QUEPALsmort=xyplot(QUEPAL~moist_long|TerrType,data=seedmort,main="QUEPAL S.Mortality",index.cond=list(c(1,3,6,9,8,8,10,7,5,4,4,11,12,2,1)),cex=abs(2*tree.hel.soil$pH_long),as.table=TRUE)
+QUEPALsmort
+QUEPALjuv=xyplot(QUEPAL~moist_long|TerrType.x,data=juvies.tree,main="QUEPAL Juveniles",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),cex=abs(2*tree.hel.soil$pH_long),as.table=TRUE)
+QUEPALjuv
+
+#### ULMSP plots ####
+ULMSPadults=xyplot(ULMSP~Po_short|TerrType,data=tree.hel.soil,main="ULMSP Adults",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),cex=abs(20*tree.hel.soil$cton_short),as.table=TRUE)
+ULMSPadults
+ULMSPag=xyplot(ULMSP~Po_short|TerrType,data=adultgrow,main="ULMSP A.Growth",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),cex=abs(20*tree.hel.soil$cton_short),as.table=TRUE)
+ULMSPag
+ULMSPamort=xyplot(ULMSP~Po_short|TerrType,data=adultmort,main="ULMSP A.Mortality",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),cex=abs(20*tree.hel.soil$cton_short),as.table=TRUE)
+ULMSPamort
+#ULMSPseeds=xyplot(ULMSP_seed~Po_short|TerrType,data=seeds,main="ULMSP Seedling",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),cex=abs(20*tree.hel.soil$cton_short),as.table=TRUE)
+#ULMSPseeds
+#ULMSPsmort=xyplot(ULMSP~Po_short|TerrType,data=seedmort,main="ULMSP S.Mortality",index.cond=list(c(1,3,6,9,8,8,10,7,5,4,4,11,12,2,1)),cex=abs(20*tree.hel.soil$cton_short),as.table=TRUE)
+#ULMSPsmort
+ULMSPjuv=xyplot(ULMSP~Po_short|TerrType.x,data=juvies.tree,main="ULMSP Juveniles",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),cex=abs(20*tree.hel.soil$cton_short),as.table=TRUE)
+ULMSPjuv
 ```
