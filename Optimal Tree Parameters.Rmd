@@ -15,6 +15,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(vegan)
 library(packfor)
 library(ggplot2)
+library(nlme)
+library(lme4)
 
 
 ##NEW DATA 2016 
@@ -74,12 +76,6 @@ for(i in 1:16){
   print(for.sel)
   print(RsquareAdj(soilselec)$adj.r.squared)
 }
-
-carovatest=rda(tree.hel.soil$CAROVA,tree.hel.soil[,55:79])
-anova(carovatest)
-RsquareAdj(carovatest)
-gt=RsquareAdj(carovatest)$adj.r.squared
-forsel=forward.sel(tree.hel.soil$CAROVA,tree.hel.soil[,55:79])
 ```
 
 
@@ -1267,11 +1263,11 @@ QUERUBjuv
 ##construct plot with two axes!
 par(mar=c(5,5,5,5))
 xorder=factor(adulttrees$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
-with(adulttrees, plot(adulttrees$FAGAME~xorder, ylim=c(0,1),ylab="Adult Abundance",xlab="Ecosystem",main="FAGAME"))
+with(adulttrees, plot(adulttrees$FAGAME~xorder, ylim=c(0,1.5),ylab="Adult Abundance",xlab="Ecosystem",main="FAGAME"))
 ##add second axis
-with(phlongterr, points(phlorder,phlongterr$pH_long+0.5,pch=16,col="red",ylab=NA,xlab=NA))
-with(ptotlongterr, points(ptotorder,ptotlongterr$ptot_long+0.5,pch=16,col="blue",ylab=NA,xlab=NA))
-axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1,by=0.1),tck=0.05)
+with(phlongterr, points(phlorder,phlongterr$pH_long+0.65,pch=16,col="red",ylab=NA,xlab=NA))
+with(ptotlongterr, points(ptotorder,ptotlongterr$ptot_long+0.65,pch=16,col="blue",ylab=NA,xlab=NA))
+axis(side=4, labels=seq(-0.5,0.5,by=0.1),at=seq(0,1.5,by=0.15),tck=0.05)
 mtext(side = 4, line = 3, 'Soil Variable')
 legend("topright",inset=c(1,1),legend=c("pH long","ptot long"),col=c("red","blue"),pch=19,cex=0.8)
 
@@ -1605,7 +1601,7 @@ mtext(side = 4, line = 3, 'Soil Variable')
 legend("topright",inset=c(1,1),legend=c("po short","cton short"),col=c("red","blue"),pch=19,cex=0.8)
 ```
 
-```{r Raked Scatter plots 2 ariable trees}
+```{r Raked Scatter plots 2 variable trees color}
 rbl=colorRampPalette(c('red','blue'))
 #### FAGAME plots ####
 FAGAMEadults=xyplot(FAGAME~pH_long|TerrType,data=tree.hel.soil,main="FAGAME Adults",index.cond=list(c(1,3,8,11,10,10,12,9,6,4,4,5,7,2,1)),col=rbl(10)[as.numeric(cut(tree.hel.soil$Ptot_long,breaks=10))],as.table=TRUE)
@@ -1753,3 +1749,29 @@ ULMSPamort
 ULMSPjuv=xyplot(ULMSP~Po_short|TerrType.x,data=juvies.tree,main="ULMSP Juveniles",index.cond=list(c(1,3,7,10,9,9,11,8,6,4,4,5,12,2,1)),cex=abs(20*tree.hel.soil$cton_short),as.table=TRUE)
 ULMSPjuv
 ```
+
+```{r glm of species by soil and ecosystem}
+#We'll use the glm() or glmer() functions, instead of lme(). Not a mixed model because, as the data stands currently, we do not have plot as a random effect. If we were to look at individuals where there were multiple in the plot, then we need the mixed model.
+
+acerubglm=glm(ACERUB~Ptot_long*TerrType,family=gaussian(link="identity"),data=tree.hel.soil)
+summary(acerubglm)
+###LOOK AT OTHER FAMILIES OF DISTRIBUTIONS SO WE CAN MAKE SURE POISSON IS THE BEST - NONINTEGERS LEAD TO ERRORS IN CURRENT MODEL###
+CARCORglm=glm(CARCOR~Ptot_long*TerrType,family=gaussian(link="identity"),data=tree.hel.soil)
+summary(CARCORglm)
+PRUSERglm=glm(PRUSER~pH_short*TerrType,family=gaussian(link="identity"),data=tree.hel.soil)
+summary(PRUSERglm)
+FAGAMEglm=glm(FAGAME~pH_long*Ptot_long*TerrType,family=gaussian(link="identity"),data=tree.hel.soil)
+summary(FAGAMEglm)
+LIRTUPglm=glm(LIRTUP~percc_short*moist_short*TerrType,family=gaussian(link="identity"),data=tree.hel.soil)
+summary(LIRTUPglm)
+PLAOCCglm=glm(PLAOCC~percc_long*pH_short*TerrType,family=gaussian(link="identity"),data=tree.hel.soil)
+summary(PLAOCCglm)
+QUEPALglm=glm(QUEPAL~moist_long*pH_long*TerrType,family=gaussian(link="identity"),data=tree.hel.soil)
+summary(QUEPALglm)
+ULMSPglm=glm(ULMSP~Po_short*cton_short*TerrType,family=gaussian(link="identity"),data=tree.hel.soil)
+summary(ULMSPglm)
+```
+
+
+
+
