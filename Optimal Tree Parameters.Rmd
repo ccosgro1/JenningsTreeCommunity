@@ -1773,5 +1773,187 @@ summary(ULMSPglm)
 ```
 
 
+```{r transition graphs for all species, no soil}
+####BETALL####
+###Abundance###
+par(mar=c(5,5,5,5))
+xorder=factor(adulttrees$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adulttrees, plot(adulttrees$BETALL~xorder, ylim=c(0,1),ylab="Adult Abundance",xlab="Ecosystem",main="BETALL"))
 
+###Mortality###
+par(mar=c(5,5,5,5),xpd=TRUE)
+xorder=factor(adultmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adultmort, plot(adultmort$BETALL~xorder, ylim=c(0,1),ylab="Prop Mort",xlab="Ecosystem",main="BETALL"))
+
+###Growth###
+par(mar=c(5,5,5,5))
+xorder=factor(adultgrow$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adultgrow, plot(adultgrow$BETALL~xorder, ylim=c(0,0.3),ylab="Prop Grow",xlab="Ecosystem",main="BETALL"))
+
+###Seedling Abundance###
+par(mar=c(5,5,5,5))
+xorder=factor(seeds$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(seeds, plot(seeds$BETALL_seed~xorder, ylim=c(0,1),ylab="Seed Abund",xlab="Ecosystem",main="BETALL"))
+
+###Seedling mortality###
+par(mar=c(5,5,5,5))
+xorder=factor(seedmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(seedmort, plot(seedmort$BETALL~xorder, ylim=c(0,1),ylab="Prop Seed Mort",xlab="Ecosystem",main="BETALL"))
+
+###Juvenile Abundance###
+par(mar=c(5,5,5,5))
+xorder=factor(juvies.tree$TerrType.x, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(juvies.tree, plot(juvies.tree$BETALL_juv~xorder, ylim=c(0,2),ylab="Count Juveniles",xlab="Ecosystem",main="BETALL"))
+
+####CARCAR####
+###Abundance###
+par(mar=c(5,5,5,5))
+xorder=factor(adulttrees$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adulttrees, plot(adulttrees$CARCAR~xorder, ylim=c(0,1),ylab="Adult Abundance",xlab="Ecosystem",main="CARCAR"))
+
+###Mortality###
+par(mar=c(5,5,5,5),xpd=TRUE)
+xorder=factor(adultmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adultmort, plot(adultmort$CARCAR~xorder, ylim=c(0,1),ylab="Prop Mort",xlab="Ecosystem",main="CARCAR"))
+
+###Growth###
+par(mar=c(5,5,5,5))
+xorder=factor(adultgrow$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adultgrow, plot(adultgrow$CARCAR~xorder, ylim=c(0,0.3),ylab="Prop Grow",xlab="Ecosystem",main="CARCAR"))
+
+###Seedling Abundance###
+par(mar=c(5,5,5,5))
+xorder=factor(seeds$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(seeds, plot(seeds$CARCAR_seed~xorder, ylim=c(0,1),ylab="Seed Abund",xlab="Ecosystem",main="CARCAR"))
+
+###Seedling mortality###
+par(mar=c(5,5,5,5))
+xorder=factor(seedmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(seedmort, plot(seedmort$CARCAR~xorder, ylim=c(0,1),ylab="Prop Seed Mort",xlab="Ecosystem",main="CARCAR"))
+
+###Juvenile Abundance###
+par(mar=c(5,5,5,5))
+xorder=factor(juvies.tree$TerrType.x, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(juvies.tree, plot(juvies.tree$CARCAR_juv~xorder, ylim=c(0,2),ylab="Count Juveniles",xlab="Ecosystem",main="CARCAR"))
+####FRAAME####
+###Abundance###
+par(mar=c(5,5,5,5))
+xorder=factor(adulttrees$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adulttrees, plot(adulttrees$FRAAME~xorder, ylim=c(0,1),ylab="Adult Abundance",xlab="Ecosystem",main="FRAAME"))
+
+###Mortality###
+par(mar=c(5,5,5,5),xpd=TRUE)
+xorder=factor(adultmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adultmort, plot(adultmort$FRAAME~xorder, ylim=c(0,1),ylab="Prop Mort",xlab="Ecosystem",main="FRAAME"))
+
+###Growth###
+par(mar=c(5,5,5,5))
+xorder=factor(adultgrow$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adultgrow, plot(adultgrow$FRAAME~xorder, ylim=c(0,0.3),ylab="Prop Grow",xlab="Ecosystem",main="FRAAME"))
+
+###Seedling Abundance###
+par(mar=c(5,5,5,5))
+xorder=factor(seeds$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(seeds, plot(seeds$FRAAME_seed~xorder, ylim=c(0,100),ylab="Seed Abund",xlab="Ecosystem",main="FRAAME"))
+
+###Seedling mortality###
+par(mar=c(5,5,5,5))
+xorder=factor(seedmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(seedmort, plot(seedmort$FRAAME~xorder, ylim=c(0,1),ylab="Prop Seed Mort",xlab="Ecosystem",main="FRAAME"))
+
+###Juvenile Abundance###
+par(mar=c(5,5,5,5))
+xorder=factor(juvies.tree$TerrType.x, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(juvies.tree, plot(juvies.tree$FRAAME_juv~xorder, ylim=c(0,20),ylab="Count Juveniles",xlab="Ecosystem",main="FRAAME"))
+####FRANIG####
+###Abundance###
+par(mar=c(5,5,5,5))
+xorder=factor(adulttrees$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adulttrees, plot(adulttrees$FRANIG~xorder, ylim=c(0,1),ylab="Adult Abundance",xlab="Ecosystem",main="FRANIG"))
+
+###Mortality###
+par(mar=c(5,5,5,5),xpd=TRUE)
+xorder=factor(adultmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adultmort, plot(adultmort$FRANIG~xorder, ylim=c(0,1),ylab="Prop Mort",xlab="Ecosystem",main="FRANIG"))
+
+###Growth###
+par(mar=c(5,5,5,5))
+xorder=factor(adultgrow$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adultgrow, plot(adultgrow$FRANIG~xorder, ylim=c(0,0.3),ylab="Prop Grow",xlab="Ecosystem",main="FRANIG"))
+
+###Seedling Abundance###
+par(mar=c(5,5,5,5))
+xorder=factor(seeds$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(seeds, plot(seeds$FRANIG_seed~xorder, ylim=c(0,20),ylab="Seed Abund",xlab="Ecosystem",main="FRANIG"))
+
+###Seedling mortality###
+par(mar=c(5,5,5,5))
+xorder=factor(seedmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(seedmort, plot(seedmort$FRANIG~xorder, ylim=c(0,1),ylab="Prop Seed Mort",xlab="Ecosystem",main="FRANIG"))
+
+###Juvenile Abundance###
+par(mar=c(5,5,5,5))
+xorder=factor(juvies.tree$TerrType.x, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(juvies.tree, plot(juvies.tree$FRANIG_juv~xorder, ylim=c(0,10),ylab="Count Juveniles",xlab="Ecosystem",main="FRANIG"))
+####TILAME####
+###Abundance###
+par(mar=c(5,5,5,5))
+xorder=factor(adulttrees$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adulttrees, plot(adulttrees$TILAME~xorder, ylim=c(0,1),ylab="Adult Abundance",xlab="Ecosystem",main="TILAME"))
+
+###Mortality###
+par(mar=c(5,5,5,5),xpd=TRUE)
+xorder=factor(adultmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adultmort, plot(adultmort$TILAME~xorder, ylim=c(0,1),ylab="Prop Mort",xlab="Ecosystem",main="TILAME"))
+
+###Growth###
+par(mar=c(5,5,5,5))
+xorder=factor(adultgrow$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adultgrow, plot(adultgrow$TILAME~xorder, ylim=c(0,0.3),ylab="Prop Grow",xlab="Ecosystem",main="TILAME"))
+
+###Seedling Abundance###
+par(mar=c(5,5,5,5))
+xorder=factor(seeds$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(seeds, plot(seeds$TILAME_seed~xorder, ylim=c(0,1),ylab="Seed Abund",xlab="Ecosystem",main="TILAME"))
+
+###Seedling mortality###
+par(mar=c(5,5,5,5))
+xorder=factor(seedmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(seedmort, plot(seedmort$TILAME~xorder, ylim=c(0,1),ylab="Prop Seed Mort",xlab="Ecosystem",main="TILAME"))
+
+###Juvenile Abundance###
+par(mar=c(5,5,5,5))
+xorder=factor(juvies.tree$TerrType.x, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(juvies.tree, plot(juvies.tree$TILAME_juv~xorder, ylim=c(0,2),ylab="Count Juveniles",xlab="Ecosystem",main="TILAME"))
+####ACESAC####
+###Abundance###
+par(mar=c(5,5,5,5))
+xorder=factor(adulttrees$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adulttrees, plot(adulttrees$ACESAC~xorder, ylim=c(0,1),ylab="Adult Abundance",xlab="Ecosystem",main="ACESAC"))
+
+###Mortality###
+par(mar=c(5,5,5,5),xpd=TRUE)
+xorder=factor(adultmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adultmort, plot(adultmort$ACESAC~xorder, ylim=c(0,1),ylab="Prop Mort",xlab="Ecosystem",main="ACESAC"))
+
+###Growth###
+par(mar=c(5,5,5,5))
+xorder=factor(adultgrow$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(adultgrow, plot(adultgrow$ACESAC~xorder, ylim=c(0,0.3),ylab="Prop Grow",xlab="Ecosystem",main="ACESAC"))
+
+###Seedling Abundance###
+par(mar=c(5,5,5,5))
+xorder=factor(seeds$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(seeds, plot(seeds$ACESAC_seed~xorder, ylim=c(0,250),ylab="Seed Abund",xlab="Ecosystem",main="ACESAC"))
+
+###Seedling mortality###
+par(mar=c(5,5,5,5))
+xorder=factor(seedmort$TerrType, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(seedmort, plot(seedmort$ACESAC~xorder, ylim=c(0,1),ylab="Prop Seed Mort",xlab="Ecosystem",main="ACESAC"))
+
+###Juvenile Abundance###
+par(mar=c(5,5,5,5))
+xorder=factor(juvies.tree$TerrType.x, levels=c("B","BU","T-UB","UB","U","UR","T-UR","RU","R","RB","T-RB","BR"))
+with(juvies.tree, plot(juvies.tree$ACESAC_juv~xorder, ylim=c(0,50),ylab="Count Juveniles",xlab="Ecosystem",main="ACESAC"))
+```
 

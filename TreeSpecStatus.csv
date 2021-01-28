@@ -1,0 +1,35 @@
+Spp,Core AdjR2,Edge AdjR2,Difference,Dispersal Method,Specialist?,GenSpec,Jennings Ecosystems,% Jenn BA,,Graphs Made?
+ACERUB,0.451,0.135,31.6,Wind,Generalist,Generalist,BDRU,12,,Y
+QUEPAL,0.408,0.18,22.8,Animal (rodents),Wetland specialist,Specialist,BD,2,,Y
+FRAAME,0.291,0.071,22,Wind,Generalist,Generalist,BDRU,9,,
+ACESAC,0.263,0.109,15.4,Wind,Generalist,Generalist,BDRU,17,,
+CARCOR,0.349,0.196,15.3,Animal (rodents),Wetland specialist,Specialist,BR,0.25,,Y
+FRANIG,0.273,0.13,14.3,Wind,Wetland specialist,Specialist,B,1,,
+PRUSER,0.191,0.064,12.7,Animal (birds),Generalist,Generalist,BRU,5.5,,Y
+POPGRA,0.12,0.004,11.6,Wind,~Wetland specialist,Specialist,D,1,,
+OSTVIR,0.145,0.041,10.4,Animal (rodents),Generalist,Generalist,BUD,0.25,,
+ULMSP,0.347,0.243,10.4,Wind,Wetland specialist,Specialist,BDR,1,,Y
+ULMAME,0.12,0.02,10,Wind,Wetland specialist,Specialist,-,,,
+LIRTUP,0.226,0.131,9.5,Wind,Generalist,Generalist,BUD,1,,Y
+PLAOCC,0.243,0.149,9.4,Water/wind,Wetland specialist,Specialist,BDR,4.5,,Y
+FAGAME,0.167,0.09,7.7,Runners/Animal (mammals),Generalist,Generalist,BDRU,19,,Y
+POPDEL,0.165,0.091,7.4,Water/wind,Wetland specialist,Specialist,R,1,,
+TOXVER,0.12,0.049,7.1,Animals (birds),Wetland specialist,Specialist,B,0,,
+HAMVIR,0.18,0.127,5.3,Pressure?,Wetland specialist,Specialist,R,0,,
+MAGACU,0.053,0.006,4.7,Animal,~Wetland specialist,Specialist,U,0.1,,
+SALNIG,0.056,0.026,3,Water/wind,Wetland specialist,Specialist,R,0.5,,
+CARCAR,0.168,0.138,3,Wind,Generalist,Generalist,BDRU,0.25,,
+TILAME,0.113,0.083,3,Wind,~Upland specialist,Specialist,BDR,1.5,,
+QUEALB,0.056,0.028,2.8,Animal (rodents),Generalist,Generalist,BDRU,2,,
+CAROVA,0.122,0.101,2.1,Animal (rodents),Generalist,Generalist,BDRU,6,,Y
+BETALL,0.121,0.11,1.1,Wind,Generalist,Generalist,R,0.5,,
+NYSSYL,0.037,0.029,0.8,Animal (birds),Generalist,Generalist,BUD,0.5,,
+ACESIL,,,0,Wind,Wetland specialist,Specialist,,,,
+CARTOM,,,0,Animal (rodents),Generalist,Generalist,,,,
+QUERUB,0.014,0.024,-1,Animal (rodents),Generalist,Generalist,BDRU,11.5,,Y
+QUEBIC,0.22,0.232,-1.2,Animal (rodents),Wetland specialist,Specialist,BD,0.5,,
+SASALB,0.056,0.076,-2,Animal (birds)/runners,Generalist,Generalist,R,0.1,,
+CORFLO,,0.026,-2.6,Animal,Upland Specialist,Specialist,-,0,,
+ULMRUB,,0.026,-2.6,Wind,Wetland specialist,Specialist,,,,
+CRAPUN,,0.049,-4.9,Animal (birds),,,-,0,,
+MALCOR,,0.049,-4.9,Animal (rodents),~Wetland specialist,Specialist,-,0,,
