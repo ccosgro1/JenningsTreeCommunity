@@ -597,11 +597,8 @@ tiles=rank(rbind(res.vec,jac.edge.eff))
 
 
 
-
-
 ###Species level decoupling###
 #Mortality
-
 treedata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/Species Mortality Matrix.csv")
 soildata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
 names(treedata)
