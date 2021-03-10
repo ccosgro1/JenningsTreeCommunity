@@ -1,0 +1,810 @@
+---
+title: "Monographs code_Species"
+author: "Colleen Cosgrove"
+date: "March 8, 2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r library}
+library(vegan)
+```
+
+```{r ACERUB}
+treedata=read.csv("C:/Users/Colleen/Dropbox/Jennings 2016/New Adult Basal Area.csv")
+soildata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
+names(treedata)
+dim(treedata)
+names(soildata)
+dim(soildata)
+treedata$ecosys
+
+treedata[is.na(treedata)] <- 0
+
+# The tree data was collected in three rings for each plot
+# We are going to exclude stream plots (no soil data) and then sum the three rings
+treedata=treedata[treedata$ecosys!="S",]
+tree.ringsum=treedata[1:80,]
+#This [1:80,] refers to all plots within the first ring.
+
+
+# Perform Hellinger transformation on tree species data so that RDA is based on Hellinger distance
+tree.rowsums=apply(tree.ringsum[,10:43],1,sum)
+tree.hel=tree.ringsum
+tree.hel[,10:43]=tree.hel[,10:43]/tree.rowsums
+tree.hel[,10:43]=sqrt(tree.hel[,10:43])
+
+tree.hel=na.exclude(tree.hel)
+# Here is a quick analysis to test for the edge effect on tree communities when Ecosystem type is the explanatory factor, just like we did before with soil data
+# First the core plots
+tree.hel.core=tree.hel[tree.hel$EP=="Core",]
+rownames(tree.hel.core)
+tree.hel.core.rda.ecosys = rda(tree.hel.core[,10] ~ tree.hel.core[,3])
+anova(tree.hel.core.rda.ecosys)
+core.arsq=RsquareAdj(tree.hel.core.rda.ecosys)
+# Then the core+edge plots
+tree.hel.edge=tree.hel[tree.hel$EP=="Core"|tree.hel$EP=="Edge",]
+names(tree.hel.edge)
+tree.hel.edge.rda.ecosys = rda(tree.hel.edge[,10] ~ tree.hel.edge[,3])
+anova(tree.hel.edge.rda.ecosys)
+edge.arsq=RsquareAdj(tree.hel.edge.rda.ecosys)
+# Then the permmutation test of the edge effect
+edge.eff=core.arsq$adj.r.squared/edge.arsq$adj.r.squared
+# The permutation test for significance of edge effect
+nperm=999
+res.vec=matrix(nrow=nperm,ncol=1,0)
+for(i in 1:nperm){
+	dat.ec.rand=tree.hel.edge
+	dat.ec.rand[dat.ec.rand$ecosys=="B",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="B",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="B",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="R",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="R",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="R",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="U",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="U",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="U",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="D",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="D",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="D",]))
+	dat.core.rand=dat.ec.rand[dat.ec.rand$EP=="Core",]
+	datcore.rda.ecosys = rda(dat.core.rand[,10] ~ dat.core.rand[,3])
+	core.arsq.rand=RsquareAdj(datcore.rda.ecosys)
+	res.vec[i]=core.arsq.rand$adj.r.squared/edge.arsq$adj.r.squared
+}
+tiles=rank(rbind(res.vec,edge.eff))
+1-tiles[nperm+1]/(nperm+1)
+# How well is each species fitted by these models?  Find out below.
+goodness(tree.hel.core.rda.ecosys)
+goodness(tree.hel.edge.rda.ecosys)
+
+#Core soil significance
+tree.hel.soil=merge(tree.hel,soildata)
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=tree.hel.soil[tree.hel.soil$EP=="Core",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+colnames(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil = rda(tree.hel.soil[,10], tree.hel.soil[,55:79])
+anova(hel.rda.fulsoil)
+RsquareAdj(hel.rda.fulsoil)
+global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+```
+
+```{r ACESAC}
+# First the core plots
+tree.hel.core=tree.hel[tree.hel$EP=="Core",]
+rownames(tree.hel.core)
+tree.hel.core.rda.ecosys = rda(tree.hel.core[,11] ~ tree.hel.core[,3])
+anova(tree.hel.core.rda.ecosys)
+core.arsq=RsquareAdj(tree.hel.core.rda.ecosys)
+# Then the core+edge plots
+tree.hel.edge=tree.hel[tree.hel$EP=="Core"|tree.hel$EP=="Edge",]
+names(tree.hel.edge)
+tree.hel.edge.rda.ecosys = rda(tree.hel.edge[,11] ~ tree.hel.edge[,3])
+anova(tree.hel.edge.rda.ecosys)
+edge.arsq=RsquareAdj(tree.hel.edge.rda.ecosys)
+# Then the permmutation test of the edge effect
+edge.eff=core.arsq$adj.r.squared/edge.arsq$adj.r.squared
+# The permutation test for significance of edge effect
+nperm=999
+res.vec=matrix(nrow=nperm,ncol=1,0)
+for(i in 1:nperm){
+	dat.ec.rand=tree.hel.edge
+	dat.ec.rand[dat.ec.rand$ecosys=="B",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="B",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="B",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="R",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="R",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="R",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="U",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="U",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="U",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="D",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="D",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="D",]))
+	dat.core.rand=dat.ec.rand[dat.ec.rand$EP=="Core",]
+	datcore.rda.ecosys = rda(dat.core.rand[,11] ~ dat.core.rand[,3])
+	core.arsq.rand=RsquareAdj(datcore.rda.ecosys)
+	res.vec[i]=core.arsq.rand$adj.r.squared/edge.arsq$adj.r.squared
+}
+tiles=rank(rbind(res.vec,edge.eff))
+1-tiles[nperm+1]/(nperm+1)
+# How well is each species fitted by these models?  Find out below.
+goodness(tree.hel.core.rda.ecosys)
+goodness(tree.hel.edge.rda.ecosys)
+
+#Core soil significance
+tree.hel.soil=merge(tree.hel,soildata)
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=tree.hel.soil[tree.hel.soil$EP=="Core",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+colnames(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil = rda(tree.hel.soil[,11], tree.hel.soil[,55:79])
+anova(hel.rda.fulsoil)
+RsquareAdj(hel.rda.fulsoil)
+global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+```
+
+```{r CARCAR}
+# First the core plots
+tree.hel.core=tree.hel[tree.hel$EP=="Core",]
+rownames(tree.hel.core)
+tree.hel.core.rda.ecosys = rda(tree.hel.core[,14] ~ tree.hel.core[,3])
+anova(tree.hel.core.rda.ecosys)
+core.arsq=RsquareAdj(tree.hel.core.rda.ecosys)
+# Then the core+edge plots
+tree.hel.edge=tree.hel[tree.hel$EP=="Core"|tree.hel$EP=="Edge",]
+names(tree.hel.edge)
+tree.hel.edge.rda.ecosys = rda(tree.hel.edge[,14] ~ tree.hel.edge[,3])
+anova(tree.hel.edge.rda.ecosys)
+edge.arsq=RsquareAdj(tree.hel.edge.rda.ecosys)
+# Then the permmutation test of the edge effect
+edge.eff=core.arsq$adj.r.squared/edge.arsq$adj.r.squared
+# The permutation test for significance of edge effect
+nperm=999
+res.vec=matrix(nrow=nperm,ncol=1,0)
+for(i in 1:nperm){
+	dat.ec.rand=tree.hel.edge
+	dat.ec.rand[dat.ec.rand$ecosys=="B",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="B",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="B",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="R",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="R",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="R",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="U",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="U",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="U",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="D",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="D",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="D",]))
+	dat.core.rand=dat.ec.rand[dat.ec.rand$EP=="Core",]
+	datcore.rda.ecosys = rda(dat.core.rand[,14] ~ dat.core.rand[,3])
+	core.arsq.rand=RsquareAdj(datcore.rda.ecosys)
+	res.vec[i]=core.arsq.rand$adj.r.squared/edge.arsq$adj.r.squared
+}
+tiles=rank(rbind(res.vec,edge.eff))
+1-tiles[nperm+1]/(nperm+1)
+# How well is each species fitted by these models?  Find out below.
+goodness(tree.hel.core.rda.ecosys)
+goodness(tree.hel.edge.rda.ecosys)
+
+#Core soil significance
+hel.rda.fulsoil = rda(tree.hel.soil[,14], tree.hel.soil[,55:79])
+anova(hel.rda.fulsoil)
+RsquareAdj(hel.rda.fulsoil)
+global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+```
+
+```{r CARCOR}
+# First the core plots
+tree.hel.core=tree.hel[tree.hel$EP=="Core",]
+rownames(tree.hel.core)
+tree.hel.core.rda.ecosys = rda(tree.hel.core[,15] ~ tree.hel.core[,3])
+anova(tree.hel.core.rda.ecosys)
+core.arsq=RsquareAdj(tree.hel.core.rda.ecosys)
+# Then the core+edge plots
+tree.hel.edge=tree.hel[tree.hel$EP=="Core"|tree.hel$EP=="Edge",]
+names(tree.hel.edge)
+tree.hel.edge.rda.ecosys = rda(tree.hel.edge[,15] ~ tree.hel.edge[,3])
+anova(tree.hel.edge.rda.ecosys)
+edge.arsq=RsquareAdj(tree.hel.edge.rda.ecosys)
+# Then the permmutation test of the edge effect
+edge.eff=core.arsq$adj.r.squared/edge.arsq$adj.r.squared
+# The permutation test for significance of edge effect
+nperm=999
+res.vec=matrix(nrow=nperm,ncol=1,0)
+for(i in 1:nperm){
+	dat.ec.rand=tree.hel.edge
+	dat.ec.rand[dat.ec.rand$ecosys=="B",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="B",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="B",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="R",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="R",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="R",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="U",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="U",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="U",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="D",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="D",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="D",]))
+	dat.core.rand=dat.ec.rand[dat.ec.rand$EP=="Core",]
+	datcore.rda.ecosys = rda(dat.core.rand[,15] ~ dat.core.rand[,3])
+	core.arsq.rand=RsquareAdj(datcore.rda.ecosys)
+	res.vec[i]=core.arsq.rand$adj.r.squared/edge.arsq$adj.r.squared
+}
+tiles=rank(rbind(res.vec,edge.eff))
+1-tiles[nperm+1]/(nperm+1)
+# How well is each species fitted by these models?  Find out below.
+goodness(tree.hel.core.rda.ecosys)
+goodness(tree.hel.edge.rda.ecosys)
+
+#Core soil significance
+hel.rda.fulsoil = rda(tree.hel.soil[,15], tree.hel.soil[,55:79])
+anova(hel.rda.fulsoil)
+RsquareAdj(hel.rda.fulsoil)
+global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+```
+
+```{r CAROVA}
+# First the core plots
+tree.hel.core=tree.hel[tree.hel$EP=="Core",]
+rownames(tree.hel.core)
+tree.hel.core.rda.ecosys = rda(tree.hel.core[,16] ~ tree.hel.core[,3])
+anova(tree.hel.core.rda.ecosys)
+core.arsq=RsquareAdj(tree.hel.core.rda.ecosys)
+# Then the core+edge plots
+tree.hel.edge=tree.hel[tree.hel$EP=="Core"|tree.hel$EP=="Edge",]
+names(tree.hel.edge)
+tree.hel.edge.rda.ecosys = rda(tree.hel.edge[,16] ~ tree.hel.edge[,3])
+anova(tree.hel.edge.rda.ecosys)
+edge.arsq=RsquareAdj(tree.hel.edge.rda.ecosys)
+# Then the permmutation test of the edge effect
+edge.eff=core.arsq$adj.r.squared/edge.arsq$adj.r.squared
+# The permutation test for significance of edge effect
+nperm=999
+res.vec=matrix(nrow=nperm,ncol=1,0)
+for(i in 1:nperm){
+	dat.ec.rand=tree.hel.edge
+	dat.ec.rand[dat.ec.rand$ecosys=="B",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="B",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="B",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="R",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="R",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="R",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="U",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="U",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="U",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="D",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="D",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="D",]))
+	dat.core.rand=dat.ec.rand[dat.ec.rand$EP=="Core",]
+	datcore.rda.ecosys = rda(dat.core.rand[,16] ~ dat.core.rand[,3])
+	core.arsq.rand=RsquareAdj(datcore.rda.ecosys)
+	res.vec[i]=core.arsq.rand$adj.r.squared/edge.arsq$adj.r.squared
+}
+tiles=rank(rbind(res.vec,edge.eff))
+1-tiles[nperm+1]/(nperm+1)
+# How well is each species fitted by these models?  Find out below.
+goodness(tree.hel.core.rda.ecosys)
+goodness(tree.hel.edge.rda.ecosys)
+
+#Core soil significance
+hel.rda.fulsoil = rda(tree.hel.soil[,16], tree.hel.soil[,55:79])
+anova(hel.rda.fulsoil)
+RsquareAdj(hel.rda.fulsoil)
+global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+```
+
+```{r FAGAME}
+# First the core plots
+tree.hel.core=tree.hel[tree.hel$EP=="Core",]
+rownames(tree.hel.core)
+tree.hel.core.rda.ecosys = rda(tree.hel.core[,20] ~ tree.hel.core[,3])
+anova(tree.hel.core.rda.ecosys)
+core.arsq=RsquareAdj(tree.hel.core.rda.ecosys)
+# Then the core+edge plots
+tree.hel.edge=tree.hel[tree.hel$EP=="Core"|tree.hel$EP=="Edge",]
+names(tree.hel.edge)
+tree.hel.edge.rda.ecosys = rda(tree.hel.edge[,20] ~ tree.hel.edge[,3])
+anova(tree.hel.edge.rda.ecosys)
+edge.arsq=RsquareAdj(tree.hel.edge.rda.ecosys)
+# Then the permmutation test of the edge effect
+edge.eff=core.arsq$adj.r.squared/edge.arsq$adj.r.squared
+# The permutation test for significance of edge effect
+nperm=999
+res.vec=matrix(nrow=nperm,ncol=1,0)
+for(i in 1:nperm){
+	dat.ec.rand=tree.hel.edge
+	dat.ec.rand[dat.ec.rand$ecosys=="B",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="B",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="B",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="R",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="R",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="R",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="U",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="U",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="U",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="D",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="D",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="D",]))
+	dat.core.rand=dat.ec.rand[dat.ec.rand$EP=="Core",]
+	datcore.rda.ecosys = rda(dat.core.rand[,20] ~ dat.core.rand[,3])
+	core.arsq.rand=RsquareAdj(datcore.rda.ecosys)
+	res.vec[i]=core.arsq.rand$adj.r.squared/edge.arsq$adj.r.squared
+}
+tiles=rank(rbind(res.vec,edge.eff))
+1-tiles[nperm+1]/(nperm+1)
+# How well is each species fitted by these models?  Find out below.
+goodness(tree.hel.core.rda.ecosys)
+goodness(tree.hel.edge.rda.ecosys)
+
+#Core soil significance
+hel.rda.fulsoil = rda(tree.hel.soil[,20], tree.hel.soil[,55:79])
+anova(hel.rda.fulsoil)
+RsquareAdj(hel.rda.fulsoil)
+global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+```
+
+```{r FRAAME}
+# First the core plots
+tree.hel.core=tree.hel[tree.hel$EP=="Core",]
+rownames(tree.hel.core)
+tree.hel.core.rda.ecosys = rda(tree.hel.core[,21] ~ tree.hel.core[,3])
+anova(tree.hel.core.rda.ecosys)
+core.arsq=RsquareAdj(tree.hel.core.rda.ecosys)
+# Then the core+edge plots
+tree.hel.edge=tree.hel[tree.hel$EP=="Core"|tree.hel$EP=="Edge",]
+names(tree.hel.edge)
+tree.hel.edge.rda.ecosys = rda(tree.hel.edge[,21] ~ tree.hel.edge[,3])
+anova(tree.hel.edge.rda.ecosys)
+edge.arsq=RsquareAdj(tree.hel.edge.rda.ecosys)
+# Then the permmutation test of the edge effect
+edge.eff=core.arsq$adj.r.squared/edge.arsq$adj.r.squared
+# The permutation test for significance of edge effect
+nperm=999
+res.vec=matrix(nrow=nperm,ncol=1,0)
+for(i in 1:nperm){
+	dat.ec.rand=tree.hel.edge
+	dat.ec.rand[dat.ec.rand$ecosys=="B",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="B",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="B",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="R",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="R",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="R",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="U",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="U",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="U",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="D",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="D",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="D",]))
+	dat.core.rand=dat.ec.rand[dat.ec.rand$EP=="Core",]
+	datcore.rda.ecosys = rda(dat.core.rand[,21] ~ dat.core.rand[,3])
+	core.arsq.rand=RsquareAdj(datcore.rda.ecosys)
+	res.vec[i]=core.arsq.rand$adj.r.squared/edge.arsq$adj.r.squared
+}
+tiles=rank(rbind(res.vec,edge.eff))
+1-tiles[nperm+1]/(nperm+1)
+# How well is each species fitted by these models?  Find out below.
+goodness(tree.hel.core.rda.ecosys)
+goodness(tree.hel.edge.rda.ecosys)
+
+#Core soil significance
+hel.rda.fulsoil = rda(tree.hel.soil[,21], tree.hel.soil[,55:79])
+anova(hel.rda.fulsoil)
+RsquareAdj(hel.rda.fulsoil)
+global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+```
+
+```{r FRANIG}
+# First the core plots
+tree.hel.core=tree.hel[tree.hel$EP=="Core",]
+rownames(tree.hel.core)
+tree.hel.core.rda.ecosys = rda(tree.hel.core[,22] ~ tree.hel.core[,3])
+anova(tree.hel.core.rda.ecosys)
+core.arsq=RsquareAdj(tree.hel.core.rda.ecosys)
+# Then the core+edge plots
+tree.hel.edge=tree.hel[tree.hel$EP=="Core"|tree.hel$EP=="Edge",]
+names(tree.hel.edge)
+tree.hel.edge.rda.ecosys = rda(tree.hel.edge[,22] ~ tree.hel.edge[,3])
+anova(tree.hel.edge.rda.ecosys)
+edge.arsq=RsquareAdj(tree.hel.edge.rda.ecosys)
+# Then the permmutation test of the edge effect
+edge.eff=core.arsq$adj.r.squared/edge.arsq$adj.r.squared
+# The permutation test for significance of edge effect
+nperm=999
+res.vec=matrix(nrow=nperm,ncol=1,0)
+for(i in 1:nperm){
+	dat.ec.rand=tree.hel.edge
+	dat.ec.rand[dat.ec.rand$ecosys=="B",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="B",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="B",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="R",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="R",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="R",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="U",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="U",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="U",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="D",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="D",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="D",]))
+	dat.core.rand=dat.ec.rand[dat.ec.rand$EP=="Core",]
+	datcore.rda.ecosys = rda(dat.core.rand[,22] ~ dat.core.rand[,3])
+	core.arsq.rand=RsquareAdj(datcore.rda.ecosys)
+	res.vec[i]=core.arsq.rand$adj.r.squared/edge.arsq$adj.r.squared
+}
+tiles=rank(rbind(res.vec,edge.eff))
+1-tiles[nperm+1]/(nperm+1)
+# How well is each species fitted by these models?  Find out below.
+goodness(tree.hel.core.rda.ecosys)
+goodness(tree.hel.edge.rda.ecosys)
+
+#Core soil significance
+hel.rda.fulsoil = rda(tree.hel.soil[,22], tree.hel.soil[,55:79])
+anova(hel.rda.fulsoil)
+RsquareAdj(hel.rda.fulsoil)
+global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+```
+
+```{r LIRTUP}
+# First the core plots
+tree.hel.core=tree.hel[tree.hel$EP=="Core",]
+rownames(tree.hel.core)
+tree.hel.core.rda.ecosys = rda(tree.hel.core[,24] ~ tree.hel.core[,3])
+anova(tree.hel.core.rda.ecosys)
+core.arsq=RsquareAdj(tree.hel.core.rda.ecosys)
+# Then the core+edge plots
+tree.hel.edge=tree.hel[tree.hel$EP=="Core"|tree.hel$EP=="Edge",]
+names(tree.hel.edge)
+tree.hel.edge.rda.ecosys = rda(tree.hel.edge[,24] ~ tree.hel.edge[,3])
+anova(tree.hel.edge.rda.ecosys)
+edge.arsq=RsquareAdj(tree.hel.edge.rda.ecosys)
+# Then the permmutation test of the edge effect
+edge.eff=core.arsq$adj.r.squared/edge.arsq$adj.r.squared
+# The permutation test for significance of edge effect
+nperm=999
+res.vec=matrix(nrow=nperm,ncol=1,0)
+for(i in 1:nperm){
+	dat.ec.rand=tree.hel.edge
+	dat.ec.rand[dat.ec.rand$ecosys=="B",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="B",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="B",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="R",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="R",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="R",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="U",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="U",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="U",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="D",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="D",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="D",]))
+	dat.core.rand=dat.ec.rand[dat.ec.rand$EP=="Core",]
+	datcore.rda.ecosys = rda(dat.core.rand[,24] ~ dat.core.rand[,3])
+	core.arsq.rand=RsquareAdj(datcore.rda.ecosys)
+	res.vec[i]=core.arsq.rand$adj.r.squared/edge.arsq$adj.r.squared
+}
+tiles=rank(rbind(res.vec,edge.eff))
+1-tiles[nperm+1]/(nperm+1)
+# How well is each species fitted by these models?  Find out below.
+goodness(tree.hel.core.rda.ecosys)
+goodness(tree.hel.edge.rda.ecosys)
+
+#Core soil significance
+hel.rda.fulsoil = rda(tree.hel.soil[,24], tree.hel.soil[,55:79])
+anova(hel.rda.fulsoil)
+RsquareAdj(hel.rda.fulsoil)
+global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+```
+
+```{r NYSSYL}
+# First the core plots
+tree.hel.core=tree.hel[tree.hel$EP=="Core",]
+rownames(tree.hel.core)
+tree.hel.core.rda.ecosys = rda(tree.hel.core[,26] ~ tree.hel.core[,3])
+anova(tree.hel.core.rda.ecosys)
+core.arsq=RsquareAdj(tree.hel.core.rda.ecosys)
+# Then the core+edge plots
+tree.hel.edge=tree.hel[tree.hel$EP=="Core"|tree.hel$EP=="Edge",]
+names(tree.hel.edge)
+tree.hel.edge.rda.ecosys = rda(tree.hel.edge[,26] ~ tree.hel.edge[,3])
+anova(tree.hel.edge.rda.ecosys)
+edge.arsq=RsquareAdj(tree.hel.edge.rda.ecosys)
+# Then the permmutation test of the edge effect
+edge.eff=core.arsq$adj.r.squared/edge.arsq$adj.r.squared
+# The permutation test for significance of edge effect
+nperm=999
+res.vec=matrix(nrow=nperm,ncol=1,0)
+for(i in 1:nperm){
+	dat.ec.rand=tree.hel.edge
+	dat.ec.rand[dat.ec.rand$ecosys=="B",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="B",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="B",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="R",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="R",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="R",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="U",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="U",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="U",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="D",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="D",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="D",]))
+	dat.core.rand=dat.ec.rand[dat.ec.rand$EP=="Core",]
+	datcore.rda.ecosys = rda(dat.core.rand[,26] ~ dat.core.rand[,3])
+	core.arsq.rand=RsquareAdj(datcore.rda.ecosys)
+	res.vec[i]=core.arsq.rand$adj.r.squared/edge.arsq$adj.r.squared
+}
+tiles=rank(rbind(res.vec,edge.eff))
+1-tiles[nperm+1]/(nperm+1)
+# How well is each species fitted by these models?  Find out below.
+goodness(tree.hel.core.rda.ecosys)
+goodness(tree.hel.edge.rda.ecosys)
+
+#Core soil significance
+hel.rda.fulsoil = rda(tree.hel.soil[,26], tree.hel.soil[,55:79])
+anova(hel.rda.fulsoil)
+RsquareAdj(hel.rda.fulsoil)
+global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+```
+
+```{r OSTVIR}
+# First the core plots
+tree.hel.core=tree.hel[tree.hel$EP=="Core",]
+rownames(tree.hel.core)
+tree.hel.core.rda.ecosys = rda(tree.hel.core[,28] ~ tree.hel.core[,3])
+anova(tree.hel.core.rda.ecosys)
+core.arsq=RsquareAdj(tree.hel.core.rda.ecosys)
+# Then the core+edge plots
+tree.hel.edge=tree.hel[tree.hel$EP=="Core"|tree.hel$EP=="Edge",]
+names(tree.hel.edge)
+tree.hel.edge.rda.ecosys = rda(tree.hel.edge[,28] ~ tree.hel.edge[,3])
+anova(tree.hel.edge.rda.ecosys)
+edge.arsq=RsquareAdj(tree.hel.edge.rda.ecosys)
+# Then the permmutation test of the edge effect
+edge.eff=core.arsq$adj.r.squared/edge.arsq$adj.r.squared
+# The permutation test for significance of edge effect
+nperm=999
+res.vec=matrix(nrow=nperm,ncol=1,0)
+for(i in 1:nperm){
+	dat.ec.rand=tree.hel.edge
+	dat.ec.rand[dat.ec.rand$ecosys=="B",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="B",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="B",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="R",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="R",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="R",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="U",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="U",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="U",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="D",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="D",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="D",]))
+	dat.core.rand=dat.ec.rand[dat.ec.rand$EP=="Core",]
+	datcore.rda.ecosys = rda(dat.core.rand[,28] ~ dat.core.rand[,3])
+	core.arsq.rand=RsquareAdj(datcore.rda.ecosys)
+	res.vec[i]=core.arsq.rand$adj.r.squared/edge.arsq$adj.r.squared
+}
+tiles=rank(rbind(res.vec,edge.eff))
+1-tiles[nperm+1]/(nperm+1)
+# How well is each species fitted by these models?  Find out below.
+goodness(tree.hel.core.rda.ecosys)
+goodness(tree.hel.edge.rda.ecosys)
+
+#Core soil significance
+hel.rda.fulsoil = rda(tree.hel.soil[,28], tree.hel.soil[,55:79])
+anova(hel.rda.fulsoil)
+RsquareAdj(hel.rda.fulsoil)
+global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+```
+
+```{r PLAOCC}
+# First the core plots
+tree.hel.core=tree.hel[tree.hel$EP=="Core",]
+rownames(tree.hel.core)
+tree.hel.core.rda.ecosys = rda(tree.hel.core[,29] ~ tree.hel.core[,3])
+anova(tree.hel.core.rda.ecosys)
+core.arsq=RsquareAdj(tree.hel.core.rda.ecosys)
+# Then the core+edge plots
+tree.hel.edge=tree.hel[tree.hel$EP=="Core"|tree.hel$EP=="Edge",]
+names(tree.hel.edge)
+tree.hel.edge.rda.ecosys = rda(tree.hel.edge[,29] ~ tree.hel.edge[,3])
+anova(tree.hel.edge.rda.ecosys)
+edge.arsq=RsquareAdj(tree.hel.edge.rda.ecosys)
+# Then the permmutation test of the edge effect
+edge.eff=core.arsq$adj.r.squared/edge.arsq$adj.r.squared
+# The permutation test for significance of edge effect
+nperm=999
+res.vec=matrix(nrow=nperm,ncol=1,0)
+for(i in 1:nperm){
+	dat.ec.rand=tree.hel.edge
+	dat.ec.rand[dat.ec.rand$ecosys=="B",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="B",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="B",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="R",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="R",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="R",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="U",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="U",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="U",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="D",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="D",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="D",]))
+	dat.core.rand=dat.ec.rand[dat.ec.rand$EP=="Core",]
+	datcore.rda.ecosys = rda(dat.core.rand[,29] ~ dat.core.rand[,3])
+	core.arsq.rand=RsquareAdj(datcore.rda.ecosys)
+	res.vec[i]=core.arsq.rand$adj.r.squared/edge.arsq$adj.r.squared
+}
+tiles=rank(rbind(res.vec,edge.eff))
+1-tiles[nperm+1]/(nperm+1)
+# How well is each species fitted by these models?  Find out below.
+goodness(tree.hel.core.rda.ecosys)
+goodness(tree.hel.edge.rda.ecosys)
+
+#Core soil significance
+hel.rda.fulsoil = rda(tree.hel.soil[,29], tree.hel.soil[,55:79])
+anova(hel.rda.fulsoil)
+RsquareAdj(hel.rda.fulsoil)
+global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+```
+
+```{r PRUSER}
+# First the core plots
+tree.hel.core=tree.hel[tree.hel$EP=="Core",]
+rownames(tree.hel.core)
+tree.hel.core.rda.ecosys = rda(tree.hel.core[,32] ~ tree.hel.core[,3])
+anova(tree.hel.core.rda.ecosys)
+core.arsq=RsquareAdj(tree.hel.core.rda.ecosys)
+# Then the core+edge plots
+tree.hel.edge=tree.hel[tree.hel$EP=="Core"|tree.hel$EP=="Edge",]
+names(tree.hel.edge)
+tree.hel.edge.rda.ecosys = rda(tree.hel.edge[,32] ~ tree.hel.edge[,3])
+anova(tree.hel.edge.rda.ecosys)
+edge.arsq=RsquareAdj(tree.hel.edge.rda.ecosys)
+# Then the permmutation test of the edge effect
+edge.eff=core.arsq$adj.r.squared/edge.arsq$adj.r.squared
+# The permutation test for significance of edge effect
+nperm=999
+res.vec=matrix(nrow=nperm,ncol=1,0)
+for(i in 1:nperm){
+	dat.ec.rand=tree.hel.edge
+	dat.ec.rand[dat.ec.rand$ecosys=="B",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="B",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="B",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="R",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="R",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="R",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="U",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="U",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="U",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="D",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="D",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="D",]))
+	dat.core.rand=dat.ec.rand[dat.ec.rand$EP=="Core",]
+	datcore.rda.ecosys = rda(dat.core.rand[,32] ~ dat.core.rand[,3])
+	core.arsq.rand=RsquareAdj(datcore.rda.ecosys)
+	res.vec[i]=core.arsq.rand$adj.r.squared/edge.arsq$adj.r.squared
+}
+tiles=rank(rbind(res.vec,edge.eff))
+1-tiles[nperm+1]/(nperm+1)
+# How well is each species fitted by these models?  Find out below.
+goodness(tree.hel.core.rda.ecosys)
+goodness(tree.hel.edge.rda.ecosys)
+
+#Core soil significance
+hel.rda.fulsoil = rda(tree.hel.soil[,32], tree.hel.soil[,55:79])
+anova(hel.rda.fulsoil)
+RsquareAdj(hel.rda.fulsoil)
+global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+```
+
+```{r QUEALB}
+# First the core plots
+tree.hel.core=tree.hel[tree.hel$EP=="Core",]
+rownames(tree.hel.core)
+tree.hel.core.rda.ecosys = rda(tree.hel.core[,33] ~ tree.hel.core[,3])
+anova(tree.hel.core.rda.ecosys)
+core.arsq=RsquareAdj(tree.hel.core.rda.ecosys)
+# Then the core+edge plots
+tree.hel.edge=tree.hel[tree.hel$EP=="Core"|tree.hel$EP=="Edge",]
+names(tree.hel.edge)
+tree.hel.edge.rda.ecosys = rda(tree.hel.edge[,33] ~ tree.hel.edge[,3])
+anova(tree.hel.edge.rda.ecosys)
+edge.arsq=RsquareAdj(tree.hel.edge.rda.ecosys)
+# Then the permmutation test of the edge effect
+edge.eff=core.arsq$adj.r.squared/edge.arsq$adj.r.squared
+# The permutation test for significance of edge effect
+nperm=999
+res.vec=matrix(nrow=nperm,ncol=1,0)
+for(i in 1:nperm){
+	dat.ec.rand=tree.hel.edge
+	dat.ec.rand[dat.ec.rand$ecosys=="B",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="B",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="B",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="R",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="R",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="R",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="U",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="U",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="U",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="D",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="D",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="D",]))
+	dat.core.rand=dat.ec.rand[dat.ec.rand$EP=="Core",]
+	datcore.rda.ecosys = rda(dat.core.rand[,33] ~ dat.core.rand[,3])
+	core.arsq.rand=RsquareAdj(datcore.rda.ecosys)
+	res.vec[i]=core.arsq.rand$adj.r.squared/edge.arsq$adj.r.squared
+}
+tiles=rank(rbind(res.vec,edge.eff))
+1-tiles[nperm+1]/(nperm+1)
+# How well is each species fitted by these models?  Find out below.
+goodness(tree.hel.core.rda.ecosys)
+goodness(tree.hel.edge.rda.ecosys)
+
+#Core soil significance
+hel.rda.fulsoil = rda(tree.hel.soil[,33], tree.hel.soil[,55:79])
+anova(hel.rda.fulsoil)
+RsquareAdj(hel.rda.fulsoil)
+global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+```
+
+```{r QUEPAL}
+# First the core plots
+tree.hel.core=tree.hel[tree.hel$EP=="Core",]
+rownames(tree.hel.core)
+tree.hel.core.rda.ecosys = rda(tree.hel.core[,35] ~ tree.hel.core[,3])
+anova(tree.hel.core.rda.ecosys)
+core.arsq=RsquareAdj(tree.hel.core.rda.ecosys)
+# Then the core+edge plots
+tree.hel.edge=tree.hel[tree.hel$EP=="Core"|tree.hel$EP=="Edge",]
+names(tree.hel.edge)
+tree.hel.edge.rda.ecosys = rda(tree.hel.edge[,35] ~ tree.hel.edge[,3])
+anova(tree.hel.edge.rda.ecosys)
+edge.arsq=RsquareAdj(tree.hel.edge.rda.ecosys)
+# Then the permmutation test of the edge effect
+edge.eff=core.arsq$adj.r.squared/edge.arsq$adj.r.squared
+# The permutation test for significance of edge effect
+nperm=999
+res.vec=matrix(nrow=nperm,ncol=1,0)
+for(i in 1:nperm){
+	dat.ec.rand=tree.hel.edge
+	dat.ec.rand[dat.ec.rand$ecosys=="B",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="B",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="B",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="R",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="R",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="R",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="U",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="U",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="U",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="D",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="D",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="D",]))
+	dat.core.rand=dat.ec.rand[dat.ec.rand$EP=="Core",]
+	datcore.rda.ecosys = rda(dat.core.rand[,35] ~ dat.core.rand[,3])
+	core.arsq.rand=RsquareAdj(datcore.rda.ecosys)
+	res.vec[i]=core.arsq.rand$adj.r.squared/edge.arsq$adj.r.squared
+}
+tiles=rank(rbind(res.vec,edge.eff))
+1-tiles[nperm+1]/(nperm+1)
+# How well is each species fitted by these models?  Find out below.
+goodness(tree.hel.core.rda.ecosys)
+goodness(tree.hel.edge.rda.ecosys)
+
+#Core soil significance
+hel.rda.fulsoil = rda(tree.hel.soil[,35], tree.hel.soil[,55:79])
+anova(hel.rda.fulsoil)
+RsquareAdj(hel.rda.fulsoil)
+global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+```
+
+```{r QUERUB}
+# First the core plots
+tree.hel.core=tree.hel[tree.hel$EP=="Core",]
+rownames(tree.hel.core)
+tree.hel.core.rda.ecosys = rda(tree.hel.core[,36] ~ tree.hel.core[,3])
+anova(tree.hel.core.rda.ecosys)
+core.arsq=RsquareAdj(tree.hel.core.rda.ecosys)
+# Then the core+edge plots
+tree.hel.edge=tree.hel[tree.hel$EP=="Core"|tree.hel$EP=="Edge",]
+names(tree.hel.edge)
+tree.hel.edge.rda.ecosys = rda(tree.hel.edge[,36] ~ tree.hel.edge[,3])
+anova(tree.hel.edge.rda.ecosys)
+edge.arsq=RsquareAdj(tree.hel.edge.rda.ecosys)
+# Then the permmutation test of the edge effect
+edge.eff=core.arsq$adj.r.squared/edge.arsq$adj.r.squared
+# The permutation test for significance of edge effect
+nperm=999
+res.vec=matrix(nrow=nperm,ncol=1,0)
+for(i in 1:nperm){
+	dat.ec.rand=tree.hel.edge
+	dat.ec.rand[dat.ec.rand$ecosys=="B",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="B",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="B",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="R",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="R",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="R",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="U",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="U",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="U",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="D",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="D",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="D",]))
+	dat.core.rand=dat.ec.rand[dat.ec.rand$EP=="Core",]
+	datcore.rda.ecosys = rda(dat.core.rand[,36] ~ dat.core.rand[,3])
+	core.arsq.rand=RsquareAdj(datcore.rda.ecosys)
+	res.vec[i]=core.arsq.rand$adj.r.squared/edge.arsq$adj.r.squared
+}
+tiles=rank(rbind(res.vec,edge.eff))
+1-tiles[nperm+1]/(nperm+1)
+# How well is each species fitted by these models?  Find out below.
+goodness(tree.hel.core.rda.ecosys)
+goodness(tree.hel.edge.rda.ecosys)
+
+#Core soil significance
+hel.rda.fulsoil = rda(tree.hel.soil[,36], tree.hel.soil[,55:79])
+anova(hel.rda.fulsoil)
+RsquareAdj(hel.rda.fulsoil)
+global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+```
+
+```{r TILAME}
+# First the core plots
+tree.hel.core=tree.hel[tree.hel$EP=="Core",]
+rownames(tree.hel.core)
+tree.hel.core.rda.ecosys = rda(tree.hel.core[,39] ~ tree.hel.core[,3])
+anova(tree.hel.core.rda.ecosys)
+core.arsq=RsquareAdj(tree.hel.core.rda.ecosys)
+# Then the core+edge plots
+tree.hel.edge=tree.hel[tree.hel$EP=="Core"|tree.hel$EP=="Edge",]
+names(tree.hel.edge)
+tree.hel.edge.rda.ecosys = rda(tree.hel.edge[,39] ~ tree.hel.edge[,3])
+anova(tree.hel.edge.rda.ecosys)
+edge.arsq=RsquareAdj(tree.hel.edge.rda.ecosys)
+# Then the permmutation test of the edge effect
+edge.eff=core.arsq$adj.r.squared/edge.arsq$adj.r.squared
+# The permutation test for significance of edge effect
+nperm=999
+res.vec=matrix(nrow=nperm,ncol=1,0)
+for(i in 1:nperm){
+	dat.ec.rand=tree.hel.edge
+	dat.ec.rand[dat.ec.rand$ecosys=="B",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="B",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="B",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="R",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="R",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="R",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="U",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="U",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="U",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="D",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="D",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="D",]))
+	dat.core.rand=dat.ec.rand[dat.ec.rand$EP=="Core",]
+	datcore.rda.ecosys = rda(dat.core.rand[,39] ~ dat.core.rand[,3])
+	core.arsq.rand=RsquareAdj(datcore.rda.ecosys)
+	res.vec[i]=core.arsq.rand$adj.r.squared/edge.arsq$adj.r.squared
+}
+tiles=rank(rbind(res.vec,edge.eff))
+1-tiles[nperm+1]/(nperm+1)
+# How well is each species fitted by these models?  Find out below.
+goodness(tree.hel.core.rda.ecosys)
+goodness(tree.hel.edge.rda.ecosys)
+
+#Core soil significance
+hel.rda.fulsoil = rda(tree.hel.soil[,39], tree.hel.soil[,55:79])
+anova(hel.rda.fulsoil)
+RsquareAdj(hel.rda.fulsoil)
+global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+```
+
+```{r ULMSP}
+# First the core plots
+tree.hel.core=tree.hel[tree.hel$EP=="Core",]
+rownames(tree.hel.core)
+tree.hel.core.rda.ecosys = rda(tree.hel.core[,43] ~ tree.hel.core[,3])
+anova(tree.hel.core.rda.ecosys)
+core.arsq=RsquareAdj(tree.hel.core.rda.ecosys)
+# Then the core+edge plots
+tree.hel.edge=tree.hel[tree.hel$EP=="Core"|tree.hel$EP=="Edge",]
+names(tree.hel.edge)
+tree.hel.edge.rda.ecosys = rda(tree.hel.edge[,43] ~ tree.hel.edge[,3])
+anova(tree.hel.edge.rda.ecosys)
+edge.arsq=RsquareAdj(tree.hel.edge.rda.ecosys)
+# Then the permmutation test of the edge effect
+edge.eff=core.arsq$adj.r.squared/edge.arsq$adj.r.squared
+# The permutation test for significance of edge effect
+nperm=999
+res.vec=matrix(nrow=nperm,ncol=1,0)
+for(i in 1:nperm){
+	dat.ec.rand=tree.hel.edge
+	dat.ec.rand[dat.ec.rand$ecosys=="B",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="B",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="B",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="R",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="R",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="R",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="U",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="U",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="U",]))
+	dat.ec.rand[dat.ec.rand$ecosys=="D",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="D",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="D",]))
+	dat.core.rand=dat.ec.rand[dat.ec.rand$EP=="Core",]
+	datcore.rda.ecosys = rda(dat.core.rand[,43] ~ dat.core.rand[,3])
+	core.arsq.rand=RsquareAdj(datcore.rda.ecosys)
+	res.vec[i]=core.arsq.rand$adj.r.squared/edge.arsq$adj.r.squared
+}
+tiles=rank(rbind(res.vec,edge.eff))
+1-tiles[nperm+1]/(nperm+1)
+# How well is each species fitted by these models?  Find out below.
+goodness(tree.hel.core.rda.ecosys)
+goodness(tree.hel.edge.rda.ecosys)
+
+#Core soil significance
+hel.rda.fulsoil = rda(tree.hel.soil[,43], tree.hel.soil[,55:79])
+anova(hel.rda.fulsoil)
+RsquareAdj(hel.rda.fulsoil)
+global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+```

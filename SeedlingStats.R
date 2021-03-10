@@ -270,6 +270,78 @@ global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
 #varpart(tree.hel.soil[,5:35], tree.hel.soil[,c(47,48,56,55,65,53)])
 
 
+########new tree data 2016; bonus code########
+###### Some Bonus tree code
+# Here is a quick analysis to test for the edge effect on tree communities when Ecosystem type is the explanatory factor, just like we did before with soil data
+# First the core plots
+tree.hel.core=tree.hel[tree.hel$EP=="Core",]
+rownames(tree.hel.core)
+tree.hel.core.rda.ecosys = rda(tree.hel.core[,10:43] ~ tree.hel.core[,3])
+anova(tree.hel.core.rda.ecosys)
+core.arsq=RsquareAdj(tree.hel.core.rda.ecosys)
+# Then the core+edge plots
+tree.hel.edge=tree.hel[tree.hel$EP=="Core"|tree.hel$EP=="Edge",]
+names(tree.hel.edge)
+tree.hel.edge.rda.ecosys = rda(tree.hel.edge[,10:43] ~ tree.hel.edge[,3])
+anova(tree.hel.edge.rda.ecosys)
+edge.arsq=RsquareAdj(tree.hel.edge.rda.ecosys)
+# Then the permmutation test of the edge effect
+edge.eff=core.arsq$adj.r.squared/edge.arsq$adj.r.squared
+# The permutation test for significance of edge effect
+nperm=999
+res.vec=matrix(nrow=nperm,ncol=1,0)
+for(i in 1:nperm){
+  dat.ec.rand=tree.hel.edge
+  dat.ec.rand[dat.ec.rand$ecosys=="B",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="B",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="B",]))
+  dat.ec.rand[dat.ec.rand$ecosys=="R",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="R",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="R",]))
+  dat.ec.rand[dat.ec.rand$ecosys=="U",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="U",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="U",]))
+  dat.ec.rand[dat.ec.rand$ecosys=="D",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="D",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="D",]))
+  dat.core.rand=dat.ec.rand[dat.ec.rand$EP=="Core",]
+  datcore.rda.ecosys = rda(dat.core.rand[,10:43] ~ dat.core.rand[,3])
+  core.arsq.rand=RsquareAdj(datcore.rda.ecosys)
+  res.vec[i]=core.arsq.rand$adj.r.squared/edge.arsq$adj.r.squared
+}
+tiles=rank(rbind(res.vec,edge.eff))
+1-tiles[nperm+1]/(nperm+1)
+# How well is each species fitted by these models?  Find out below.
+goodness(tree.hel.core.rda.ecosys)
+goodness(tree.hel.edge.rda.ecosys)
+
+##Same idea as above, but Jaccard distance analysis by PCoA/distance-based RDA
+jac.core.dist=vegdist(tree.hel.core[,10:43],method="jaccard",binary=TRUE)
+jac.core.pcoa=cmdscale(jac.core.dist,eig=TRUE,k=41,add=TRUE)
+jac.core.rda.ecosys = rda(jac.core.pcoa$points ~ tree.hel.core[,3])
+anova(jac.core.rda.ecosys)
+jac.core.arsq=RsquareAdj(jac.core.rda.ecosys)
+jac.edge.dist=vegdist(tree.hel.edge[,10:43],method="jaccard",binary=TRUE)
+jac.edge.pcoa=cmdscale(jac.edge.dist,eig=TRUE,k=70,add=TRUE)
+jac.edge.pcoa.points=cbind(jac.edge.pcoa$points,tree.hel.edge)
+jac.edge.rda.ecosys = rda(jac.edge.pcoa.points[,1:70] ~ jac.edge.pcoa.points[,73])
+anova(jac.edge.rda.ecosys)
+jac.edge.arsq=RsquareAdj(jac.edge.rda.ecosys)
+jac.edge.eff=jac.core.arsq$adj.r.squared/jac.edge.arsq$adj.r.squared
+nperm=999
+res.vec=matrix(nrow=nperm,ncol=1,0)
+for(i in 1:nperm){
+  dat.ec.rand=jac.edge.pcoa.points
+  dat.ec.rand[dat.ec.rand$ecosys=="B",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="B",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="B",]))
+  dat.ec.rand[dat.ec.rand$ecosys=="R",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="R",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="R",]))
+  dat.ec.rand[dat.ec.rand$ecosys=="U",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="U",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="U",]))
+  dat.ec.rand[dat.ec.rand$ecosys=="D",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="D",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="D",]))
+  dat.core.rand=dat.ec.rand[dat.ec.rand$EP=="Core",]
+  datcore.rda.ecosys = rda(dat.core.rand[,1:70] ~ dat.core.rand[,73])
+  core.arsq.rand=RsquareAdj(datcore.rda.ecosys)
+  res.vec[i]=core.arsq.rand$adj.r.squared/jac.edge.arsq$adj.r.squared
+}
+tiles=rank(rbind(res.vec,jac.edge.eff))
+1-tiles[nperm+1]/(nperm+1)
+
+
+
+
+
+
+
 ####SEEDLING######
 
 dim(seeds)

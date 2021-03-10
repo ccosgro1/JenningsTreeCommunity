@@ -555,7 +555,7 @@ for(i in 1:nperm){
 	dat.ec.rand[dat.ec.rand$ecosys=="U",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="U",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="U",]))
 	dat.ec.rand[dat.ec.rand$ecosys=="D",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="D",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="D",]))
 	dat.core.rand=dat.ec.rand[dat.ec.rand$EP=="Core",]
-	datcore.rda.ecosys = rda(dat.core.rand[,10:42] ~ dat.core.rand[,3])
+	datcore.rda.ecosys = rda(dat.core.rand[,10:43] ~ dat.core.rand[,3])
 	core.arsq.rand=RsquareAdj(datcore.rda.ecosys)
 	res.vec[i]=core.arsq.rand$adj.r.squared/edge.arsq$adj.r.squared
 }
