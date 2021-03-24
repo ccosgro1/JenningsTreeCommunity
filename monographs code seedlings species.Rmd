@@ -82,17 +82,6 @@ hel.rda.fulsoil_nug=rda(tree.hel.soil[,6], tree.hel.soil[,c(56:64)]) #variables_
 anova(hel.rda.fulsoil_nug)
 hel.rda.fulsoil_short = rda(tree.hel.soil[,6], tree.hel.soil[,c(65:72)]) #variables_long. significant: p=0.006
 anova(hel.rda.fulsoil_short)
-RsquareAdj(hel.rda.fulsoil_long)
-RsquareAdj(hel.rda.fulsoil)
-global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
-# Here is the forward selection command and then constructing a model with selected variables.
-hel.rda.for=forward.sel(tree.hel.soil[,39:72], tree.hel.soil[,49:55], adjR2thresh=global.thresh)
-hel.rda.for
-names(tree.hel.soil)
-hel.rda.selsoil = rda(tree.hel.soil[,39:72] ~ as.matrix(tree.hel.soil[,c(51)]))
-anova(hel.rda.selsoil)
-RsquareAdj(hel.rda.selsoil)
-#plot(hel.rda.selsoil)
 
 
 #Core Plots
@@ -127,8 +116,20 @@ anova(hel.rda.fulsoil_nug)
 hel.rda.fulsoil_short = rda(tree.hel.soil[,6], tree.hel.soil[,c(65:72)]) #variables_long. significant: p=0.006
 anova(hel.rda.fulsoil_short)
 
-RsquareAdj(hel.rda.fulsoil_long)
-global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+##NEW forward selection
+hel.rda.fulsoil.none = rda(tree.hel.soil[,6]~1)
+hel.rda.fulsoil = rda(tree.hel.soil[,6], tree.hel.soil[,65:72])
+
+hel.rda.fulsoil.full=rda(tree.hel.soil[,6]~tree.hel.soil$Ptot_short+tree.hel.soil$Po_short+tree.hel.soil$pH_short+tree.hel.soil$moist_short+tree.hel.soil$ps1_short+tree.hel.soil$percc_short+tree.hel.soil$pomc_short+tree.hel.soil$cton_short)
+
+tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
+tree.sel #whole model
+
+# Constructing a model with selected variables.
+#hel.rda.selsoil = rda(tree.hel.soil[,6] ~ as.matrix(tree.hel.soil[,c(35,37,39,41)]))
+#anova(hel.rda.selsoil)
+#RsquareAdj(hel.rda.selsoil)
+#plot(hel.rda.selsoil)
 ```
 ```{r ACESAC}
 tree.hel.soil=tree.hel.soil1
@@ -181,6 +182,21 @@ anova(hel.rda.fulsoil_nug)
 hel.rda.fulsoil_short = rda(tree.hel.soil[,18], tree.hel.soil[,c(65:72)]) #variables_long. insignificant
 anova(hel.rda.fulsoil_short)
 
+##NEW forward selection
+hel.rda.fulsoil.none = rda(tree.hel.soil[,18]~1)
+hel.rda.fulsoil = rda(tree.hel.soil[,18], tree.hel.soil[,65:72])
+
+hel.rda.fulsoil.full=rda(tree.hel.soil[,18]~tree.hel.soil$Ptot_short+tree.hel.soil$Po_short+tree.hel.soil$pH_short+tree.hel.soil$moist_short+tree.hel.soil$ps1_short+tree.hel.soil$percc_short+tree.hel.soil$pomc_short+tree.hel.soil$cton_short)
+
+tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
+tree.sel #whole model
+
+# Constructing a model with selected variables.
+#hel.rda.selsoil = rda(tree.hel.soil[,18] ~ as.matrix(tree.hel.soil[,c(35,37,39,41)]))
+#anova(hel.rda.selsoil)
+#RsquareAdj(hel.rda.selsoil)
+#plot(hel.rda.selsoil)
+
 #Core Plots
 tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core",]
 rownames(tree.hel.soil)=tree.hel.soil[,1]
@@ -196,8 +212,7 @@ hel.rda.fulsoil_short = rda(tree.hel.soil[,18], tree.hel.soil[,c(65:72)]) #varia
 anova(hel.rda.fulsoil_short)
 hel.rda.fulsoil = rda(tree.hel.soil[,18], tree.hel.soil[,65:72])
 anova(hel.rda.fulsoil)
-RsquareAdj(hel.rda.fulsoil)
-global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+
 #Run forward selection
 hel.rda.fulsoil.none = rda(tree.hel.soil[,18]~1)
 hel.rda.fulsoil = rda(tree.hel.soil[,18], tree.hel.soil[,65:72])
@@ -368,6 +383,8 @@ tree.hel.soil=tree.hel.soil1
 colnames(tree.hel.soil)
 hel.rda.fulsoil_long = rda(tree.hel.soil[,28], tree.hel.soil[,49:55]) #variables_long. significant: p=0.006
 anova(hel.rda.fulsoil_long)
+
+#Forward Selection
 hel.rda.fulsoil.none = rda(tree.hel.soil[,28]~1)
 hel.rda.fulsoil = rda(tree.hel.soil[,28], tree.hel.soil[,49:55])
 
@@ -382,6 +399,7 @@ anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 
+#Back to RDAs
 hel.rda.fulsoil_nug=rda(tree.hel.soil[,28], tree.hel.soil[,c(56:64)]) #variables_nug. not significant.
 anova(hel.rda.fulsoil_nug)
 hel.rda.fulsoil_short = rda(tree.hel.soil[,28], tree.hel.soil[,c(65:72)]) #variables_long. not significant
@@ -426,6 +444,7 @@ colnames(tree.hel.soil)
 dim(tree.hel.soil)
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
 hel.rda.fulsoil_long = rda(tree.hel.soil[,28], tree.hel.soil[,49:55]) #variables_long. significant: p=0.002
+anova(hel.rda.fulsoil_long)
 
 #Forward Selection
 hel.rda.fulsoil.none = rda(tree.hel.soil[,28]~1)
@@ -442,7 +461,7 @@ anova(hel.rda.selsoil)
 RsquareAdj(hel.rda.selsoil)
 plot(hel.rda.selsoil)
 
-anova(hel.rda.fulsoil_long)
+#Back to RDAs
 hel.rda.fulsoil_nug=rda(tree.hel.soil[,28], tree.hel.soil[,c(56:64)]) #variables_nug. not significant.
 anova(hel.rda.fulsoil_nug)
 hel.rda.fulsoil_short = rda(tree.hel.soil[,28], tree.hel.soil[,c(65:72)]) #variables_long. not significant
