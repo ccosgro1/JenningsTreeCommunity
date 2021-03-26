@@ -1041,3 +1041,593 @@ anova(hel.rda.fulsoil_short)
 RsquareAdj(hel.rda.fulsoil_long)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 ```
+
+
+NOW lets compare juveniles against the soil variables correlated with adult conspecifics
+```{r ACERUB}
+###ACERUB adults are correlated with ptot_long
+tree.hel.soil=juvies1
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+colnames(tree.hel.soil)
+hel.rda.fulsoil_long = rda(tree.hel.soil[,6], tree.hel.soil[,45]) # not significant
+anova(hel.rda.fulsoil_long)
+
+#Core Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+dim(tree.hel.soil)
+colnames(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,6], tree.hel.soil[,c(45)]) #not significant
+anova(hel.rda.fulsoil_long)
+
+#Core + edge Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core"|tree.hel.soil$Transect.x=="Edge",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+colnames(tree.hel.soil)
+dim(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,6], tree.hel.soil[,45]) #not significant
+anova(hel.rda.fulsoil_long)
+```
+```{r ACESAC}
+###ACESAC adults are correlated with ptot_long, ph_long, pomc_short, ps2_long
+tree.hel.soil=juvies1
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+colnames(tree.hel.soil)
+hel.rda.fulsoil_long = rda(tree.hel.soil[,7], tree.hel.soil[,c(45,47,68,50)]) #variables_long. significant: p=0.004
+anova(hel.rda.fulsoil_long)
+##NEW forward selection
+hel.rda.fulsoil.none = rda(tree.hel.soil[,7]~1)
+hel.rda.fulsoil = rda(tree.hel.soil[,7], tree.hel.soil[,c(45,47,68,50)])
+
+hel.rda.fulsoil.full=rda(tree.hel.soil[,7]~tree.hel.soil$Ptot_long+tree.hel.soil$Po_long+tree.hel.soil$pH_long+tree.hel.soil$pomc_short+tree.hel.soil$ps2_long)
+
+tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
+tree.sel #whole model
+
+# Constructing a model with selected variables.
+#hel.rda.selsoil = rda(tree.hel.soil[,7] ~ as.matrix(tree.hel.soil[,c(50,47)]))
+#anova(hel.rda.selsoil)
+RsquareAdj(hel.rda.selsoil) #0.538
+#plot(hel.rda.selsoil)
+
+#Core Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+dim(tree.hel.soil)
+colnames(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,7], tree.hel.soil[,c(45,47,68,50)]) #variables_long. not significant
+anova(hel.rda.fulsoil_long)
+
+#Core + edge Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core"|tree.hel.soil$Transect.x=="Edge",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+colnames(tree.hel.soil)
+dim(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,7], tree.hel.soil[,c(45,47,68,50)]) #variables_long. significant: p=0.006
+anova(hel.rda.fulsoil_long)
+##NEW forward selection
+hel.rda.fulsoil.none = rda(tree.hel.soil[,7]~1)
+hel.rda.fulsoil = rda(tree.hel.soil[,7], tree.hel.soil[,c(45,47,68,50)])
+
+hel.rda.fulsoil.full=rda(tree.hel.soil[,7]~tree.hel.soil$Ptot_long+tree.hel.soil$Po_long+tree.hel.soil$pH_long+tree.hel.soil$pomc_short+tree.hel.soil$ps2_long)
+
+tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
+tree.sel #pomc_short&Ptot_long
+
+# Constructing a model with selected variables.
+#hel.rda.selsoil = rda(tree.hel.soil[,7] ~ as.matrix(tree.hel.soil[,c(50,47)]))
+#anova(hel.rda.selsoil)
+RsquareAdj(hel.rda.selsoil) #0.538
+#plot(hel.rda.selsoil)
+```
+```{r QUERUB}
+###QUERUB adults are correlated with pomc_short
+tree.hel.soil=juvies1
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+colnames(tree.hel.soil)
+hel.rda.fulsoil_long = rda(tree.hel.soil[,30], tree.hel.soil[,68]) #not significant
+anova(hel.rda.fulsoil_long)
+
+#Core Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+dim(tree.hel.soil)
+colnames(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,30], tree.hel.soil[,c(68)]) #not significant
+anova(hel.rda.fulsoil_long)
+
+#Core + edge Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core"|tree.hel.soil$Transect.x=="Edge",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+colnames(tree.hel.soil)
+dim(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,30], tree.hel.soil[,68]) #not significant
+anova(hel.rda.fulsoil_long)
+```
+```{r FAGAME*}
+###FAGAME adults are correlated with ph_long & ptot_long
+tree.hel.soil=juvies1
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+colnames(tree.hel.soil)
+hel.rda.fulsoil_long = rda(tree.hel.soil[,15], tree.hel.soil[,c(47,45)]) #significant: p=0.001
+anova(hel.rda.fulsoil_long)
+##NEW forward selection
+hel.rda.fulsoil.none = rda(tree.hel.soil[,15]~1)
+hel.rda.fulsoil = rda(tree.hel.soil[,15], tree.hel.soil[,c(47,45)])
+
+hel.rda.fulsoil.full=rda(tree.hel.soil[,15]~tree.hel.soil$Ptot_long+tree.hel.soil$pH_long)
+
+tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
+tree.sel #pH_long
+
+# Constructing a model with selected variables.
+hel.rda.selsoil = rda(tree.hel.soil[,15] ~ as.matrix(tree.hel.soil[,c(47)]))
+anova(hel.rda.selsoil)
+RsquareAdj(hel.rda.selsoil) #0.247
+
+#Core Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+dim(tree.hel.soil)
+colnames(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,15], tree.hel.soil[,c(47,45)]) #variables_long. significant: p=0.029
+anova(hel.rda.fulsoil_long)
+##NEW forward selection
+hel.rda.fulsoil.none = rda(tree.hel.soil[,15]~1)
+hel.rda.fulsoil = rda(tree.hel.soil[,15], tree.hel.soil[,c(47,45)])
+
+hel.rda.fulsoil.full=rda(tree.hel.soil[,15]~tree.hel.soil$Ptot_long+tree.hel.soil$pH_long)
+
+tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
+tree.sel #pH_long
+
+# Constructing a model with selected variables.
+hel.rda.selsoil = rda(tree.hel.soil[,15] ~ as.matrix(tree.hel.soil[,c(47)]))
+anova(hel.rda.selsoil)
+RsquareAdj(hel.rda.selsoil) #0.395
+
+#Core + edge Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core"|tree.hel.soil$Transect.x=="Edge",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+colnames(tree.hel.soil)
+dim(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,15], tree.hel.soil[,c(47,45)]) #significant: p=0.019
+anova(hel.rda.fulsoil_long)
+##NEW forward selection
+hel.rda.fulsoil.none = rda(tree.hel.soil[,15]~1)
+hel.rda.fulsoil = rda(tree.hel.soil[,15], tree.hel.soil[,c(47,45)])
+
+hel.rda.fulsoil.full=rda(tree.hel.soil[,15]~tree.hel.soil$Ptot_long+tree.hel.soil$pH_long)
+
+tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
+tree.sel #pH_long + ptot_long
+
+# Constructing a model with selected variables.
+hel.rda.selsoil = rda(tree.hel.soil[,15] ~ as.matrix(tree.hel.soil[,c(47,45)]))
+anova(hel.rda.selsoil)
+RsquareAdj(hel.rda.selsoil) #0.414
+```
+```{r CAROVA}
+###CAROVA adults are correlated with ph_long
+tree.hel.soil=juvies1
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+colnames(tree.hel.soil)
+hel.rda.fulsoil_long = rda(tree.hel.soil[,10], tree.hel.soil[,47]) #not significant
+anova(hel.rda.fulsoil_long)
+
+#Core Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+dim(tree.hel.soil)
+colnames(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,10], tree.hel.soil[,47]) #not significant
+anova(hel.rda.fulsoil_long)
+
+#Core + edge Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core"|tree.hel.soil$Transect.x=="Edge",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+colnames(tree.hel.soil)
+dim(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,10], tree.hel.soil[,47]) #not significant
+anova(hel.rda.fulsoil_long)
+```
+```{r FRAAME*}
+###FRAAME adults are correlated with moist_long, Po_long, percc_long
+tree.hel.soil=juvies1
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+colnames(tree.hel.soil)
+hel.rda.fulsoil_long = rda(tree.hel.soil[,16], tree.hel.soil[,c(48,46,51)]) #variables_long. not significant
+anova(hel.rda.fulsoil_long)
+
+##NEW forward selection
+hel.rda.fulsoil.none = rda(tree.hel.soil[,16]~1)
+hel.rda.fulsoil = rda(tree.hel.soil[,16], tree.hel.soil[,c(48,46,51)])
+
+hel.rda.fulsoil.full=rda(tree.hel.soil[,16]~tree.hel.soil$moist_long+tree.hel.soil$Po_long+tree.hel.soil$percc_long)
+
+tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
+tree.sel #percc_long
+
+# Constructing a model with selected variables.
+hel.rda.selsoil = rda(tree.hel.soil[,16] ~ as.matrix(tree.hel.soil[,c(51)]))
+anova(hel.rda.selsoil)
+RsquareAdj(hel.rda.selsoil) #0.334
+
+#Core Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+dim(tree.hel.soil)
+colnames(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,16], tree.hel.soil[,c(48,46,51)]) #significant: p=0.035
+anova(hel.rda.fulsoil_long)
+##NEW forward selection
+hel.rda.fulsoil.none = rda(tree.hel.soil[,16]~1)
+hel.rda.fulsoil = rda(tree.hel.soil[,16], tree.hel.soil[,c(48,46,51)])
+
+hel.rda.fulsoil.full=rda(tree.hel.soil[,16]~tree.hel.soil$moist_long+tree.hel.soil$Po_long+tree.hel.soil$percc_long)
+
+tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
+tree.sel #null model
+
+# Constructing a model with selected variables.
+hel.rda.selsoil = rda(tree.hel.soil[,16] ~ as.matrix(tree.hel.soil[,c(48,46,51)]))
+anova(hel.rda.selsoil)
+RsquareAdj(hel.rda.selsoil) #0.439
+
+#Core + edge Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core"|tree.hel.soil$Transect.x=="Edge",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+colnames(tree.hel.soil)
+dim(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,16], tree.hel.soil[,c(48,46,51)]) #variables_long. not significant
+anova(hel.rda.fulsoil_long)
+##NEW forward selection
+hel.rda.fulsoil.none = rda(tree.hel.soil[,16]~1)
+hel.rda.fulsoil = rda(tree.hel.soil[,16], tree.hel.soil[,c(48,46,51)])
+
+hel.rda.fulsoil.full=rda(tree.hel.soil[,16]~tree.hel.soil$moist_long+tree.hel.soil$Po_long+tree.hel.soil$percc_long)
+
+tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
+tree.sel #null model
+
+# Constructing a model with selected variables.
+hel.rda.selsoil = rda(tree.hel.soil[,16] ~ as.matrix(tree.hel.soil[,c(48,46,51)]))
+anova(hel.rda.selsoil)
+RsquareAdj(hel.rda.selsoil) #0.326
+```
+```{r PRUSER}
+###PRUSER adults are correlated with pH_short
+tree.hel.soil=juvies1
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+colnames(tree.hel.soil)
+hel.rda.fulsoil_long = rda(tree.hel.soil[,26], tree.hel.soil[,64]) #not significant
+anova(hel.rda.fulsoil_long)
+
+#Core Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+dim(tree.hel.soil)
+colnames(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,26], tree.hel.soil[,64]) #not significant
+anova(hel.rda.fulsoil_long)
+
+#Core + edge Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core"|tree.hel.soil$Transect.x=="Edge",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+colnames(tree.hel.soil)
+dim(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,26], tree.hel.soil[,64]) #not significant
+anova(hel.rda.fulsoil_long)
+```
+```{r QUEALB}
+###QUEALB adults are not correlated with any particular soil variable
+```
+```{r LIRTUP}
+###LIRTUP adults are correlated with percc_short, moist_short
+tree.hel.soil=juvies1
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+colnames(tree.hel.soil)
+hel.rda.fulsoil_long = rda(tree.hel.soil[,20], tree.hel.soil[,c(67,65)]) #not significant
+anova(hel.rda.fulsoil_long)
+
+#Core Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+dim(tree.hel.soil)
+colnames(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,20], tree.hel.soil[,c(67,65)]) #not enough data
+anova(hel.rda.fulsoil_long)
+
+#Core + edge Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core"|tree.hel.soil$Transect.x=="Edge",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+colnames(tree.hel.soil)
+dim(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,20], tree.hel.soil[,c(67,65)]) #not significant
+anova(hel.rda.fulsoil_long)
+```
+```{r OSTVIR}
+###OSTVIR adults are not correlated with any particular soil variable
+```
+```{r CARCAR}
+###CARCAR adults are correlated with ptot_short, moist_long, ps1_nug
+tree.hel.soil=juvies1
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+colnames(tree.hel.soil)
+hel.rda.fulsoil_long = rda(tree.hel.soil[,8], tree.hel.soil[,c(62,48,57)]) #not significant
+anova(hel.rda.fulsoil_long)
+
+#Core Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+dim(tree.hel.soil)
+colnames(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,8], tree.hel.soil[,c(62,48,57)]) #not significant
+anova(hel.rda.fulsoil_long)
+
+#Core + edge Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core"|tree.hel.soil$Transect.x=="Edge",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+colnames(tree.hel.soil)
+dim(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,8], tree.hel.soil[,c(62,48,57)]) #not significant
+anova(hel.rda.fulsoil_long)
+```
+```{r PLAOCC}
+###PLAOCC adults are correlated with percc_long & pH_short
+tree.hel.soil=juvies1
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+colnames(tree.hel.soil)
+hel.rda.fulsoil_long = rda(tree.hel.soil[,24], tree.hel.soil[,c(51,64)]) #not significant
+anova(hel.rda.fulsoil_long)
+
+#Core Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+dim(tree.hel.soil)
+colnames(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,24], tree.hel.soil[,c(51,64)]) #not significant
+anova(hel.rda.fulsoil_long)
+
+#Core + edge Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core"|tree.hel.soil$Transect.x=="Edge",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+colnames(tree.hel.soil)
+dim(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,24], tree.hel.soil[,c(51,64)]) #not significant
+anova(hel.rda.fulsoil_long)
+```
+```{r CARCOR*}
+###CARCOR adults are correlated with ptot_long
+tree.hel.soil=juvies1
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+colnames(tree.hel.soil)
+hel.rda.fulsoil_long = rda(tree.hel.soil[,9], tree.hel.soil[,45]) #significant: p=0.041
+anova(hel.rda.fulsoil_long)
+RsquareAdj(hel.rda.fulsoil_long) #0.0997
+
+#Core Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+dim(tree.hel.soil)
+colnames(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,9], tree.hel.soil[,c(45)]) #not significant
+anova(hel.rda.fulsoil_long)
+
+#Core + edge Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core"|tree.hel.soil$Transect.x=="Edge",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+colnames(tree.hel.soil)
+dim(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,9], tree.hel.soil[,45]) #significant: p=0.04
+anova(hel.rda.fulsoil_long)
+RsquareAdj(hel.rda.fulsoil_long) #0.117
+```
+```{r QUEPAL*}
+###QUEPAL adults are correlated with moist_long & pH_long
+tree.hel.soil=juvies1
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+colnames(tree.hel.soil)
+hel.rda.fulsoil_long = rda(tree.hel.soil[,29], tree.hel.soil[,c(48,47)]) #variables_long. significant: p=0.036
+anova(hel.rda.fulsoil_long)
+##NEW forward selection
+hel.rda.fulsoil.none = rda(tree.hel.soil[,29]~1)
+hel.rda.fulsoil = rda(tree.hel.soil[,29], tree.hel.soil[,c(48,47)])
+
+hel.rda.fulsoil.full=rda(tree.hel.soil[,29]~tree.hel.soil$moist_long+tree.hel.soil$pH_long)
+
+tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
+tree.sel #moist_long
+
+# Constructing a model with selected variables.
+hel.rda.selsoil = rda(tree.hel.soil[,29] ~ as.matrix(tree.hel.soil[,48]))
+anova(hel.rda.selsoil)
+RsquareAdj(hel.rda.selsoil) #0.227
+
+#Core Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+dim(tree.hel.soil)
+colnames(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,29], tree.hel.soil[,c(48,47)]) #not significant
+anova(hel.rda.fulsoil_long)
+
+#Core + edge Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core"|tree.hel.soil$Transect.x=="Edge",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+colnames(tree.hel.soil)
+dim(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,29], tree.hel.soil[,c(48,47)]) #variables_long. significant: p=0.006
+anova(hel.rda.fulsoil_long)
+##NEW forward selection
+hel.rda.fulsoil.none = rda(tree.hel.soil[,29]~1)
+hel.rda.fulsoil = rda(tree.hel.soil[,29], tree.hel.soil[,c(48,47)])
+
+hel.rda.fulsoil.full=rda(tree.hel.soil[,29]~tree.hel.soil$moist_long+tree.hel.soil$pH_long)
+
+tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
+tree.sel #moist_long
+
+# Constructing a model with selected variables.
+hel.rda.selsoil = rda(tree.hel.soil[,29] ~ as.matrix(tree.hel.soil[,48]))
+anova(hel.rda.selsoil)
+RsquareAdj(hel.rda.selsoil) #0.239
+```
+```{r ULMSP (lumped)}
+###ULMSP adults are correlated with Po_short & cton_short
+tree.hel.soil=juvies1
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+colnames(tree.hel.soil)
+hel.rda.fulsoil_long = rda(tree.hel.soil[,34:35], tree.hel.soil[,c(63,69)]) #not significant
+anova(hel.rda.fulsoil_long)
+
+#Core Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+dim(tree.hel.soil)
+colnames(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,34:35], tree.hel.soil[,c(63,69.)]) #not signiciant
+anova(hel.rda.fulsoil_long)
+
+#Core + edge Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core"|tree.hel.soil$Transect.x=="Edge",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+colnames(tree.hel.soil)
+dim(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,34:35], tree.hel.soil[,c(63,69)]) #not significant
+anova(hel.rda.fulsoil_long)
+```
+```{r FRANIG*}
+###FRANIG adults are correlated with ptot_long, percc_long, moist_short
+tree.hel.soil=juvies1
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+colnames(tree.hel.soil)
+hel.rda.fulsoil_long = rda(tree.hel.soil[,17], tree.hel.soil[,c(45,51,65)]) #variables_long. significant: p=0.006
+anova(hel.rda.fulsoil_long)
+##NEW forward selection
+hel.rda.fulsoil.none = rda(tree.hel.soil[,17]~1)
+hel.rda.fulsoil = rda(tree.hel.soil[,17], tree.hel.soil[,c(45,51,65)])
+
+hel.rda.fulsoil.full=rda(tree.hel.soil[,17]~tree.hel.soil$Ptot_long+tree.hel.soil$percc_long +tree.hel.soil$moist_short)
+
+tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
+tree.sel #null model
+
+# Constructing a model with selected variables.
+#hel.rda.selsoil = rda(tree.hel.soil[,17] ~ as.matrix(tree.hel.soil[,c(48)]))
+#anova(hel.rda.selsoil)
+#RsquareAdj(hel.rda.selsoil)
+
+#Core Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+dim(tree.hel.soil)
+colnames(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,17], tree.hel.soil[,c(45,51,65)]) #variables_long. significant: p=0.021
+anova(hel.rda.fulsoil_long)
+##NEW forward selection
+hel.rda.fulsoil.none = rda(tree.hel.soil[,17]~1)
+hel.rda.fulsoil = rda(tree.hel.soil[,17], tree.hel.soil[,c(45,51,65)])
+
+hel.rda.fulsoil.full=rda(tree.hel.soil[,17]~tree.hel.soil$Ptot_long+tree.hel.soil$percc_long +tree.hel.soil$moist_short)
+
+tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
+tree.sel #null model
+
+# Constructing a model with selected variables.
+#hel.rda.selsoil = rda(tree.hel.soil[,17] ~ as.matrix(tree.hel.soil[,c(48)]))
+#anova(hel.rda.selsoil)
+#RsquareAdj(hel.rda.selsoil)
+
+#Core + edge Plots
+tree.hel.soil=juvies1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core"|tree.hel.soil$Transect.x=="Edge",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+colnames(tree.hel.soil)
+dim(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,17], tree.hel.soil[,c(45,51,65)]) #not significant
+anova(hel.rda.fulsoil_long)
+```
