@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(vegan)
 ```
 
-```{r ACERUB}
+```{r load data}
 treedata=read.csv("C:/Users/crc31/Dropbox/Jennings 2016/New Adult Basal Area.csv")
 soildata=read.csv("C:/Users/crc31/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
 names(treedata)
@@ -31,6 +31,14 @@ treedata=treedata[treedata$ecosys!="S",]
 tree.ringsum=treedata[1:80,]
 #This [1:80,] refers to all plots within the first ring.
 
+for(i in 1:80) {
+	tree.ringsum[i,10:43]=treedata[i,10:43]+treedata[i+83,10:43]+treedata[i+166,10:43]}
+rownames(tree.ringsum)=tree.ringsum[,1]
+# Let's look at a rank abbundance plot for fun
+tree.colsums=apply(tree.ringsum[,10:43],2,sum)
+plot(rank(tree.colsums),tree.colsums)
+print(tree.colsums)
+
 
 # Perform Hellinger transformation on tree species data so that RDA is based on Hellinger distance
 tree.rowsums=apply(tree.ringsum[,10:43],1,sum)
@@ -39,6 +47,8 @@ tree.hel[,10:43]=tree.hel[,10:43]/tree.rowsums
 tree.hel[,10:43]=sqrt(tree.hel[,10:43])
 
 tree.hel=na.exclude(tree.hel)
+```
+```{r ACERUB}
 # Here is a quick analysis to test for the edge effect on tree communities when Ecosystem type is the explanatory factor, just like we did before with soil data
 # First the core plots
 tree.hel.core=tree.hel[tree.hel$EP=="Core",]
@@ -87,7 +97,6 @@ anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 ```
-
 ```{r ACESAC}
 # First the core plots
 tree.hel.core=tree.hel[tree.hel$EP=="Core",]
@@ -136,7 +145,6 @@ anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 ```
-
 ```{r CARCAR}
 # First the core plots
 tree.hel.core=tree.hel[tree.hel$EP=="Core",]
@@ -178,7 +186,6 @@ anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 ```
-
 ```{r CARCOR}
 # First the core plots
 tree.hel.core=tree.hel[tree.hel$EP=="Core",]
@@ -220,7 +227,6 @@ anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 ```
-
 ```{r CAROVA}
 # First the core plots
 tree.hel.core=tree.hel[tree.hel$EP=="Core",]
@@ -262,7 +268,6 @@ anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 ```
-
 ```{r FAGAME}
 # First the core plots
 tree.hel.core=tree.hel[tree.hel$EP=="Core",]
@@ -304,7 +309,6 @@ anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 ```
-
 ```{r FRAAME}
 # First the core plots
 tree.hel.core=tree.hel[tree.hel$EP=="Core",]
@@ -346,7 +350,6 @@ anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 ```
-
 ```{r FRANIG}
 # First the core plots
 tree.hel.core=tree.hel[tree.hel$EP=="Core",]
@@ -388,7 +391,6 @@ anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 ```
-
 ```{r LIRTUP}
 # First the core plots
 tree.hel.core=tree.hel[tree.hel$EP=="Core",]
@@ -430,7 +432,6 @@ anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 ```
-
 ```{r NYSSYL}
 # First the core plots
 tree.hel.core=tree.hel[tree.hel$EP=="Core",]
@@ -472,7 +473,6 @@ anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 ```
-
 ```{r OSTVIR}
 # First the core plots
 tree.hel.core=tree.hel[tree.hel$EP=="Core",]
@@ -514,7 +514,6 @@ anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 ```
-
 ```{r PLAOCC}
 # First the core plots
 tree.hel.core=tree.hel[tree.hel$EP=="Core",]
@@ -556,7 +555,6 @@ anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 ```
-
 ```{r PRUSER}
 # First the core plots
 tree.hel.core=tree.hel[tree.hel$EP=="Core",]
@@ -598,7 +596,6 @@ anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 ```
-
 ```{r QUEALB}
 # First the core plots
 tree.hel.core=tree.hel[tree.hel$EP=="Core",]
@@ -640,7 +637,6 @@ anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 ```
-
 ```{r QUEPAL}
 # First the core plots
 tree.hel.core=tree.hel[tree.hel$EP=="Core",]
@@ -682,7 +678,6 @@ anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 ```
-
 ```{r QUERUB}
 # First the core plots
 tree.hel.core=tree.hel[tree.hel$EP=="Core",]
@@ -724,7 +719,6 @@ anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 ```
-
 ```{r TILAME}
 # First the core plots
 tree.hel.core=tree.hel[tree.hel$EP=="Core",]
@@ -766,7 +760,6 @@ anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 ```
-
 ```{r ULMSP}
 # First the core plots
 tree.hel.core=tree.hel[tree.hel$EP=="Core",]
