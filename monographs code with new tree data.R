@@ -565,6 +565,21 @@ tiles=rank(rbind(res.vec,edge.eff))
 goodness(tree.hel.core.rda.ecosys)
 goodness(tree.hel.edge.rda.ecosys)
 
+#Test the significance between the core and edge values
+coregoodness=goodness(tree.hel.core.rda.ecosys)
+edgegoodness=goodness(tree.hel.edge.rda.ecosys)
+coregoodness=coregoodness[,3]
+edgegoodness=edgegoodness[,3]
+coregoodness=coregoodness[!is.infinite(coregoodness)]
+edgegoodness=edgegoodness[!is.infinite(edgegoodness)]
+coregoodness=coregoodness[!is.na(coregoodness)]
+edgegoodness=edgegoodness[!is.na(edgegoodness)]
+edgegoodness=edgegoodness[c(1:6,9:14,16:30,32)]
+
+coreedgeaov=aov(coregoodness~edgegoodness)
+summary(coreedgeaov)
+###I guess maybe I have no idea what I'm doing. There has to be a more right way to do this?
+
 ##Same idea as above, but Jaccard distance analysis by PCoA/distance-based RDA
 jac.core.dist=vegdist(tree.hel.core[,10:43],method="jaccard",binary=TRUE)
 jac.core.pcoa=cmdscale(jac.core.dist,eig=TRUE,k=41,add=TRUE)
