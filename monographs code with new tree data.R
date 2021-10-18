@@ -4,9 +4,7 @@
 #attempt to push to github
 
 library(vegan)
-library(packfor)
 # Although the code below does not, you should use the better PCNM library if you can, to select significantly structured PCNMs before anything else with them
-#library(PCNM)
 
 #### OLD DATA 2008 ######
 treedata=read.csv("C:/Users/Colleen/Dropbox/Jennings 2016/tree basal areas.csv")
@@ -777,6 +775,11 @@ tiles=rank(rbind(res.vec,jac.edge.eff))
 goodness(jac.core.rda.ecosys)
 goodness(jac.edge.rda.ecosys)
 
+###Ecosystem significance###
+coreplots=tree.hel.soil[tree.hel.soil$Ecosystem=="U"|tree.hel.soil=="B"|tree.hel.soil=="R",]
+mortsig=aov(rowMeans(tree.hel.soil[c(10:42)])~tree.hel.soil$Ecosystem)
+anova(mortsig)
+
 ##Recruitment
 treedata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/General transition graph files/Species Recruitment Matrix.csv")
 soildata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
@@ -939,7 +942,10 @@ tiles=rank(rbind(res.vec,jac.edge.eff))
 goodness(jac.core.rda.ecosys)
 goodness(jac.edge.rda.ecosys)
 
-
+###Ecosystem significance###
+coreplots=tree.hel.soil[tree.hel.soil$Ecosystem=="U"|tree.hel.soil=="B"|tree.hel.soil=="R",]
+recruitsig=aov(rowMeans(tree.hel.soil[c(10:42)])~tree.hel.soil$Ecosystem)
+anova(recruitsig)
 
 
 ###Species Growth
@@ -1118,7 +1124,10 @@ tiles=rank(rbind(res.vec,jac.edge.eff))
 goodness(jac.core.rda.ecosys)
 goodness(jac.edge.rda.ecosys)
 
-
+###Ecosystem significance###
+coreplots=tree.hel.soil[tree.hel.soil$ecosys=="U"|tree.hel.soil=="B"|tree.hel.soil=="R",]
+growthsig=aov(rowMeans(tree.hel.soil[c(10:42)])~tree.hel.soil$ecosys)
+anova(growthsig)
 
 ####Rank specialists by ecosystem####
 treedata=read.csv("C:/Users/Colleen/Dropbox/Jennings 2016/tree basal areas.csv")
