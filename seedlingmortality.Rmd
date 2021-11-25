@@ -12,18 +12,19 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r, load data}
-rawdata=read.csv("Seedling Mortality Data.csv")
+rawdata=read.csv("seedmort.csv")
 seeddata=read.csv("SeedlingSpeciesMortality.csv", header=T)
+soildat=read.csv("C:/Users/crc31/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv", header=T)
 dim(seeddata)
 colnames(seeddata)
-rownames(seeddata)=seeddata[,1]
+rownames(rawdata)=rawdata[,1]
+rownames(soildat)=soildat[,1]
+tree.hel.soil=merge(rawdata,soildat, by="Plot")
 
 library(vegan)
 library(ggplot2)
-
 ```
-
-```{r,}
+```{r graph something}
 colnames(seeddata)
 mortabund=glm(Grand.Total~Transect, data=seeddata)
 summary(mortabund)
@@ -46,8 +47,6 @@ ggplot(seeddata, aes(x=Transect, y=percmort)) +
 
 
 ```
-
-
 ```{r, aov}
 colnames(seeddata)
 mortecosys=glm(Dead~TerrType,family=binomial, data=rawdata)
@@ -67,7 +66,6 @@ sum(edgeplots$Grand.Total)/sum(seeddata$Grand.Total)
 sum(transplots$Grand.Total)/sum(seeddata$Grand.Total)
 
 
-
 colnames(seeddata)
 seeddata$percmort=seeddata$Dead/sum(seeddata$Dead)
 ggplot(seeddata, aes(x=Transect, y=percmort)) +
@@ -82,9 +80,66 @@ ggplot(seeddata, aes(x=Transect, y=percmort)) +
         axis.text.y=element_text(size=12))+
   scale_y_continuous(expand=c(0,0, limits=(c(0,0.05))))+
   labs(y="Proportion Mortality")
-
-
 ```
 
+Seedling mortality Stats as RDAs
+```{r total community}
+tree.hel.soil=tree.hel.soil1
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+colnames(tree.hel.soil)
+hel.rda.fulsoil_long = rda(tree.hel.soil[,6], tree.hel.soil[,48:55]) #variables_long. significant: p=0.006
+anova(hel.rda.fulsoil_long)
+hel.rda.fulsoil_nug=rda(tree.hel.soil[,6], tree.hel.soil[,c(56:64)]) #variables_nug. not significant.
+anova(hel.rda.fulsoil_nug)
+hel.rda.fulsoil_short = rda(tree.hel.soil[,6], tree.hel.soil[,c(65:72)]) #variables_long. significant: p=0.006
+anova(hel.rda.fulsoil_short)
+
+
+#Core Plots
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+dim(tree.hel.soil)
+colnames(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,6], tree.hel.soil[,c(48:55)]) #variables_long. significant: p=0.006
+anova(hel.rda.fulsoil_long)
+hel.rda.fulsoil_nug=rda(tree.hel.soil[,6], tree.hel.soil[,c(56:64)]) #variables_nug. not significant.
+anova(hel.rda.fulsoil_nug)
+hel.rda.fulsoil_short = rda(tree.hel.soil[,6], tree.hel.soil[,c(65:72)]) #variables_long. significant: p=0.006
+anova(hel.rda.fulsoil_short)
+RsquareAdj(hel.rda.fulsoil_long)
+global.thresh=RsquareAdj(hel.rda.fulsoil_long)$adj.r.squared
+
+
+#Core + edge Plots
+tree.hel.soil=tree.hel.soil1
+tree.hel.soil=tree.hel.soil[tree.hel.soil$Transect.x=="Core"|tree.hel.soil$Transect.x=="Edge",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+colnames(tree.hel.soil)
+dim(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil_long = rda(tree.hel.soil[,6], tree.hel.soil[,48:55]) #variables_long. significant: p=0.006
+anova(hel.rda.fulsoil_long)
+hel.rda.fulsoil_nug=rda(tree.hel.soil[,6], tree.hel.soil[,c(56:64)]) #variables_nug. not significant.
+anova(hel.rda.fulsoil_nug)
+hel.rda.fulsoil_short = rda(tree.hel.soil[,6], tree.hel.soil[,c(65:72)]) #variables_long. significant: p=0.006
+anova(hel.rda.fulsoil_short)
+
+##NEW forward selection
+hel.rda.fulsoil.none = rda(tree.hel.soil[,6]~1)
+hel.rda.fulsoil = rda(tree.hel.soil[,6], tree.hel.soil[,65:72])
+
+hel.rda.fulsoil.full=rda(tree.hel.soil[,6]~tree.hel.soil$Ptot_short+tree.hel.soil$Po_short+tree.hel.soil$pH_short+tree.hel.soil$moist_short+tree.hel.soil$ps1_short+tree.hel.soil$percc_short+tree.hel.soil$pomc_short+tree.hel.soil$cton_short)
+
+tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
+tree.sel #whole model
+
+# Constructing a model with selected variables.
+#hel.rda.selsoil = rda(tree.hel.soil[,6] ~ as.matrix(tree.hel.soil[,c(35,37,39,41)]))
+#anova(hel.rda.selsoil)
+#RsquareAdj(hel.rda.selsoil)
+#plot(hel.rda.selsoil)
 
 
