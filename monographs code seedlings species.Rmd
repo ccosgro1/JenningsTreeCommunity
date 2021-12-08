@@ -1345,3 +1345,5 @@ dim(tree.hel.soil)
 hel.rda.fulsoil_long = rda(tree.hel.soil[,20], tree.hel.soil[,c(48,54,68)]) #variables_long. not significant
 anova(hel.rda.fulsoil_long)
 ```
+
+Do this all over again, but with ONLY the soil variables associated with the total seedling community

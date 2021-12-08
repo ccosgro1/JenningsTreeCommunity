@@ -4,11 +4,12 @@
 #attempt to push to github
 
 library(vegan)
+library(dplyr)
 # Although the code below does not, you should use the better PCNM library if you can, to select significantly structured PCNMs before anything else with them
 
 #### OLD DATA 2008 ######
-treedata=read.csv("C:/Users/Colleen/Dropbox/Jennings 2016/tree basal areas.csv")
-soildata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
+treedata=read.csv("C:/Users/crc31/Dropbox/Jennings 2016/tree basal areas.csv")
+soildata=read.csv("C:/Users/crc31/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
 names(treedata)
 dim(treedata)
 names(soildata)
@@ -133,7 +134,7 @@ hel.rda.all.forpcnm
 # Let's store a model using the selected variables only
 names(tree.hel.all.pcnm)
 
-#####COLLEEN GO BACK TO THIS#######
+#####crc31 GO BACK TO THIS#######
 hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:43] ~ as.matrix(tree.hel.all.pcnm[,c(77,79,78,93,94)]))
 anova(hel.rda.all.selpcnm)
 RsquareAdj(hel.rda.all.selpcnm)
@@ -283,8 +284,8 @@ goodness(jac.edge.rda.ecosys)
 
 
 ######## NEW DATA 2016 ######
-treedata=read.csv("C:/Users/Colleen/Dropbox/Jennings 2016/New Adult Basal Area.csv")
-soildata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
+treedata=read.csv("C:/Users/crc31/Dropbox/Jennings 2016/New Adult Basal Area.csv")
+soildata=read.csv("C:/Users/crc31/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
 names(treedata)
 dim(treedata)
 names(soildata)
@@ -612,8 +613,8 @@ tiles=rank(rbind(res.vec,jac.edge.eff))
 
 ###Species level decoupling###
 #Mortality
-treedata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/Species Mortality Matrix.csv")
-soildata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
+treedata=read.csv("C:/Users/crc31/OneDrive/Documents/School/Research/Data/Trees/Species Mortality Matrix.csv")
+soildata=read.csv("C:/Users/crc31/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
 names(treedata)
 rownames(treedata)=treedata[,1]
 dim(treedata)
@@ -781,8 +782,8 @@ mortsig=aov(rowMeans(tree.hel.soil[c(10:42)])~tree.hel.soil$Ecosystem)
 anova(mortsig)
 
 ##Recruitment
-treedata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/General transition graph files/Species Recruitment Matrix.csv")
-soildata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
+treedata=read.csv("C:/Users/crc31/OneDrive/Documents/School/Research/Data/Trees/General transition graph files/Species Recruitment Matrix.csv")
+soildata=read.csv("C:/Users/crc31/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
 names(treedata)
 dim(treedata)
 names(soildata)
@@ -949,8 +950,8 @@ anova(recruitsig)
 
 
 ###Species Growth
-treedata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/Species Growth Matrix.csv")
-soildata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
+treedata=read.csv("C:/Users/crc31/OneDrive/Documents/School/Research/Data/Trees/Species Growth Matrix.csv")
+soildata=read.csv("C:/Users/crc31/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
 names(treedata)
 dim(treedata)
 names(soildata)
@@ -1130,8 +1131,8 @@ growthsig=aov(rowMeans(tree.hel.soil[c(10:42)])~tree.hel.soil$ecosys)
 anova(growthsig)
 
 ####Rank specialists by ecosystem####
-treedata=read.csv("C:/Users/Colleen/Dropbox/Jennings 2016/tree basal areas.csv")
-soildata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
+treedata=read.csv("C:/Users/crc31/Dropbox/Jennings 2016/tree basal areas.csv")
+soildata=read.csv("C:/Users/crc31/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
 treedata[is.na(treedata)] <- 0
 treedata[,c(1,3)]
 

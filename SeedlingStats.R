@@ -411,6 +411,30 @@ tree.hel.soil=na.exclude(tree.hel.soil)
 dim(tree.hel.soil)
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
 colnames(tree.hel.soil)
+
+hel.rda.forhel.rda.fulsoil.none = rda(tree.hel.soil[,5:38]~1)
+hel.rda.fulsoil = rda(tree.hel.soil[,5:38], tree.hel.soil[,45:69])
+
+hel.rda.fulsoil.full=rda(tree.hel.soil[,5:38]~tree.hel.soil$Ptot_long+tree.hel.soil$Po_long+tree.hel.soil$pH_long+tree.hel.soil$moist_long+tree.hel.soil$ps1_long+tree.hel.soil$ps2_long+tree.hel.soil$percc_long+tree.hel.soil$cton_long)
+                         
+hel.rda.fulsoil.full=rda(tree.hel.soil[,5:38]~tree.hel.soil$Ptot_nug+tree.hel.soil$Po_nug+tree.hel.soil$pH_nug+tree.hel.soil$moist_nug+tree.hel.soil$ps1_nug+tree.hel.soil$ps2_nug+tree.hel.soil$percc_nug+tree.hel.soil$pomc_nug+tree.hel.soil$cton_nug)
+
+hel.rda.fulsoil.full=rda(tree.hel.soil[,5:38]~tree.hel.soil$Ptot_short+tree.hel.soil$Po_short+tree.hel.soil$pH_short+tree.hel.soil$moist_short+tree.hel.soil$ps1_short+tree.hel.soil$percc_short+tree.hel.soil$pomc_short+tree.hel.soil$cton_short)
+
+tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
+tree.sel
+names(tree.hel.soil)
+hel.rda.selsoil = rda(tree.hel.soil[,5:38] ~ as.matrix(tree.hel.soil[,c(47,48,56,55)]))
+anova(hel.rda.selsoil)
+RsquareAdj(hel.rda.selsoil)
+
+
+
+
+
+
+
+
 hel.rda.fulsoil_long = rda(tree.hel.soil[,5:38], tree.hel.soil[,48:55]) #variables_long. significant: p=0.006
 anova(hel.rda.fulsoil_long)
 hel.rda.fulsoil_nug=rda(tree.hel.soil[,5:38], tree.hel.soil[,c(56:64)]) #variables_nug. not significant.
