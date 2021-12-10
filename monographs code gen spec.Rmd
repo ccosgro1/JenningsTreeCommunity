@@ -12,7 +12,41 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 ```{r libraries}
 library(vegan)
+library(labdsv)
 ```
+
+Let's classify things as generalists v specialists statistically.
+```{r indval}
+##Load the data and subset to just the cores in BUDR
+sppabun=read.csv("C:/Users/crc31/OneDrive/Documents/School/Research/Data/Trees/Adult Plot Species Matrix.csv")
+cores=sppabun[sppabun$Transect=="Core",]
+cores=cores[cores$Ecosystem!="S",]
+##Remove species that don't have individuals in the core (these are: ACESIL, CARTOM, CORFLOR, CRAPUN, MALCOR). Also remove Transect and TerrType because those shouldn't be necessary anymore and we're already removing stuff.
+colnames(cores)
+cores=cores[,c(1:2,5:6,8:11,15:20,22:37)]
+
+indvalsummary=indval(cores[,3:30], clustering=cores$Ecosystem)
+summary(indvalsummary, p=0.05,type='short', digits=2, show=p, sort=FALSE)
+#This would suggest that FRANIG, QUEPAL, ULMSP, LIRTUP, PLAOCC, ACESAC, FAGAME, and PRUSER are all specialists with reference to the core ecosystems.
+
+
+###Let's try this again with the entire forest. For shits and giggs.
+indvaltotal=indval(sppabun[,5:37],clustering=sppabun$Ecosystem)
+summary(indvaltotal, p=0.05,type='short', digits=2, show=p, sort=FALSE)
+#This suggests that, relative to the entire ecosystem, only CARCAR, TILAME, and PLAOCC are specialists.
+
+
+###One last time with reference to edges.
+#subset the cores out.
+edges=sppabun[sppabun$Transect=="Edge"|sppabun$Transect=="Trans",]
+#remove species that aren't present
+edges=edges[,c(1:2,5:6,8:11,13:28,30:31,33:34,36)]
+#run the stats
+indvalsummary=indval(edges[,3:29], clustering=edges$Ecosystem)
+summary(indvalsummary, p=0.05,type='short', digits=2, show=p, sort=FALSE)
+#This would suggest that CARCAR, TILAME, and ULMSP are specialists in reference to edges/transition plots.
+```
+
 
 ```{r Generalists}
 treedata=read.csv("C:/Users/Colleen/Dropbox/Jennings 2016/New Adult Basal Area.csv")
@@ -340,8 +374,6 @@ for(i in 1:nperm){
 tiles=rank(rbind(res.vec,jac.edge.eff))
 1-tiles[nperm+1]/(nperm+1)
 ```
-
-
 ```{r gen mortality}
 #Mortality
 treedata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/Species Mortality Matrix.csv")
@@ -1013,6 +1045,7 @@ goodness(jac.core.rda.ecosys)
 goodness(jac.edge.rda.ecosys)
 ```
 
+
 ```{r specialists}
 ## Specialists ##
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
@@ -1296,8 +1329,6 @@ for(i in 1:nperm){
 tiles=rank(rbind(res.vec,jac.edge.eff))
 1-tiles[nperm+1]/(nperm+1)
 ```
-
-
 ```{r spec mortalirt}
 #Mortality
 treedata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/Species Mortality Matrix.csv")
