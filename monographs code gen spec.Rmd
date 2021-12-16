@@ -1,6 +1,6 @@
 ---
 title: "GenSpec monographs code"
-author: "Colleen Cosgrove"
+author: "crc31 Cosgrove"
 date: "January 25, 2021"
 output: html_document
 editor_options: 
@@ -39,7 +39,7 @@ summary(indvaltotal, p=0.05,type='short', digits=2, show=p, sort=FALSE)
 ###One last time with reference to edges.
 #subset the cores out.
 edges=sppabun[sppabun$Transect=="Edge"|sppabun$Transect=="Trans",]
-#remove species that aren't present
+#remove species that aren't present (ACESIL, CARTOM, QUEBIC, SALNIG, TOXVER, VIBLEN)
 edges=edges[,c(1:2,5:6,8:11,13:28,30:31,33:34,36)]
 #run the stats
 indvalsummary=indval(edges[,3:29], clustering=edges$Ecosystem)
@@ -49,8 +49,8 @@ summary(indvalsummary, p=0.05,type='short', digits=2, show=p, sort=FALSE)
 
 
 ```{r Generalists}
-treedata=read.csv("C:/Users/Colleen/Dropbox/Jennings 2016/New Adult Basal Area.csv")
-soildata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
+treedata=read.csv("C:/Users/crc31/Dropbox/Jennings 2016/New Adult Basal Area.csv")
+soildata=read.csv("C:/Users/crc31/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
 names(treedata)
 dim(treedata)
 names(soildata)
@@ -88,27 +88,26 @@ colnames(tree.hel.soil)
 
 ## Before continuing, subset data into generalists and specialists.
 #generalists
-tree.hel.soil.gen=tree.hel.soil[,c(1:11,13:14,16:17,20:21,24,27:28,32:33,36,38,45:79)]
+tree.hel.soil.gen=tree.hel.soil[,c(1:10,15:16,27:28,33,36,46:79)]
 
 ### Generalists ###
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil.gen[,10:24], tree.hel.soil.gen[,35:59])
+hel.rda.fulsoil = rda(tree.hel.soil.gen[,10:16], tree.hel.soil.gen[,26:50])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 
-
 ##NEW forward selection
-hel.rda.fulsoil.none = rda(tree.hel.soil.gen[,10:24]~1)
-hel.rda.fulsoil = rda(tree.hel.soil.gen[,10:24], tree.hel.soil.gen[,35:59])
+hel.rda.fulsoil.none = rda(tree.hel.soil.gen[,10:16]~1)
+hel.rda.fulsoil = rda(tree.hel.soil.gen[,10:16], tree.hel.soil.gen[,26:50])
 
-hel.rda.fulsoil.full=rda(tree.hel.soil.gen[,10:24]~tree.hel.soil.gen$Ptot_long+tree.hel.soil.gen$Po_long+tree.hel.soil.gen$pH_long+tree.hel.soil.gen$moist_long +tree.hel.soil.gen$ps1_long+tree.hel.soil.gen$ps2_long+tree.hel.soil.gen$percc_long+tree.hel.soil.gen$cton_long+tree.hel.soil.gen$Ptot_nug+tree.hel.soil.gen$Po_nug+tree.hel.soil.gen$pH_nug+tree.hel.soil.gen$moist_nug+tree.hel.soil.gen$ps1_nug+tree.hel.soil.gen$ps2_nug+tree.hel.soil.gen$percc_nug+tree.hel.soil.gen$pomc_nug+tree.hel.soil.gen$cton_nug+tree.hel.soil.gen$Ptot_short+tree.hel.soil.gen$Po_short+tree.hel.soil.gen$pH_short+tree.hel.soil.gen$moist_short+tree.hel.soil.gen$ps1_short+tree.hel.soil.gen$percc_short+tree.hel.soil.gen$pomc_short+tree.hel.soil.gen$cton_short)
+hel.rda.fulsoil.full=rda(tree.hel.soil.gen[,10:16]~tree.hel.soil.gen$Ptot_long+tree.hel.soil.gen$Po_long+tree.hel.soil.gen$pH_long+tree.hel.soil.gen$moist_long +tree.hel.soil.gen$ps1_long+tree.hel.soil.gen$ps2_long+tree.hel.soil.gen$percc_long+tree.hel.soil.gen$cton_long+tree.hel.soil.gen$Ptot_nug+tree.hel.soil.gen$Po_nug+tree.hel.soil.gen$pH_nug+tree.hel.soil.gen$moist_nug+tree.hel.soil.gen$ps1_nug+tree.hel.soil.gen$ps2_nug+tree.hel.soil.gen$percc_nug+tree.hel.soil.gen$pomc_nug+tree.hel.soil.gen$cton_nug+tree.hel.soil.gen$Ptot_short+tree.hel.soil.gen$Po_short+tree.hel.soil.gen$pH_short+tree.hel.soil.gen$moist_short+tree.hel.soil.gen$ps1_short+tree.hel.soil.gen$percc_short+tree.hel.soil.gen$pomc_short+tree.hel.soil.gen$cton_short)
 
 tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
 tree.sel
 
-# Constructing a model with selected variables.
-hel.rda.selsoil = rda(tree.hel.soil.gen[,10:24] ~ as.matrix(tree.hel.soil.gen[,c(35,37,39,41)]))
+# Constructing a model with selected variables (ps1_long & Ptot_short.
+hel.rda.selsoil = rda(tree.hel.soil.gen[,10:16] ~ as.matrix(tree.hel.soil.gen[,c(30,43)]))
 anova(hel.rda.selsoil)
 RsquareAdj(hel.rda.selsoil)
 plot(hel.rda.selsoil)
@@ -124,43 +123,25 @@ all.pcnmvecs=all.pcnm1$vectors
 tree.hel.all.pcnm=cbind(tree.hel.soil.gen,all.pcnmvecs)
 names(tree.hel.all.pcnm)
 # Now run step 1, global analysis
-hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,60:102])
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,51:93])
 anova(hel.rda.all.fulpcnm)
 RsquareAdj(hel.rda.all.fulpcnm)
 global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
-# now run step 2, the selection part
-hel.rda.fulsoil.none = rda(tree.hel.all.pcnm[,10:24]~1)
-hel.rda.fulsoil = rda(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,60:102])
 
-hel.rda.fulsoil.full=rda(tree.hel.all.pcnm[,10:24]~tree.hel.all.pcnm$PCNM1+tree.hel.all.pcnm$PCNM2+tree.hel.all.pcnm$PCNM3+tree.hel.all.pcnm$PCNM4+tree.hel.all.pcnm$PCNM5+tree.hel.all.pcnm$PCNM6+tree.hel.all.pcnm$PCNM7+tree.hel.all.pcnm$PCNM8+tree.hel.all.pcnm$PCNM9+tree.hel.all.pcnm$PCNM10+tree.hel.all.pcnm$PCNM11+tree.hel.all.pcnm$PCNM12+tree.hel.all.pcnm$PCNM13+tree.hel.all.pcnm$PCNM14+tree.hel.all.pcnm$PCNM15+tree.hel.all.pcnm$PCNM16+tree.hel.all.pcnm$PCNM17+tree.hel.all.pcnm$PCNM18+tree.hel.all.pcnm$PCNM19+tree.hel.all.pcnm$PCNM20+tree.hel.all.pcnm$PCNM21+tree.hel.all.pcnm$PCNM22+tree.hel.all.pcnm$PCNM23+tree.hel.all.pcnm$PCNM24+tree.hel.all.pcnm$PCNM25+tree.hel.all.pcnm$PCNM26+tree.hel.all.pcnm$PCNM27+tree.hel.all.pcnm$PCNM28+tree.hel.all.pcnm$PCNM29+tree.hel.all.pcnm$PCNM30+tree.hel.all.pcnm$PCNM31+tree.hel.all.pcnm$PCNM32+tree.hel.all.pcnm$PCNM33+tree.hel.all.pcnm$PCNM34+tree.hel.all.pcnm$PCNM35+tree.hel.all.pcnm$PCNM36+tree.hel.all.pcnm$PCNM37+tree.hel.all.pcnm$PCNM38+tree.hel.all.pcnm$PCNM39+tree.hel.all.pcnm$PCNM40+tree.hel.all.pcnm$PCNM41+tree.hel.all.pcnm$PCNM42+tree.hel.all.pcnm$PCNM43)
-
-tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
-tree.sel
-
-# Let's store a model using the selected variables only
-names(tree.hel.all.pcnm)
-hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:24] ~ as.matrix(tree.hel.all.pcnm[,c(60:61,65:68)]))
-anova(hel.rda.all.selpcnm)
-RsquareAdj(hel.rda.all.selpcnm)
 
 # Now that we have these parsimonious models, NOW WE CAN PERFORM VARIANCE PARTITIONING!  Hurray!
 colnames(tree.hel.all.pcnm)
-varpart(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,c(35,37,39,41)], tree.hel.all.pcnm[,c(60:61,65:68)])
+varpart(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,c(35,37,39,41)], tree.hel.all.pcnm[,c(60:61,65:68)])
 # The variance explained by soil variables and spatial structure clearly overlap. 
 # It also appears that there is more independent spatial structure in the trees than independent structuring by soil.
 # Are the soil variables significant after accounting for spatial structure, and vice versa?
 # Let's see.
-hel.rda.all.partpcnm=rda(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,c(60:61,65:68)], tree.hel.all.pcnm[,c(35,37,39,41)])
+hel.rda.all.partpcnm=rda(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,c(30,43)])
 anova(hel.rda.all.partpcnm)
 # Yes.
-hel.rda.all.partsoil=rda(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,c(35,37,39,41)], tree.hel.all.pcnm[,c(60:61,65:68)])
-anova(hel.rda.all.partsoil)
-# Also yes.  But only by p-value; that is really not much variance explained anymore.
-
 
 colnames(tree.hel.all.pcnm)
-varpart(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,c(35,37,39,41)], tree.hel.all.pcnm[,c(60:61,65:68)])
-
+varpart(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,c(30,43)])
 
 names(tree.hel.all.pcnm)
 plot(hel.rda.all.partpcnm)
@@ -173,24 +154,23 @@ rownames(tree.hel.soil.gen)=tree.hel.soil.gen[,1]
 tree.hel.soil.gen=na.exclude(tree.hel.soil.gen)
 colnames(tree.hel.soil.gen)
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil.gen[,10:24], tree.hel.soil.gen[,35:59])
+hel.rda.fulsoil = rda(tree.hel.soil.gen[,10:16], tree.hel.soil.gen[,26:50])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 
 # Here is the forward selection command and then constructing a model with selected variables.
 ##NEW forward selection
-hel.rda.fulsoil.none = rda(tree.hel.soil.gen[,10:24]~1)
-hel.rda.fulsoil = rda(tree.hel.soil.gen[,10:24], tree.hel.soil.gen[,35:59])
+hel.rda.fulsoil.none = rda(tree.hel.soil.gen[,10:16]~1)
+hel.rda.fulsoil = rda(tree.hel.soil.gen[,10:16], tree.hel.soil.gen[,26:50])
 
-hel.rda.fulsoil.full=rda(tree.hel.soil.gen[,10:24]~tree.hel.soil.gen$Ptot_long+tree.hel.soil.gen$Po_long+tree.hel.soil.gen$pH_long+tree.hel.soil.gen$moist_long +tree.hel.soil.gen$ps1_long+tree.hel.soil.gen$ps2_long+tree.hel.soil.gen$percc_long+tree.hel.soil.gen$cton_long+tree.hel.soil.gen$Ptot_nug+tree.hel.soil.gen$Po_nug+tree.hel.soil.gen$pH_nug+tree.hel.soil.gen$moist_nug+tree.hel.soil.gen$ps1_nug+tree.hel.soil.gen$ps2_nug+tree.hel.soil.gen$percc_nug+tree.hel.soil.gen$pomc_nug+tree.hel.soil.gen$cton_nug+tree.hel.soil.gen$Ptot_short+tree.hel.soil.gen$Po_short+tree.hel.soil.gen$pH_short+tree.hel.soil.gen$moist_short+tree.hel.soil.gen$ps1_short+tree.hel.soil.gen$percc_short+tree.hel.soil.gen$pomc_short+tree.hel.soil.gen$cton_short)
+hel.rda.fulsoil.full=rda(tree.hel.soil.gen[,10:16]~tree.hel.soil.gen$Ptot_long+tree.hel.soil.gen$Po_long+tree.hel.soil.gen$pH_long+tree.hel.soil.gen$moist_long +tree.hel.soil.gen$ps1_long+tree.hel.soil.gen$ps2_long+tree.hel.soil.gen$percc_long+tree.hel.soil.gen$cton_long+tree.hel.soil.gen$Ptot_nug+tree.hel.soil.gen$Po_nug+tree.hel.soil.gen$pH_nug+tree.hel.soil.gen$moist_nug+tree.hel.soil.gen$ps1_nug+tree.hel.soil.gen$ps2_nug+tree.hel.soil.gen$percc_nug+tree.hel.soil.gen$pomc_nug+tree.hel.soil.gen$cton_nug+tree.hel.soil.gen$Ptot_short+tree.hel.soil.gen$Po_short+tree.hel.soil.gen$pH_short+tree.hel.soil.gen$moist_short+tree.hel.soil.gen$ps1_short+tree.hel.soil.gen$percc_short+tree.hel.soil.gen$pomc_short+tree.hel.soil.gen$cton_short)
 
 tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
 tree.sel
 
-
 names(tree.hel.soil.gen)
-hel.rda.selsoil = rda(tree.hel.soil.gen[,10:24] ~ as.matrix(tree.hel.soil.gen[,c(35,58,37,41)]))
+hel.rda.selsoil = rda(tree.hel.soil.gen[,10:16] ~ as.matrix(tree.hel.soil.gen[,c(26,49,44,28)]))
 anova(hel.rda.selsoil)
 RsquareAdj(hel.rda.selsoil)
 plot(hel.rda.selsoil)
@@ -206,35 +186,35 @@ all.pcnmvecs=all.pcnm1$vectors
 tree.hel.all.pcnm=cbind(tree.hel.soil.gen,all.pcnmvecs)
 names(tree.hel.all.pcnm)
 # Now run step 1, global analysis
-hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,60:84])
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,51:75])
 anova(hel.rda.all.fulpcnm)
 RsquareAdj(hel.rda.all.fulpcnm)
 global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
 # now run step 2, the selection part
-hel.rda.fulsoil.none = rda(tree.hel.all.pcnm[,10:24]~1)
-hel.rda.fulsoil = rda(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,60:102])
+hel.rda.fulsoil.none = rda(tree.hel.all.pcnm[,10:16]~1)
+hel.rda.fulsoil = rda(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,51:75])
 
-hel.rda.fulsoil.full=rda(tree.hel.all.pcnm[,10:24]~tree.hel.all.pcnm$PCNM1+tree.hel.all.pcnm$PCNM2+tree.hel.all.pcnm$PCNM3+tree.hel.all.pcnm$PCNM4+tree.hel.all.pcnm$PCNM5+tree.hel.all.pcnm$PCNM6+tree.hel.all.pcnm$PCNM7+tree.hel.all.pcnm$PCNM8+tree.hel.all.pcnm$PCNM9+tree.hel.all.pcnm$PCNM10+tree.hel.all.pcnm$PCNM11+tree.hel.all.pcnm$PCNM12+tree.hel.all.pcnm$PCNM13+tree.hel.all.pcnm$PCNM14+tree.hel.all.pcnm$PCNM15+tree.hel.all.pcnm$PCNM16+tree.hel.all.pcnm$PCNM17+tree.hel.all.pcnm$PCNM18+tree.hel.all.pcnm$PCNM19+tree.hel.all.pcnm$PCNM20+tree.hel.all.pcnm$PCNM21+tree.hel.all.pcnm$PCNM22+tree.hel.all.pcnm$PCNM23+tree.hel.all.pcnm$PCNM24+tree.hel.all.pcnm$PCNM25)
+hel.rda.fulsoil.full=rda(tree.hel.all.pcnm[,10:16]~tree.hel.all.pcnm$PCNM1+tree.hel.all.pcnm$PCNM2+tree.hel.all.pcnm$PCNM3+tree.hel.all.pcnm$PCNM4+tree.hel.all.pcnm$PCNM5+tree.hel.all.pcnm$PCNM6+tree.hel.all.pcnm$PCNM7+tree.hel.all.pcnm$PCNM8+tree.hel.all.pcnm$PCNM9+tree.hel.all.pcnm$PCNM10+tree.hel.all.pcnm$PCNM11+tree.hel.all.pcnm$PCNM12+tree.hel.all.pcnm$PCNM13+tree.hel.all.pcnm$PCNM14+tree.hel.all.pcnm$PCNM15+tree.hel.all.pcnm$PCNM16+tree.hel.all.pcnm$PCNM17+tree.hel.all.pcnm$PCNM18+tree.hel.all.pcnm$PCNM19+tree.hel.all.pcnm$PCNM20+tree.hel.all.pcnm$PCNM21+tree.hel.all.pcnm$PCNM22+tree.hel.all.pcnm$PCNM23+tree.hel.all.pcnm$PCNM24+tree.hel.all.pcnm$PCNM25)
 
 tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
 tree.sel
 # Let's store a model using the selected variables only
 names(tree.hel.all.pcnm)
-hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:24] ~ as.matrix(tree.hel.all.pcnm[,c(60:64,68)]))
+hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:16] ~ as.matrix(tree.hel.all.pcnm[,c(51:55,57:60,63,65)]))
 anova(hel.rda.all.selpcnm)
 RsquareAdj(hel.rda.all.selpcnm)
 
 # Now that we have these parsimonious models, NOW WE CAN PERFORM VARIANCE PARTITIONING!  Hurray!
 colnames(tree.hel.all.pcnm)
-varpart(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,c(35,58,37,41)], tree.hel.all.pcnm[,c(60:64,68)])
+varpart(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,c(26,49,44,28)], tree.hel.all.pcnm[,c(51:55,57:60,63,65)])
 # The variance explained by soil variables and spatial structure clearly overlap. 
 # It also appears that there is more independent spatial structure in the trees than independent structuring by soil.
 # Are the soil variables significant after accounting for spatial structure, and vice versa?
 # Let's see.
-hel.rda.all.partpcnm=rda(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,c(60:64,68)], tree.hel.all.pcnm[,c(35,58,37,41)])
+hel.rda.all.partpcnm=rda(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,c(51:55,57:60,63,65)], tree.hel.all.pcnm[,c(26,49,44,28)])
 anova(hel.rda.all.partpcnm)
 # NO.
-hel.rda.all.partsoil=rda(tree.hel.all.pcnm[,10:43], tree.hel.all.pcnm[,c(35,58,37,41)], tree.hel.all.pcnm[,c(60:64,68)])
+hel.rda.all.partsoil=rda(tree.hel.all.pcnm[,10:43], tree.hel.all.pcnm[,c(26,49,44,28)], tree.hel.all.pcnm[,c(51:55,57:60,63,65)])
 anova(hel.rda.all.partsoil)
 # Also yes.  But only by p-value; that is really not much variance explained anymore.
 
@@ -245,22 +225,22 @@ rownames(tree.hel.soil.gen)=tree.hel.soil.gen[,1]
 tree.hel.soil.gen=na.exclude(tree.hel.soil.gen)
 colnames(tree.hel.soil.gen)
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil.gen[,10:24], tree.hel.soil.gen[,35:59])
+hel.rda.fulsoil = rda(tree.hel.soil.gen[,10:16], tree.hel.soil.gen[,26:50])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 
 # Here is the forward selection command and then constructing a model with selected variables.
-hel.rda.fulsoil.none = rda(tree.hel.soil.gen[,10:24]~1)
-hel.rda.fulsoil = rda(tree.hel.soil.gen[,10:24], tree.hel.soil.gen[,35:59])
+hel.rda.fulsoil.none = rda(tree.hel.soil.gen[,10:16]~1)
+hel.rda.fulsoil = rda(tree.hel.soil.gen[,10:16], tree.hel.soil.gen[,26:50])
 
-hel.rda.fulsoil.full=rda(tree.hel.soil.gen[,10:24]~tree.hel.soil.gen$Ptot_long+tree.hel.soil.gen$Po_long+tree.hel.soil.gen$pH_long+tree.hel.soil.gen$moist_long +tree.hel.soil.gen$ps1_long+tree.hel.soil.gen$ps2_long+tree.hel.soil.gen$percc_long+tree.hel.soil.gen$cton_long+tree.hel.soil.gen$Ptot_nug+tree.hel.soil.gen$Po_nug+tree.hel.soil.gen$pH_nug+tree.hel.soil.gen$moist_nug+tree.hel.soil.gen$ps1_nug+tree.hel.soil.gen$ps2_nug+tree.hel.soil.gen$percc_nug+tree.hel.soil.gen$pomc_nug+tree.hel.soil.gen$cton_nug+tree.hel.soil.gen$Ptot_short+tree.hel.soil.gen$Po_short+tree.hel.soil.gen$pH_short+tree.hel.soil.gen$moist_short+tree.hel.soil.gen$ps1_short+tree.hel.soil.gen$percc_short+tree.hel.soil.gen$pomc_short+tree.hel.soil.gen$cton_short)
+hel.rda.fulsoil.full=rda(tree.hel.soil.gen[,10:16]~tree.hel.soil.gen$Ptot_long+tree.hel.soil.gen$Po_long+tree.hel.soil.gen$pH_long+tree.hel.soil.gen$moist_long +tree.hel.soil.gen$ps1_long+tree.hel.soil.gen$ps2_long+tree.hel.soil.gen$percc_long+tree.hel.soil.gen$cton_long+tree.hel.soil.gen$Ptot_nug+tree.hel.soil.gen$Po_nug+tree.hel.soil.gen$pH_nug+tree.hel.soil.gen$moist_nug+tree.hel.soil.gen$ps1_nug+tree.hel.soil.gen$ps2_nug+tree.hel.soil.gen$percc_nug+tree.hel.soil.gen$pomc_nug+tree.hel.soil.gen$cton_nug+tree.hel.soil.gen$Ptot_short+tree.hel.soil.gen$Po_short+tree.hel.soil.gen$pH_short+tree.hel.soil.gen$moist_short+tree.hel.soil.gen$ps1_short+tree.hel.soil.gen$percc_short+tree.hel.soil.gen$pomc_short+tree.hel.soil.gen$cton_short)
 
 tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
 tree.sel
 
 names(tree.hel.soil.gen)
-hel.rda.selsoil = rda(tree.hel.soil.gen[,10:24] ~ as.matrix(tree.hel.soil.gen[,c(35,37,58,41,49)]))
+hel.rda.selsoil = rda(tree.hel.soil.gen[,10:16] ~ as.matrix(tree.hel.soil.gen[,c(30,49,28,33,42)]))
 anova(hel.rda.selsoil)
 RsquareAdj(hel.rda.selsoil)
 plot(hel.rda.selsoil)
@@ -276,35 +256,35 @@ all.pcnmvecs=all.pcnm1$vectors
 tree.hel.all.pcnm=cbind(tree.hel.soil.gen,all.pcnmvecs)
 names(tree.hel.all.pcnm)
 # Now run step 1, global analysis
-hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,60:98])
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,51:89])
 anova(hel.rda.all.fulpcnm)
 RsquareAdj(hel.rda.all.fulpcnm)
 global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
 # now run step 2, the selection part
-hel.rda.fulsoil.none = rda(tree.hel.all.pcnm[,10:24]~1)
-hel.rda.fulsoil = rda(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,60:98])
+hel.rda.fulsoil.none = rda(tree.hel.all.pcnm[,10:16]~1)
+hel.rda.fulsoil = rda(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,51:89])
 
-hel.rda.fulsoil.full=rda(tree.hel.all.pcnm[,10:24]~tree.hel.all.pcnm$PCNM1+tree.hel.all.pcnm$PCNM2+tree.hel.all.pcnm$PCNM3+tree.hel.all.pcnm$PCNM4+tree.hel.all.pcnm$PCNM5+tree.hel.all.pcnm$PCNM6+tree.hel.all.pcnm$PCNM7+tree.hel.all.pcnm$PCNM8+tree.hel.all.pcnm$PCNM9+tree.hel.all.pcnm$PCNM10+tree.hel.all.pcnm$PCNM11+tree.hel.all.pcnm$PCNM12+tree.hel.all.pcnm$PCNM13+tree.hel.all.pcnm$PCNM14+tree.hel.all.pcnm$PCNM15+tree.hel.all.pcnm$PCNM16+tree.hel.all.pcnm$PCNM17+tree.hel.all.pcnm$PCNM18+tree.hel.all.pcnm$PCNM19+tree.hel.all.pcnm$PCNM20+tree.hel.all.pcnm$PCNM21+tree.hel.all.pcnm$PCNM22+tree.hel.all.pcnm$PCNM23+tree.hel.all.pcnm$PCNM24+tree.hel.all.pcnm$PCNM25+tree.hel.all.pcnm$PCNM26+tree.hel.all.pcnm$PCNM27+tree.hel.all.pcnm$PCNM28+tree.hel.all.pcnm$PCNM29+tree.hel.all.pcnm$PCNM30+tree.hel.all.pcnm$PCNM31+tree.hel.all.pcnm$PCNM32+tree.hel.all.pcnm$PCNM33+tree.hel.all.pcnm$PCNM34+tree.hel.all.pcnm$PCNM35+tree.hel.all.pcnm$PCNM36+tree.hel.all.pcnm$PCNM37+tree.hel.all.pcnm$PCNM38+tree.hel.all.pcnm$PCNM39)
+hel.rda.fulsoil.full=rda(tree.hel.all.pcnm[,10:16]~tree.hel.all.pcnm$PCNM1+tree.hel.all.pcnm$PCNM2+tree.hel.all.pcnm$PCNM3+tree.hel.all.pcnm$PCNM4+tree.hel.all.pcnm$PCNM5+tree.hel.all.pcnm$PCNM6+tree.hel.all.pcnm$PCNM7+tree.hel.all.pcnm$PCNM8+tree.hel.all.pcnm$PCNM9+tree.hel.all.pcnm$PCNM10+tree.hel.all.pcnm$PCNM11+tree.hel.all.pcnm$PCNM12+tree.hel.all.pcnm$PCNM13+tree.hel.all.pcnm$PCNM14+tree.hel.all.pcnm$PCNM15+tree.hel.all.pcnm$PCNM16+tree.hel.all.pcnm$PCNM17+tree.hel.all.pcnm$PCNM18+tree.hel.all.pcnm$PCNM19+tree.hel.all.pcnm$PCNM20+tree.hel.all.pcnm$PCNM21+tree.hel.all.pcnm$PCNM22+tree.hel.all.pcnm$PCNM23+tree.hel.all.pcnm$PCNM24+tree.hel.all.pcnm$PCNM25+tree.hel.all.pcnm$PCNM26+tree.hel.all.pcnm$PCNM27+tree.hel.all.pcnm$PCNM28+tree.hel.all.pcnm$PCNM29+tree.hel.all.pcnm$PCNM30+tree.hel.all.pcnm$PCNM31+tree.hel.all.pcnm$PCNM32+tree.hel.all.pcnm$PCNM33+tree.hel.all.pcnm$PCNM34+tree.hel.all.pcnm$PCNM35+tree.hel.all.pcnm$PCNM36+tree.hel.all.pcnm$PCNM37+tree.hel.all.pcnm$PCNM38+tree.hel.all.pcnm$PCNM39)
 
 tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
 tree.sel
 # Let's store a model using the selected variables only
 names(tree.hel.all.pcnm)
-hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:24] ~ as.matrix(tree.hel.all.pcnm[,c(61,63,65:67,71)]))
+hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:16] ~ as.matrix(tree.hel.all.pcnm[,c(52:53,58,60)]))
 anova(hel.rda.all.selpcnm)
 RsquareAdj(hel.rda.all.selpcnm)
 
 # Now that we have these parsimonious models, NOW WE CAN PERFORM VARIANCE PARTITIONING!  Hurray!
 colnames(tree.hel.all.pcnm)
-varpart(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,c(35,37,58,41,49)], tree.hel.all.pcnm[,c(61,63,65:67,71)])
+varpart(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,c(30,49,28,33,42)], tree.hel.all.pcnm[,c(52:53,58,60)])
 # The variance explained by soil variables and spatial structure clearly overlap. 
 # It also appears that there is more independent spatial structure in the trees than independent structuring by soil.
 # Are the soil variables significant after accounting for spatial structure, and vice versa?
 # Let's see.
-hel.rda.all.partpcnm=rda(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,c(61,63,65:67,71)], tree.hel.all.pcnm[,c(35,37,58,41,49)])
+hel.rda.all.partpcnm=rda(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,c(52:53,58,60)], tree.hel.all.pcnm[,c(30,49,28,33,42)])
 anova(hel.rda.all.partpcnm)
 # Yes.
-hel.rda.all.partsoil=rda(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,c(35,37,58,41,49)], tree.hel.all.pcnm[,c(61,63,65:67,71)])
+hel.rda.all.partsoil=rda(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,c(30,49,28,33,42)], tree.hel.all.pcnm[,c(52:53,58,60)])
 anova(hel.rda.all.partsoil)
 # Also yes.  But only by p-value; that is really not much variance explained anymore.
 
@@ -314,7 +294,7 @@ anova(hel.rda.all.partsoil)
 # First the core plots
 tree.hel.core=tree.hel[tree.hel$EP=="Core",]
 rownames(tree.hel.core)
-tree.hel.core.rda.ecosys = rda(tree.hel.core[,10:24] ~ tree.hel.core[,3])
+tree.hel.core.rda.ecosys = rda(tree.hel.core[,10:16] ~ tree.hel.core[,3])
 anova(tree.hel.core.rda.ecosys)
 core.arsq=RsquareAdj(tree.hel.core.rda.ecosys)
 # Then the core+edge plots
@@ -376,8 +356,8 @@ tiles=rank(rbind(res.vec,jac.edge.eff))
 ```
 ```{r gen mortality}
 #Mortality
-treedata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/Species Mortality Matrix.csv")
-soildata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
+treedata=read.csv("C:/Users/crc31/OneDrive/Documents/School/Research/Data/Trees/Species Mortality Matrix.csv")
+soildata=read.csv("C:/Users/crc31/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
 names(treedata)
 rownames(treedata)=treedata[,1]
 dim(treedata)
@@ -390,7 +370,7 @@ treedata=treedata[treedata$Ecosystem!="S",]
 dim(treedata)
 treedata[is.na(treedata)] <- 0
 treedata
-treedata=treedata
+tree.ringsum=treedata
 
 rownames(tree.ringsum)=tree.ringsum[,1]
 # Let's look at a rank abbundance plot for fun
@@ -413,10 +393,10 @@ dim(tree.hel.soil)
 tree.hel.soil=na.exclude(tree.hel.soil)
 
 #separate out generalists
-tree.hel.soil=tree.hel.soil[,c(1:11,13:14,16:17,20:21,24,27:28,32:33,36,38,43:76)]
+tree.hel.soil=tree.hel.soil[,c(1:10,15:16,27:28,33,36,52:76)]
 
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil[,10:24], tree.hel.soil[,34:58])
+hel.rda.fulsoil = rda(tree.hel.soil[,10:16], tree.hel.soil[,17:41])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
@@ -431,7 +411,7 @@ tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs[,which(all.pcnm1$Moran_I[,2]<
 tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs)
 names(tree.hel.all.pcnm)
 ## Now run step 1, global analysis
-hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,59:76])
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,42:75])
 anova(hel.rda.all.fulpcnm)
 RsquareAdj(hel.rda.all.fulpcnm)
 global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
@@ -444,28 +424,10 @@ rownames(tree.hel.soil)=tree.hel.soil[,1]
 tree.hel.soil=na.exclude(tree.hel.soil)
 colnames(tree.hel.soil)
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil[,10:24], tree.hel.soil[,35:58])
+hel.rda.fulsoil = rda(tree.hel.soil[,10:16], tree.hel.soil[,10:16])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
-
-# Here is the forward selection command and then constructing a model with selected variables.
-##NEW forward selection
-hel.rda.fulsoil.none = rda(tree.hel.soil[,10:24]~1)
-hel.rda.fulsoil = rda(tree.hel.soil[,10:24], tree.hel.soil[,35:58])
-
-hel.rda.fulsoil.full=rda(tree.hel.soil[,10:24]~tree.hel.soil$Ptot_long+tree.hel.soil$Po_long+tree.hel.soil$pH_long+tree.hel.soil$moist_long +tree.hel.soil$ps1_long+tree.hel.soil$ps2_long+tree.hel.soil$percc_long+tree.hel.soil$cton_long+tree.hel.soil$Ptot_nug+tree.hel.soil$Po_nug+tree.hel.soil$pH_nug+tree.hel.soil$moist_nug+tree.hel.soil$ps1_nug+tree.hel.soil$ps2_nug+tree.hel.soil$percc_nug+tree.hel.soil$pomc_nug+tree.hel.soil$cton_nug+tree.hel.soil$Ptot_short+tree.hel.soil$Po_short+tree.hel.soil$pH_short+tree.hel.soil$moist_short+tree.hel.soil$ps1_short+tree.hel.soil$percc_short+tree.hel.soil$pomc_short+tree.hel.soil$cton_short)
-
-tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
-tree.sel
-
-
-names(tree.hel.soil)
-hel.rda.selsoil = rda(tree.hel.soil[,10:24] ~ as.matrix(tree.hel.soil[,c(38:39)]))
-anova(hel.rda.selsoil)
-RsquareAdj(hel.rda.selsoil)
-plot(hel.rda.selsoil)
-# Cool analysis, but what a terrible plot.  Much better to get the scores and plot them in a real graphing program, or do some fancy graphing in R if that is your thing.
 
 #### Forward selection using PCNM vectors
 # First we perform PCNM to get the vectors
@@ -477,38 +439,10 @@ all.pcnmvecs=all.pcnm1$vectors
 tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs)
 names(tree.hel.all.pcnm)
 # Now run step 1, global analysis
-hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,58:76])
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,42:60])
 anova(hel.rda.all.fulpcnm)
 RsquareAdj(hel.rda.all.fulpcnm)
 global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
-# now run step 2, the selection part
-hel.rda.fulsoil.none = rda(tree.hel.all.pcnm[,10:24]~1)
-hel.rda.fulsoil = rda(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,58:76])
-
-hel.rda.fulsoil.full=rda(tree.hel.all.pcnm[,10:24]~tree.hel.all.pcnm$PCNM1+tree.hel.all.pcnm$PCNM2+tree.hel.all.pcnm$PCNM3+tree.hel.all.pcnm$PCNM4+tree.hel.all.pcnm$PCNM5+tree.hel.all.pcnm$PCNM6+tree.hel.all.pcnm$PCNM7+tree.hel.all.pcnm$PCNM8+tree.hel.all.pcnm$PCNM9+tree.hel.all.pcnm$PCNM10+tree.hel.all.pcnm$PCNM11+tree.hel.all.pcnm$PCNM12+tree.hel.all.pcnm$PCNM13+tree.hel.all.pcnm$PCNM14+tree.hel.all.pcnm$PCNM15+tree.hel.all.pcnm$PCNM16+tree.hel.all.pcnm$PCNM17+tree.hel.all.pcnm$PCNM18)
-
-tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
-tree.sel
-# Let's store a model using the selected variables only
-names(tree.hel.all.pcnm)
-hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:24] ~ as.matrix(tree.hel.all.pcnm[,c(59,61,70)]))
-anova(hel.rda.all.selpcnm)
-RsquareAdj(hel.rda.all.selpcnm)
-
-# Now that we have these parsimonious models, NOW WE CAN PERFORM VARIANCE PARTITIONING!  Hurray!
-colnames(tree.hel.all.pcnm)
-varpart(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,c(38:39)], tree.hel.all.pcnm[,c(59,61,70)])
-# The variance explained by soil variables and spatial structure clearly overlap. 
-# It also appears that there is more independent spatial structure in the trees than independent structuring by soil.
-# Are the soil variables significant after accounting for spatial structure, and vice versa?
-# Let's see.
-hel.rda.all.partpcnm=rda(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,c(59,61,70)], tree.hel.all.pcnm[,c(38:39)])
-anova(hel.rda.all.partpcnm)
-# NO.
-hel.rda.all.partsoil=rda(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,c(59,61,70)], tree.hel.all.pcnm[,c(38:39)])
-anova(hel.rda.all.partsoil)
-# Also yes.  But only by p-value; that is really not much variance explained anymore.
-
 
 #Core+Edge
 tree.hel.soil=tree.hel.soil1[tree.hel.soil1$EP=="Core"|tree.hel.soil1$EP=="Edge",]
@@ -516,7 +450,7 @@ rownames(tree.hel.soil)=tree.hel.soil[,1]
 tree.hel.soil=na.exclude(tree.hel.soil)
 colnames(tree.hel.soil)
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil[,10:24], tree.hel.soil[,35:58])
+hel.rda.fulsoil = rda(tree.hel.soil[,10:16], tree.hel.soil[,17:41])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
@@ -531,23 +465,10 @@ all.pcnmvecs=all.pcnm1$vectors
 tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs)
 names(tree.hel.all.pcnm)
 # Now run step 1, global analysis
-hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,59:76])
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,42:69])
 anova(hel.rda.all.fulpcnm)
 RsquareAdj(hel.rda.all.fulpcnm)
 global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
-# now run step 2, the selection part
-hel.rda.fulsoil.none = rda(tree.hel.all.pcnm[,10:24]~1)
-hel.rda.fulsoil = rda(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,59:76])
-
-hel.rda.fulsoil.full=rda(tree.hel.all.pcnm[,10:24]~tree.hel.all.pcnm$PCNM1+tree.hel.all.pcnm$PCNM2+tree.hel.all.pcnm$PCNM3+tree.hel.all.pcnm$PCNM4+tree.hel.all.pcnm$PCNM5+tree.hel.all.pcnm$PCNM6+tree.hel.all.pcnm$PCNM7+tree.hel.all.pcnm$PCNM8+tree.hel.all.pcnm$PCNM9+tree.hel.all.pcnm$PCNM10+tree.hel.all.pcnm$PCNM11+tree.hel.all.pcnm$PCNM12+tree.hel.all.pcnm$PCNM13+tree.hel.all.pcnm$PCNM14+tree.hel.all.pcnm$PCNM15+tree.hel.all.pcnm$PCNM16+tree.hel.all.pcnm$PCNM17+tree.hel.all.pcnm$PCNM18)
-
-tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
-tree.sel
-# Let's store a model using the selected variables only
-names(tree.hel.all.pcnm)
-hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:24] ~ as.matrix(tree.hel.all.pcnm[,c(59,61,70)]))
-anova(hel.rda.all.selpcnm)
-RsquareAdj(hel.rda.all.selpcnm)
 
 ###### Some Bonus tree code
 # Here is a quick analysis to test for the edge effect on tree communities when Ecosystem type is the explanatory factor, just like we did before with soil data
@@ -555,12 +476,12 @@ RsquareAdj(hel.rda.all.selpcnm)
 is.na(tree.hel)
 tree.hel[is.na(tree.hel)] <- 0
 tree.hel.core=tree.hel[tree.hel$EP=="Core",]
-tree.hel.core.rda.ecosys = rda(tree.hel.core[,10:24] ~ tree.hel.core[,3])
+tree.hel.core.rda.ecosys = rda(tree.hel.core[,10:16] ~ tree.hel.core[,3])
 anova(tree.hel.core.rda.ecosys)
 core.arsq=RsquareAdj(tree.hel.core.rda.ecosys)
 # Then the core+edge plots
 tree.hel.edge=tree.hel[tree.hel$EP=="Core"|tree.hel$EP=="Edge",]
-tree.hel.edge.rda.ecosys = rda(tree.hel.edge[,10:24] ~ tree.hel.edge[,3])
+tree.hel.edge.rda.ecosys = rda(tree.hel.edge[,10:16] ~ tree.hel.edge[,3])
 anova(tree.hel.edge.rda.ecosys)
 edge.arsq=RsquareAdj(tree.hel.edge.rda.ecosys)
 # Then the permmutation test of the edge effect
@@ -586,12 +507,12 @@ goodness(tree.hel.core.rda.ecosys)
 goodness(tree.hel.edge.rda.ecosys)
 
 ##Same idea as above, but Jaccard distance analysis by PCoA/distance-based RDA
-jac.core.dist=vegdist(tree.hel.core[,10:24],method="jaccard",binary=TRUE)
+jac.core.dist=vegdist(tree.hel.core[,10:16],method="jaccard",binary=TRUE)
 jac.core.pcoa=cmdscale(jac.core.dist,eig=TRUE,k=41,add=TRUE)
 jac.core.rda.ecosys = rda(jac.core.pcoa$points ~ tree.hel.core[,3])
 anova(jac.core.rda.ecosys)
 jac.core.arsq=RsquareAdj(jac.core.rda.ecosys)
-jac.edge.dist=vegdist(tree.hel.edge[,10:24],method="jaccard",binary=TRUE)
+jac.edge.dist=vegdist(tree.hel.edge[,10:16],method="jaccard",binary=TRUE)
 jac.edge.pcoa=cmdscale(jac.edge.dist,eig=TRUE,k=70,add=TRUE)
 jac.edge.pcoa.points=cbind(jac.edge.pcoa$points,tree.hel.edge)
 jac.edge.rda.ecosys = rda(jac.edge.pcoa.points[,1:70] ~ jac.edge.pcoa.points[,73])
@@ -619,8 +540,8 @@ goodness(jac.edge.rda.ecosys)
 ```
 ```{r gen recruitment}
 ##Recruitment
-treedata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/General transition graph files/Species Recruitment Matrix.csv")
-soildata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
+treedata=read.csv("C:/Users/crc31/OneDrive/Documents/School/Research/Data/Trees/General transition graph files/Species Recruitment Matrix.csv")
+soildata=read.csv("C:/Users/crc31/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
 names(treedata)
 dim(treedata)
 names(soildata)
@@ -648,8 +569,6 @@ tree.hel[,10:35]=sqrt(tree.hel[,10:35])
 
 #### Forward selection using regionalized soil variables
 # First we have to merge the datasets
-rownames(soildata)=soildata$Plot
-rownames(tree.hel)=treedata$Plot
 tree.hel.soil=merge(tree.hel,soildata)
 rownames(tree.hel.soil)=tree.hel.soil$Plot
 is.na(tree.hel.soil)
@@ -657,10 +576,10 @@ tree.hel.soil=na.exclude(tree.hel.soil)
 dim(tree.hel.soil)
 
 #separate out the generalists
-tree.hel.soil=tree.hel.soil[,c(1:13,15,19:20,23,25:27,30:31,38:71)]
+tree.hel.soil=tree.hel.soil[,c(1:10,14:15,25,27,30,47:71)]
 
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil[,10:22], tree.hel.soil[,32:56])
+hel.rda.fulsoil = rda(tree.hel.soil[,10:15], tree.hel.soil[,16:40])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
@@ -676,26 +595,11 @@ all.pcnmvecs=all.pcnm1$vectors
 tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs)
 names(tree.hel.all.pcnm)
 # Now run step 1, global analysis
-hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:22], tree.hel.all.pcnm[,57:92])
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:15], tree.hel.all.pcnm[,41:76])
 anova(hel.rda.all.fulpcnm)
 RsquareAdj(hel.rda.all.fulpcnm)
 global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
 
-###Signficant, so we run the following code:
-##now run step 2, the selection part
-hel.rda.fulsoil.none = rda(tree.hel.all.pcnm[,10:22]~1)
-hel.rda.fulsoil = rda(tree.hel.all.pcnm[,10:22], tree.hel.all.pcnm[,57:92])
-
-hel.rda.fulsoil.full=rda(tree.hel.all.pcnm[,10:22]~tree.hel.all.pcnm$PCNM1+tree.hel.all.pcnm$PCNM2+tree.hel.all.pcnm$PCNM3+tree.hel.all.pcnm$PCNM4+tree.hel.all.pcnm$PCNM5+tree.hel.all.pcnm$PCNM6+tree.hel.all.pcnm$PCNM7+tree.hel.all.pcnm$PCNM8+tree.hel.all.pcnm$PCNM9+tree.hel.all.pcnm$PCNM10+tree.hel.all.pcnm$PCNM11+tree.hel.all.pcnm$PCNM12+tree.hel.all.pcnm$PCNM13+tree.hel.all.pcnm$PCNM14+tree.hel.all.pcnm$PCNM15+tree.hel.all.pcnm$PCNM16+tree.hel.all.pcnm$PCNM17+tree.hel.all.pcnm$PCNM18+tree.hel.all.pcnm$PCNM19+tree.hel.all.pcnm$PCNM20+tree.hel.all.pcnm$PCNM21+tree.hel.all.pcnm$PCNM22+tree.hel.all.pcnm$PCNM23+tree.hel.all.pcnm$PCNM24+tree.hel.all.pcnm$PCNM25+tree.hel.all.pcnm$PCNM26+tree.hel.all.pcnm$PCNM27+tree.hel.all.pcnm$PCNM28+tree.hel.all.pcnm$PCNM29+tree.hel.all.pcnm$PCNM30+tree.hel.all.pcnm$PCNM31+tree.hel.all.pcnm$PCNM32+tree.hel.all.pcnm$PCNM33+tree.hel.all.pcnm$PCNM34+tree.hel.all.pcnm$PCNM35+tree.hel.all.pcnm$PCNM36)
-
-tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
-tree.sel
-## Let's store a model using the selected variables only
-names(tree.hel.all.pcnm)
-hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:22] ~ as.matrix(tree.hel.all.pcnm[,c(57:58,67,79,89,92)]))
-anova(hel.rda.all.selpcnm)
-RsquareAdj(hel.rda.all.selpcnm)
-# No need for variance partitioning since there is no soil effect.
 
 tree.hel.soil1=tree.hel.soil
 #Core Plots
@@ -704,10 +608,11 @@ rownames(tree.hel.soil)=tree.hel.soil[,1]
 tree.hel.soil=na.exclude(tree.hel.soil)
 colnames(tree.hel.soil)
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil[,10:22], tree.hel.soil[,35:56])
+hel.rda.fulsoil = rda(tree.hel.soil[,10:15], tree.hel.soil[,16:40])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+
 
 #### Forward selection using PCNM vectors
 # First we perform PCNM to get the vectors
@@ -719,7 +624,7 @@ all.pcnmvecs=all.pcnm1$vectors
 tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs)
 names(tree.hel.all.pcnm)
 # Now run step 1, global analysis
-hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:22], tree.hel.all.pcnm[,57:77])
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:15], tree.hel.all.pcnm[,41:61])
 anova(hel.rda.all.fulpcnm)
 RsquareAdj(hel.rda.all.fulpcnm)
 global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
@@ -730,7 +635,7 @@ rownames(tree.hel.soil)=tree.hel.soil[,1]
 tree.hel.soil=na.exclude(tree.hel.soil)
 colnames(tree.hel.soil)
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil[,10:22], tree.hel.soil[,32:56])
+hel.rda.fulsoil = rda(tree.hel.soil[,10:15], tree.hel.soil[,16:40])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
@@ -745,7 +650,7 @@ all.pcnmvecs=all.pcnm1$vectors
 tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs)
 names(tree.hel.all.pcnm)
 # Now run step 1, global analysis
-hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,57:90])
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:15], tree.hel.all.pcnm[,41:74])
 anova(hel.rda.all.fulpcnm)
 RsquareAdj(hel.rda.all.fulpcnm)
 global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
@@ -818,8 +723,8 @@ goodness(jac.edge.rda.ecosys)
 ```
 ```{r gen growth}
 ###Species Growth
-treedata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/Species Growth Matrix.csv")
-soildata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
+treedata=read.csv("C:/Users/crc31/OneDrive/Documents/School/Research/Data/Trees/Species Growth Matrix.csv")
+soildata=read.csv("C:/Users/crc31/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
 names(treedata)
 dim(treedata)
 names(soildata)
@@ -854,24 +759,67 @@ names(tree.hel.soil)
 dim(tree.hel.soil)
 
 #separate out the generalists
-tree.hel.soil=tree.hel.soil[,c(1:11,13:14,16,19:20,23,26:27,31:32,35,37,45:78)]
+tree.hel.soil=tree.hel.soil[,c(1:10,15:16,26:27,32,35,54:78)]
 
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil[,10:23], tree.hel.soil[,33:57])
+hel.rda.fulsoil = rda(tree.hel.soil[,10:16], tree.hel.soil[,17:41])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
-# Here is the forward selection command and then constructing a model with selected variables.
-hel.rda.fulsoil.none = rda(tree.hel.soil[,10:23]~1)
-hel.rda.fulsoil = rda(tree.hel.soil[,10:23], tree.hel.soil[,33:57])
 
-hel.rda.fulsoil.full=rda(tree.hel.soil[,10:23]~tree.hel.soil$Ptot_long+tree.hel.soil$Po_long+tree.hel.soil$pH_long+tree.hel.soil$moist_long +tree.hel.soil$ps1_long+tree.hel.soil$ps2_long+tree.hel.soil$percc_long+tree.hel.soil$cton_long+tree.hel.soil$Ptot_nug+tree.hel.soil$Po_nug+tree.hel.soil$pH_nug+tree.hel.soil$moist_nug+tree.hel.soil$ps1_nug+tree.hel.soil$ps2_nug+tree.hel.soil$percc_nug+tree.hel.soil$pomc_nug+tree.hel.soil$cton_nug+tree.hel.soil$Ptot_short+tree.hel.soil$Po_short+tree.hel.soil$pH_short+tree.hel.soil$moist_short+tree.hel.soil$ps1_short+tree.hel.soil$percc_short+tree.hel.soil$pomc_short+tree.hel.soil$cton_short)
+#### Forward selection using PCNM vectors
+# First we perform PCNM to get the vectors
+all.geog.dist=vegdist(tree.hel.soil[,8:9],method="euclid")
+all.pcnm1=pcnm(all.geog.dist)
+all.pcnmvecs=all.pcnm1$vectors
+# If you can get the PCNM library to run, you could do the line below to select only significantly structured PCNMs
+#tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs[,which(all.pcnm1$Moran_I[,2]<0.05)])
+tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs)
+names(tree.hel.all.pcnm)
+# Now run step 1, global analysis
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,42:75])
+anova(hel.rda.all.fulpcnm)
+RsquareAdj(hel.rda.all.fulpcnm)
+global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
+
+#Forward seclection
+hel.rda.fulsoil.none = rda(tree.hel.all.pcnm[,10:16]~1)
+hel.rda.fulsoil = rda(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,42:75])
+
+hel.rda.fulsoil.full=rda(tree.hel.all.pcnm[,10:16]~tree.hel.all.pcnm$PCNM1+tree.hel.all.pcnm$PCNM2+tree.hel.all.pcnm$PCNM3+tree.hel.all.pcnm$PCNM4+tree.hel.all.pcnm$PCNM5+tree.hel.all.pcnm$PCNM6+tree.hel.all.pcnm$PCNM7+tree.hel.all.pcnm$PCNM8+tree.hel.all.pcnm$PCNM9+tree.hel.all.pcnm$PCNM10+tree.hel.all.pcnm$PCNM11+tree.hel.all.pcnm$PCNM12+tree.hel.all.pcnm$PCNM13+tree.hel.all.pcnm$PCNM14+tree.hel.all.pcnm$PCNM15+tree.hel.all.pcnm$PCNM16+tree.hel.all.pcnm$PCNM17+tree.hel.all.pcnm$PCNM18+tree.hel.all.pcnm$PCNM19+tree.hel.all.pcnm$PCNM20+tree.hel.all.pcnm$PCNM21+tree.hel.all.pcnm$PCNM22+tree.hel.all.pcnm$PCNM23+tree.hel.all.pcnm$PCNM24+tree.hel.all.pcnm$PCNM25+tree.hel.all.pcnm$PCNM26+tree.hel.all.pcnm$PCNM27+tree.hel.all.pcnm$PCNM28+tree.hel.all.pcnm$PCNM29+tree.hel.all.pcnm$PCNM30+tree.hel.all.pcnm$PCNM31+tree.hel.all.pcnm$PCNM32+tree.hel.all.pcnm$PCNM33+tree.hel.all.pcnm$PCNM34)
+
+tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
+tree.sel
+## Let's store a model using the selected variables only
+names(tree.hel.all.pcnm)
+hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:16] ~ as.matrix(tree.hel.all.pcnm[,c(47:48,50,52,68)]))
+anova(hel.rda.all.selpcnm)
+RsquareAdj(hel.rda.all.selpcnm)
+# No need for variance partitioning since there is no soil effect.
+
+tree.hel.soil1=tree.hel.soil
+#Core Plots
+tree.hel.soil=tree.hel.soil1[tree.hel.soil1$EP=="Core",]
+rownames(tree.hel.soil)=tree.hel.soil[,1]
+tree.hel.soil=na.exclude(tree.hel.soil)
+colnames(tree.hel.soil)
+# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
+hel.rda.fulsoil = rda(tree.hel.soil[,10:16], tree.hel.soil[,17:41])
+anova(hel.rda.fulsoil)
+RsquareAdj(hel.rda.fulsoil)
+global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+
+##NEW forward selection
+hel.rda.fulsoil.none = rda(tree.hel.soil.gen[,10:16]~1)
+hel.rda.fulsoil = rda(tree.hel.soil.gen[,10:16], tree.hel.soil.gen[,17:41])
+
+hel.rda.fulsoil.full=rda(tree.hel.soil.gen[,10:16]~tree.hel.soil.gen$Ptot_long+tree.hel.soil.gen$Po_long+tree.hel.soil.gen$pH_long+tree.hel.soil.gen$moist_long +tree.hel.soil.gen$ps1_long+tree.hel.soil.gen$ps2_long+tree.hel.soil.gen$percc_long+tree.hel.soil.gen$cton_long+tree.hel.soil.gen$Ptot_nug+tree.hel.soil.gen$Po_nug+tree.hel.soil.gen$pH_nug+tree.hel.soil.gen$moist_nug+tree.hel.soil.gen$ps1_nug+tree.hel.soil.gen$ps2_nug+tree.hel.soil.gen$percc_nug+tree.hel.soil.gen$pomc_nug+tree.hel.soil.gen$cton_nug+tree.hel.soil.gen$Ptot_short+tree.hel.soil.gen$Po_short+tree.hel.soil.gen$pH_short+tree.hel.soil.gen$moist_short+tree.hel.soil.gen$ps1_short+tree.hel.soil.gen$percc_short+tree.hel.soil.gen$pomc_short+tree.hel.soil.gen$cton_short)
 
 tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
 tree.sel
 
-names(tree.hel.soil)
-hel.rda.selsoil = rda(tree.hel.soil[,10:23] ~ as.matrix(tree.hel.soil[,c(37:38)]))
+# Constructing a model with selected variables.
+hel.rda.selsoil = rda(tree.hel.soil.gen[,10:16] ~ as.matrix(tree.hel.soil.gen[,c(19,21:22,34)]))
 anova(hel.rda.selsoil)
 RsquareAdj(hel.rda.selsoil)
 plot(hel.rda.selsoil)
@@ -887,52 +835,39 @@ all.pcnmvecs=all.pcnm1$vectors
 tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs)
 names(tree.hel.all.pcnm)
 # Now run step 1, global analysis
-hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:23], tree.hel.all.pcnm[,58,91])
-anova(hel.rda.all.fulpcnm)
-RsquareAdj(hel.rda.all.fulpcnm)
-global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
-#No need for variance partitioning since there is no spatial significance.
-
-tree.hel.soil1=tree.hel.soil
-#Core Plots
-tree.hel.soil=tree.hel.soil1[tree.hel.soil1$EP=="Core",]
-rownames(tree.hel.soil)=tree.hel.soil[,1]
-tree.hel.soil=na.exclude(tree.hel.soil)
-colnames(tree.hel.soil)
-# Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil[,10:23], tree.hel.soil[,33:57])
-anova(hel.rda.fulsoil)
-RsquareAdj(hel.rda.fulsoil)
-global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
-
-#### Forward selection using PCNM vectors
-# First we perform PCNM to get the vectors
-all.geog.dist=vegdist(tree.hel.soil[,8:9],method="euclid")
-all.pcnm1=pcnm(all.geog.dist)
-all.pcnmvecs=all.pcnm1$vectors
-# If you can get the PCNM library to run, you could do the line below to select only significantly structured PCNMs
-#tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs[,which(all.pcnm1$Moran_I[,2]<0.05)])
-tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs)
-names(tree.hel.all.pcnm)
-# Now run step 1, global analysis
-hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:23], tree.hel.all.pcnm[,58:75])
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,42:59])
 anova(hel.rda.all.fulpcnm)
 RsquareAdj(hel.rda.all.fulpcnm)
 global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
 
-hel.rda.fulsoil.none = rda(tree.hel.all.pcnm[,10:23]~1)
-hel.rda.fulsoil = rda(tree.hel.all.pcnm[,10:23], tree.hel.all.pcnm[,58:75])
+hel.rda.fulsoil.none = rda(tree.hel.all.pcnm[,10:16]~1)
+hel.rda.fulsoil = rda(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,42:59])
 
-hel.rda.fulsoil.full=rda(tree.hel.all.pcnm[,10:22]~tree.hel.all.pcnm$PCNM1+tree.hel.all.pcnm$PCNM2+tree.hel.all.pcnm$PCNM3+tree.hel.all.pcnm$PCNM4+tree.hel.all.pcnm$PCNM5+tree.hel.all.pcnm$PCNM6+tree.hel.all.pcnm$PCNM7+tree.hel.all.pcnm$PCNM8+tree.hel.all.pcnm$PCNM9+tree.hel.all.pcnm$PCNM10+tree.hel.all.pcnm$PCNM11+tree.hel.all.pcnm$PCNM12+tree.hel.all.pcnm$PCNM13+tree.hel.all.pcnm$PCNM14+tree.hel.all.pcnm$PCNM15+tree.hel.all.pcnm$PCNM16+tree.hel.all.pcnm$PCNM17+tree.hel.all.pcnm$PCNM18)
+hel.rda.fulsoil.full=rda(tree.hel.all.pcnm[,10:16]~tree.hel.all.pcnm$PCNM1+tree.hel.all.pcnm$PCNM2+tree.hel.all.pcnm$PCNM3+tree.hel.all.pcnm$PCNM4+tree.hel.all.pcnm$PCNM5+tree.hel.all.pcnm$PCNM6+tree.hel.all.pcnm$PCNM7+tree.hel.all.pcnm$PCNM8+tree.hel.all.pcnm$PCNM9+tree.hel.all.pcnm$PCNM10+tree.hel.all.pcnm$PCNM11+tree.hel.all.pcnm$PCNM12+tree.hel.all.pcnm$PCNM13+tree.hel.all.pcnm$PCNM14+tree.hel.all.pcnm$PCNM15+tree.hel.all.pcnm$PCNM16+tree.hel.all.pcnm$PCNM17+tree.hel.all.pcnm$PCNM18)
 
 tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
 tree.sel
 ## Let's store a model using the selected variables only
 names(tree.hel.all.pcnm)
-hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:28] ~ as.matrix(tree.hel.all.pcnm[,c(58,60:61)]))
+hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:16] ~ as.matrix(tree.hel.all.pcnm[,c(42,45,52)]))
 anova(hel.rda.all.selpcnm)
 RsquareAdj(hel.rda.all.selpcnm)
-# No need for variance partitioning since there is no soil effect.
+
+# Now that we have these parsimonious models, NOW WE CAN PERFORM VARIANCE PARTITIONING!  Hurray!
+colnames(tree.hel.all.pcnm)
+varpart(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,c(19,21:22,34)], tree.hel.all.pcnm[,c(42,45,52)])
+# The variance explained by soil variables and spatial structure clearly overlap. 
+# It also appears that there is more independent spatial structure in the trees than independent structuring by soil.
+# Are the soil variables significant after accounting for spatial structure, and vice versa?
+# Let's see.
+hel.rda.all.partpcnm=rda(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,c(19,21:22,34)], tree.hel.all.pcnm[,c(42,45,52)])
+anova(hel.rda.all.partpcnm)
+# Yes.
+
+colnames(tree.hel.all.pcnm)
+varpart(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,c(42,45,52)], tree.hel.all.pcnm[,c(19,21:22,34)])
+names(tree.hel.all.pcnm)
+plot(hel.rda.all.partpcnm)
 
 
 #Core+Edge
@@ -941,7 +876,7 @@ rownames(tree.hel.soil)=tree.hel.soil[,1]
 tree.hel.soil=na.exclude(tree.hel.soil)
 colnames(tree.hel.soil)
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil[,10:23], tree.hel.soil[,33:57])
+hel.rda.fulsoil = rda(tree.hel.soil[,10:16], tree.hel.soil[,17:41])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
@@ -956,10 +891,24 @@ all.pcnmvecs=all.pcnm1$vectors
 tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs)
 names(tree.hel.all.pcnm)
 # Now run step 1, global analysis
-hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:23], tree.hel.all.pcnm[,58:88])
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,42:72])
 anova(hel.rda.all.fulpcnm)
 RsquareAdj(hel.rda.all.fulpcnm)
 global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
+
+#New forward selection code
+hel.rda.fulsoil.none = rda(tree.hel.all.pcnm[,10:16]~1)
+hel.rda.fulsoil = rda(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,42:72])
+
+hel.rda.fulsoil.full=rda(tree.hel.all.pcnm[,10:16]~tree.hel.all.pcnm$PCNM1+tree.hel.all.pcnm$PCNM2+tree.hel.all.pcnm$PCNM3+tree.hel.all.pcnm$PCNM4+tree.hel.all.pcnm$PCNM5+tree.hel.all.pcnm$PCNM6+tree.hel.all.pcnm$PCNM7+tree.hel.all.pcnm$PCNM8+tree.hel.all.pcnm$PCNM9+tree.hel.all.pcnm$PCNM10+tree.hel.all.pcnm$PCNM11+tree.hel.all.pcnm$PCNM12+tree.hel.all.pcnm$PCNM13+tree.hel.all.pcnm$PCNM14+tree.hel.all.pcnm$PCNM15+tree.hel.all.pcnm$PCNM16+tree.hel.all.pcnm$PCNM17+tree.hel.all.pcnm$PCNM18+tree.hel.all.pcnm$PCNM19+tree.hel.all.pcnm$PCNM20+tree.hel.all.pcnm$PCNM21+tree.hel.all.pcnm$PCNM22+tree.hel.all.pcnm$PCNM23+tree.hel.all.pcnm$PCNM24+tree.hel.all.pcnm$PCNM25+tree.hel.all.pcnm$PCNM26+tree.hel.all.pcnm$PCNM27+tree.hel.all.pcnm$PCNM28+tree.hel.all.pcnm$PCNM29+tree.hel.all.pcnm$PCNM30+tree.hel.all.pcnm$PCNM31)
+
+tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
+tree.sel
+## Let's store a model using the selected variables only
+names(tree.hel.all.pcnm)
+hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:16] ~ as.matrix(tree.hel.all.pcnm[,c(44,48,51,67)]))
+anova(hel.rda.all.selpcnm)
+RsquareAdj(hel.rda.all.selpcnm)
 
 ## Extra code
 for(i in 1:nperm){
@@ -1048,24 +997,26 @@ goodness(jac.edge.rda.ecosys)
 
 ```{r specialists}
 ## Specialists ##
+#subset the specialists
+tree.hel.soil.spec=tree.hel.soil[,c(1:9,11,14,20:22,24,29,32,35,39,43,55:79)]
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
 tree.hel.soil.spec1=tree.hel.soil.spec
-hel.rda.fulsoil = rda(tree.hel.soil.spec[,10:29], tree.hel.soil.spec[,40:64])
+hel.rda.fulsoil = rda(tree.hel.soil.spec[,10:20], tree.hel.soil.spec[,21:45])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 
 # Here is the forward selection command and then constructing a model with selected variables.
-hel.rda.fulsoil.none = rda(tree.hel.soil.spec[,10:29]~1)
-hel.rda.fulsoil = rda(tree.hel.soil.spec[,10:29], tree.hel.soil.spec[,40:64])
+hel.rda.fulsoil.none = rda(tree.hel.soil.spec[,10:20]~1)
+hel.rda.fulsoil = rda(tree.hel.soil.spec[,10:20], tree.hel.soil.spec[,21:45])
 
-hel.rda.fulsoil.full=rda(tree.hel.soil.spec[,10:29]~tree.hel.soil.spec$Ptot_long+tree.hel.soil.spec$Po_long+tree.hel.soil.spec$pH_long+tree.hel.soil.spec$moist_long +tree.hel.soil.spec$ps1_long+tree.hel.soil.spec$ps2_long+tree.hel.soil.spec$percc_long+tree.hel.soil.spec$cton_long+tree.hel.soil.spec$Ptot_nug+tree.hel.soil.spec$Po_nug+tree.hel.soil.spec$pH_nug+tree.hel.soil.spec$moist_nug+tree.hel.soil.spec$ps1_nug+tree.hel.soil.spec$ps2_nug+tree.hel.soil.spec$percc_nug+tree.hel.soil.spec$pomc_nug+tree.hel.soil.spec$cton_nug+tree.hel.soil.spec$Ptot_short+tree.hel.soil.spec$Po_short+tree.hel.soil.spec$pH_short+tree.hel.soil.spec$moist_short+tree.hel.soil.spec$ps1_short+tree.hel.soil.spec$percc_short+tree.hel.soil.spec$pomc_short+tree.hel.soil.spec$cton_short)
+hel.rda.fulsoil.full=rda(tree.hel.soil.spec[,10:20]~tree.hel.soil.spec$Ptot_long+tree.hel.soil.spec$Po_long+tree.hel.soil.spec$pH_long+tree.hel.soil.spec$moist_long +tree.hel.soil.spec$ps1_long+tree.hel.soil.spec$ps2_long+tree.hel.soil.spec$percc_long+tree.hel.soil.spec$cton_long+tree.hel.soil.spec$Ptot_nug+tree.hel.soil.spec$Po_nug+tree.hel.soil.spec$pH_nug+tree.hel.soil.spec$moist_nug+tree.hel.soil.spec$ps1_nug+tree.hel.soil.spec$ps2_nug+tree.hel.soil.spec$percc_nug+tree.hel.soil.spec$pomc_nug+tree.hel.soil.spec$cton_nug+tree.hel.soil.spec$Ptot_short+tree.hel.soil.spec$Po_short+tree.hel.soil.spec$pH_short+tree.hel.soil.spec$moist_short+tree.hel.soil.spec$ps1_short+tree.hel.soil.spec$percc_short+tree.hel.soil.spec$pomc_short+tree.hel.soil.spec$cton_short)
 
 tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
 tree.sel
 
 names(tree.hel.soil.spec)
-hel.rda.selsoil = rda(tree.hel.soil.spec[,10:29] ~ as.matrix(tree.hel.soil.spec[,c(43,42,57)]))
+hel.rda.selsoil = rda(tree.hel.soil.spec[,10:20] ~ as.matrix(tree.hel.soil.spec[,c(21,23,27)]))
 anova(hel.rda.selsoil)
 RsquareAdj(hel.rda.selsoil)
 plot(hel.rda.selsoil)
@@ -1081,44 +1032,38 @@ all.pcnmvecs=all.pcnm1$vectors
 tree.hel.all.pcnm=cbind(tree.hel.soil.spec,all.pcnmvecs)
 names(tree.hel.all.pcnm)
 # Now run step 1, global analysis
-hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:29], tree.hel.all.pcnm[,65:107])
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:20], tree.hel.all.pcnm[,46:88])
 anova(hel.rda.all.fulpcnm)
 RsquareAdj(hel.rda.all.fulpcnm)
 global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
 # now run step 2, the selection part
-hel.rda.fulsoil.none = rda(tree.hel.all.pcnm[,10:29]~1)
-hel.rda.fulsoil = rda(tree.hel.all.pcnm[,10:29], tree.hel.all.pcnm[,60:102])
+hel.rda.fulsoil.none = rda(tree.hel.all.pcnm[,10:20]~1)
+hel.rda.fulsoil = rda(tree.hel.all.pcnm[,10:20], tree.hel.all.pcnm[,46:88])
 
-hel.rda.fulsoil.full=rda(tree.hel.all.pcnm[,10:29]~tree.hel.all.pcnm$PCNM1+tree.hel.all.pcnm$PCNM2+tree.hel.all.pcnm$PCNM3+tree.hel.all.pcnm$PCNM4+tree.hel.all.pcnm$PCNM5+tree.hel.all.pcnm$PCNM6+tree.hel.all.pcnm$PCNM7+tree.hel.all.pcnm$PCNM8+tree.hel.all.pcnm$PCNM9+tree.hel.all.pcnm$PCNM10+tree.hel.all.pcnm$PCNM11+tree.hel.all.pcnm$PCNM12+tree.hel.all.pcnm$PCNM13+tree.hel.all.pcnm$PCNM14+tree.hel.all.pcnm$PCNM15+tree.hel.all.pcnm$PCNM16+tree.hel.all.pcnm$PCNM17+tree.hel.all.pcnm$PCNM18+tree.hel.all.pcnm$PCNM19+tree.hel.all.pcnm$PCNM20+tree.hel.all.pcnm$PCNM21+tree.hel.all.pcnm$PCNM22+tree.hel.all.pcnm$PCNM23+tree.hel.all.pcnm$PCNM24+tree.hel.all.pcnm$PCNM25+tree.hel.all.pcnm$PCNM26+tree.hel.all.pcnm$PCNM27+tree.hel.all.pcnm$PCNM28+tree.hel.all.pcnm$PCNM29+tree.hel.all.pcnm$PCNM30+tree.hel.all.pcnm$PCNM31+tree.hel.all.pcnm$PCNM32+tree.hel.all.pcnm$PCNM33+tree.hel.all.pcnm$PCNM34+tree.hel.all.pcnm$PCNM35+tree.hel.all.pcnm$PCNM36+tree.hel.all.pcnm$PCNM37+tree.hel.all.pcnm$PCNM38+tree.hel.all.pcnm$PCNM39+tree.hel.all.pcnm$PCNM40+tree.hel.all.pcnm$PCNM41+tree.hel.all.pcnm$PCNM42+tree.hel.all.pcnm$PCNM43)
+hel.rda.fulsoil.full=rda(tree.hel.all.pcnm[,10:20]~tree.hel.all.pcnm$PCNM1+tree.hel.all.pcnm$PCNM2+tree.hel.all.pcnm$PCNM3+tree.hel.all.pcnm$PCNM4+tree.hel.all.pcnm$PCNM5+tree.hel.all.pcnm$PCNM6+tree.hel.all.pcnm$PCNM7+tree.hel.all.pcnm$PCNM8+tree.hel.all.pcnm$PCNM9+tree.hel.all.pcnm$PCNM10+tree.hel.all.pcnm$PCNM11+tree.hel.all.pcnm$PCNM12+tree.hel.all.pcnm$PCNM13+tree.hel.all.pcnm$PCNM14+tree.hel.all.pcnm$PCNM15+tree.hel.all.pcnm$PCNM16+tree.hel.all.pcnm$PCNM17+tree.hel.all.pcnm$PCNM18+tree.hel.all.pcnm$PCNM19+tree.hel.all.pcnm$PCNM20+tree.hel.all.pcnm$PCNM21+tree.hel.all.pcnm$PCNM22+tree.hel.all.pcnm$PCNM23+tree.hel.all.pcnm$PCNM24+tree.hel.all.pcnm$PCNM25+tree.hel.all.pcnm$PCNM26+tree.hel.all.pcnm$PCNM27+tree.hel.all.pcnm$PCNM28+tree.hel.all.pcnm$PCNM29+tree.hel.all.pcnm$PCNM30+tree.hel.all.pcnm$PCNM31+tree.hel.all.pcnm$PCNM32+tree.hel.all.pcnm$PCNM33+tree.hel.all.pcnm$PCNM34+tree.hel.all.pcnm$PCNM35+tree.hel.all.pcnm$PCNM36+tree.hel.all.pcnm$PCNM37+tree.hel.all.pcnm$PCNM38+tree.hel.all.pcnm$PCNM39+tree.hel.all.pcnm$PCNM40+tree.hel.all.pcnm$PCNM41+tree.hel.all.pcnm$PCNM42+tree.hel.all.pcnm$PCNM43)
 
 tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
 tree.sel
 # Let's store a model using the selected variables only
 names(tree.hel.all.pcnm)
-hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:29] ~ as.matrix(tree.hel.all.pcnm[,c(65:67,71,73,104:105)]))
+hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:20] ~ as.matrix(tree.hel.all.pcnm[,c(46:52,54)]))
 anova(hel.rda.all.selpcnm)
 RsquareAdj(hel.rda.all.selpcnm)
 
 # Now that we have these parsimonious models, NOW WE CAN PERFORM VARIANCE PARTITIONING!  Hurray!
 colnames(tree.hel.all.pcnm)
-varpart(tree.hel.all.pcnm[,10:29], tree.hel.all.pcnm[,c(43,42,57)], tree.hel.all.pcnm[,c(65:67,71,73,104:105)])
+varpart(tree.hel.all.pcnm[,10:20], tree.hel.all.pcnm[,c(21,23,27)], tree.hel.all.pcnm[,c(46:52,54)])
 # The variance explained by soil variables and spatial structure clearly overlap. 
 # It also appears that there is more independent spatial structure in the trees than independent structuring by soil.
 # Are the soil variables significant after accounting for spatial structure, and vice versa?
 # Let's see.
-hel.rda.all.partpcnm=rda(tree.hel.all.pcnm[,10:29], tree.hel.all.pcnm[,c(65:67,71,73,104:105)], tree.hel.all.pcnm[,c(43,42,57)])
+hel.rda.all.partpcnm=rda(tree.hel.all.pcnm[,10:20], tree.hel.all.pcnm[,c(46:52,54)], tree.hel.all.pcnm[,c(21,23,27)])
 anova(hel.rda.all.partpcnm)
 # Yes.
-hel.rda.all.partsoil=rda(tree.hel.all.pcnm[,10:29], tree.hel.all.pcnm[,c(43,42,57)], tree.hel.all.pcnm[,c(65:67,71,73,104:105)])
+hel.rda.all.partsoil=rda(tree.hel.all.pcnm[,10:20], tree.hel.all.pcnm[,c(21,23,27)], tree.hel.all.pcnm[,c(46:52,54)])
 anova(hel.rda.all.partsoil)
 # Also yes.  But only by p-value; that is really not much variance explained anymore.
 
-
-colnames(tree.hel.all.pcnm)
-varpart(tree.hel.all.pcnm[,10:43], tree.hel.all.pcnm[,c(77:81,83:86)], tree.hel.all.pcnm[,c(86,80,88,82,81,90)])
-
-
-names(tree.hel.all.pcnm)
 plot(hel.rda.all.partpcnm)
 
 ### Can you try to run this on core only plots or core+edge plots and see how the importance of soil versus spatial structure shifts?
@@ -1129,22 +1074,22 @@ rownames(tree.hel.soil.spec)=tree.hel.soil.spec[,1]
 tree.hel.soil.spec=na.exclude(tree.hel.soil.spec)
 colnames(tree.hel.soil.spec)
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil.spec[,10:29], tree.hel.soil.spec[,40:64])
+hel.rda.fulsoil = rda(tree.hel.soil.spec[,10:20], tree.hel.soil.spec[,21:45])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 
 # Here is the forward selection command and then constructing a model with selected variables.
-hel.rda.fulsoil.none = rda(tree.hel.soil.spec[,10:29]~1)
-hel.rda.fulsoil = rda(tree.hel.soil.spec[,10:29], tree.hel.soil.spec[,40:64])
+hel.rda.fulsoil.none = rda(tree.hel.soil.spec[,10:20]~1)
+hel.rda.fulsoil = rda(tree.hel.soil.spec[,10:20], tree.hel.soil.spec[,21:45])
 
-hel.rda.fulsoil.full=rda(tree.hel.soil.spec[,10:29]~tree.hel.soil.spec$Ptot_long+tree.hel.soil.spec$Po_long+tree.hel.soil.spec$pH_long+tree.hel.soil.spec$moist_long +tree.hel.soil.spec$ps1_long+tree.hel.soil.spec$ps2_long+tree.hel.soil.spec$percc_long+tree.hel.soil.spec$cton_long+tree.hel.soil.spec$Ptot_nug+tree.hel.soil.spec$Po_nug+tree.hel.soil.spec$pH_nug+tree.hel.soil.spec$moist_nug+tree.hel.soil.spec$ps1_nug+tree.hel.soil.spec$ps2_nug+tree.hel.soil.spec$percc_nug+tree.hel.soil.spec$pomc_nug+tree.hel.soil.spec$cton_nug+tree.hel.soil.spec$Ptot_short+tree.hel.soil.spec$Po_short+tree.hel.soil.spec$pH_short+tree.hel.soil.spec$moist_short+tree.hel.soil.spec$ps1_short+tree.hel.soil.spec$percc_short+tree.hel.soil.spec$pomc_short+tree.hel.soil.spec$cton_short)
+hel.rda.fulsoil.full=rda(tree.hel.soil.spec[,10:20]~tree.hel.soil.spec$Ptot_long+tree.hel.soil.spec$Po_long+tree.hel.soil.spec$pH_long+tree.hel.soil.spec$moist_long +tree.hel.soil.spec$ps1_long+tree.hel.soil.spec$ps2_long+tree.hel.soil.spec$percc_long+tree.hel.soil.spec$cton_long+tree.hel.soil.spec$Ptot_nug+tree.hel.soil.spec$Po_nug+tree.hel.soil.spec$pH_nug+tree.hel.soil.spec$moist_nug+tree.hel.soil.spec$ps1_nug+tree.hel.soil.spec$ps2_nug+tree.hel.soil.spec$percc_nug+tree.hel.soil.spec$pomc_nug+tree.hel.soil.spec$cton_nug+tree.hel.soil.spec$Ptot_short+tree.hel.soil.spec$Po_short+tree.hel.soil.spec$pH_short+tree.hel.soil.spec$moist_short+tree.hel.soil.spec$ps1_short+tree.hel.soil.spec$percc_short+tree.hel.soil.spec$pomc_short+tree.hel.soil.spec$cton_short)
 
 tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
 tree.sel
 
 names(tree.hel.soil.spec)
-hel.rda.selsoil = rda(tree.hel.soil.spec[,10:29] ~ as.matrix(tree.hel.soil.spec[,c(40,46,60)]))
+hel.rda.selsoil = rda(tree.hel.soil.spec[,10:20] ~ as.matrix(tree.hel.soil.spec[,c(21,27)]))
 anova(hel.rda.selsoil)
 RsquareAdj(hel.rda.selsoil)
 plot(hel.rda.selsoil)
@@ -1160,35 +1105,35 @@ all.pcnmvecs=all.pcnm1$vectors
 tree.hel.all.pcnm=cbind(tree.hel.soil.spec,all.pcnmvecs)
 names(tree.hel.all.pcnm)
 # Now run step 1, global analysis
-hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:29], tree.hel.all.pcnm[,65:89])
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:20], tree.hel.all.pcnm[,46:70])
 anova(hel.rda.all.fulpcnm)
 RsquareAdj(hel.rda.all.fulpcnm)
 global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
 # now run step 2, the selection part
-#hel.rda.fulsoil.none = rda(tree.hel.all.pcnm[,10:29]~1)
-#hel.rda.fulsoil = rda(tree.hel.all.pcnm[,10:29], tree.hel.all.pcnm[,60:102])
+hel.rda.fulsoil.none = rda(tree.hel.all.pcnm[,10:20]~1)
+hel.rda.fulsoil = rda(tree.hel.all.pcnm[,10:20], tree.hel.all.pcnm[,46:70])
 
-#hel.rda.fulsoil.full=rda(tree.hel.all.pcnm[,10:29]~tree.hel.all.pcnm$PCNM1+tree.hel.all.pcnm$PCNM2+tree.hel.all.pcnm$PCNM3+tree.hel.all.pcnm$PCNM4+tree.hel.all.pcnm$PCNM5+tree.hel.all.pcnm$PCNM6+tree.hel.all.pcnm$PCNM7+tree.hel.all.pcnm$PCNM8+tree.hel.all.pcnm$PCNM9+tree.hel.all.pcnm$PCNM10+tree.hel.all.pcnm$PCNM11+tree.hel.all.pcnm$PCNM12+tree.hel.all.pcnm$PCNM13+tree.hel.all.pcnm$PCNM14+tree.hel.all.pcnm$PCNM15+tree.hel.all.pcnm$PCNM16+tree.hel.all.pcnm$PCNM17+tree.hel.all.pcnm$PCNM18+tree.hel.all.pcnm$PCNM19+tree.hel.all.pcnm$PCNM20+tree.hel.all.pcnm$PCNM21+tree.hel.all.pcnm$PCNM22+tree.hel.all.pcnm$PCNM23+tree.hel.all.pcnm$PCNM24+tree.hel.all.pcnm$PCNM25+tree.hel.all.pcnm$PCNM26+tree.hel.all.pcnm$PCNM27+tree.hel.all.pcnm$PCNM28+tree.hel.all.pcnm$PCNM29+tree.hel.all.pcnm$PCNM30+tree.hel.all.pcnm$PCNM31+tree.hel.all.pcnm$PCNM32+tree.hel.all.pcnm$PCNM33+tree.hel.all.pcnm$PCNM34+tree.hel.all.pcnm$PCNM35+tree.hel.all.pcnm$PCNM36+tree.hel.all.pcnm$PCNM37+tree.hel.all.pcnm$PCNM38+tree.hel.all.pcnm$PCNM39+tree.hel.all.pcnm$PCNM40+tree.hel.all.pcnm$PCNM41+tree.hel.all.pcnm$PCNM42+tree.hel.all.pcnm$PCNM43)
+hel.rda.fulsoil.full=rda(tree.hel.all.pcnm[,10:20]~tree.hel.all.pcnm$PCNM1+tree.hel.all.pcnm$PCNM2+tree.hel.all.pcnm$PCNM3+tree.hel.all.pcnm$PCNM4+tree.hel.all.pcnm$PCNM5+tree.hel.all.pcnm$PCNM6+tree.hel.all.pcnm$PCNM7+tree.hel.all.pcnm$PCNM8+tree.hel.all.pcnm$PCNM9+tree.hel.all.pcnm$PCNM10+tree.hel.all.pcnm$PCNM11+tree.hel.all.pcnm$PCNM12+tree.hel.all.pcnm$PCNM13+tree.hel.all.pcnm$PCNM14+tree.hel.all.pcnm$PCNM15+tree.hel.all.pcnm$PCNM16+tree.hel.all.pcnm$PCNM17+tree.hel.all.pcnm$PCNM18+tree.hel.all.pcnm$PCNM19+tree.hel.all.pcnm$PCNM20+tree.hel.all.pcnm$PCNM21+tree.hel.all.pcnm$PCNM22+tree.hel.all.pcnm$PCNM23+tree.hel.all.pcnm$PCNM24+tree.hel.all.pcnm$PCNM25)
 
-#tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
-#tree.sel
+tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
+tree.sel
 # Let's store a model using the selected variables only
 names(tree.hel.all.pcnm)
-hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:43] ~ as.matrix(tree.hel.all.pcnm[,c(80,85,81,82,83,84,86,87,89)]))
+hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:20] ~ as.matrix(tree.hel.all.pcnm[,c(46:48,50:51,56)]))
 anova(hel.rda.all.selpcnm)
 RsquareAdj(hel.rda.all.selpcnm)
 
 # Now that we have these parsimonious models, NOW WE CAN PERFORM VARIANCE PARTITIONING!  Hurray!
 colnames(tree.hel.all.pcnm)
-varpart(tree.hel.all.pcnm[,10:43], tree.hel.all.pcnm[,c(88,90:104)], tree.hel.all.pcnm[,c(80,85,81,82,83,84,86,87,89)])
+varpart(tree.hel.all.pcnm[,10:43], tree.hel.all.pcnm[,c(46:48,50:51,56)], tree.hel.all.pcnm[,c(21,27)])
 # The variance explained by soil variables and spatial structure clearly overlap. 
 # It also appears that there is more independent spatial structure in the trees than independent structuring by soil.
 # Are the soil variables significant after accounting for spatial structure, and vice versa?
 # Let's see.
-hel.rda.all.partpcnm=rda(tree.hel.all.pcnm[,10:43], tree.hel.all.pcnm[,c(88,90:104)], tree.hel.all.pcnm[,c(80,85,81,82,83,84,86,87,89)])
+hel.rda.all.partpcnm=rda(tree.hel.all.pcnm[,10:43], tree.hel.all.pcnm[,c(46:48,50:51,56)], tree.hel.all.pcnm[,c(21,27)])
 anova(hel.rda.all.partpcnm)
 # NO.
-hel.rda.all.partsoil=rda(tree.hel.all.pcnm[,10:43], tree.hel.all.pcnm[,c(80,85,81,82,83,84,86,87,89)], tree.hel.all.pcnm[,c(88,90:104)])
+hel.rda.all.partsoil=rda(tree.hel.all.pcnm[,10:43], tree.hel.all.pcnm[,c(21,27)], tree.hel.all.pcnm[,c(46:48,50:51,56)])
 anova(hel.rda.all.partsoil)
 # Also yes.  But only by p-value; that is really not much variance explained anymore.
 
@@ -1199,22 +1144,22 @@ rownames(tree.hel.soil.spec)=tree.hel.soil.spec[,1]
 tree.hel.soil.spec=na.exclude(tree.hel.soil.spec)
 colnames(tree.hel.soil.spec)
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil.spec[,10:29], tree.hel.soil.spec[,40:64])
+hel.rda.fulsoil = rda(tree.hel.soil.spec[,10:20], tree.hel.soil.spec[,21:45])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 
 # Here is the forward selection command and then constructing a model with selected variables.
-hel.rda.fulsoil.none = rda(tree.hel.soil.spec[,10:29]~1)
-hel.rda.fulsoil = rda(tree.hel.soil.spec[,10:29], tree.hel.soil.spec[,40:64])
+hel.rda.fulsoil.none = rda(tree.hel.soil.spec[,10:20]~1)
+hel.rda.fulsoil = rda(tree.hel.soil.spec[,10:20], tree.hel.soil.spec[,21:45])
 
-hel.rda.fulsoil.full=rda(tree.hel.soil.spec[,10:29]~tree.hel.soil.spec$Ptot_long+tree.hel.soil.spec$Po_long+tree.hel.soil.spec$pH_long+tree.hel.soil.spec$moist_long +tree.hel.soil.spec$ps1_long+tree.hel.soil.spec$ps2_long+tree.hel.soil.spec$percc_long+tree.hel.soil.spec$cton_long+tree.hel.soil.spec$Ptot_nug+tree.hel.soil.spec$Po_nug+tree.hel.soil.spec$pH_nug+tree.hel.soil.spec$moist_nug+tree.hel.soil.spec$ps1_nug+tree.hel.soil.spec$ps2_nug+tree.hel.soil.spec$percc_nug+tree.hel.soil.spec$pomc_nug+tree.hel.soil.spec$cton_nug+tree.hel.soil.spec$Ptot_short+tree.hel.soil.spec$Po_short+tree.hel.soil.spec$pH_short+tree.hel.soil.spec$moist_short+tree.hel.soil.spec$ps1_short+tree.hel.soil.spec$percc_short+tree.hel.soil.spec$pomc_short+tree.hel.soil.spec$cton_short)
+hel.rda.fulsoil.full=rda(tree.hel.soil.spec[,10:20]~tree.hel.soil.spec$Ptot_long+tree.hel.soil.spec$Po_long+tree.hel.soil.spec$pH_long+tree.hel.soil.spec$moist_long +tree.hel.soil.spec$ps1_long+tree.hel.soil.spec$ps2_long+tree.hel.soil.spec$percc_long+tree.hel.soil.spec$cton_long+tree.hel.soil.spec$Ptot_nug+tree.hel.soil.spec$Po_nug+tree.hel.soil.spec$pH_nug+tree.hel.soil.spec$moist_nug+tree.hel.soil.spec$ps1_nug+tree.hel.soil.spec$ps2_nug+tree.hel.soil.spec$percc_nug+tree.hel.soil.spec$pomc_nug+tree.hel.soil.spec$cton_nug+tree.hel.soil.spec$Ptot_short+tree.hel.soil.spec$Po_short+tree.hel.soil.spec$pH_short+tree.hel.soil.spec$moist_short+tree.hel.soil.spec$ps1_short+tree.hel.soil.spec$percc_short+tree.hel.soil.spec$pomc_short+tree.hel.soil.spec$cton_short)
 
 tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
 tree.sel
 
 names(tree.hel.soil.spec)
-hel.rda.selsoil = rda(tree.hel.soil.spec[,10:29] ~ as.matrix(tree.hel.soil.spec[,c(43,42,60)]))
+hel.rda.selsoil = rda(tree.hel.soil.spec[,10:20] ~ as.matrix(tree.hel.soil.spec[,c(24,23,27)]))
 anova(hel.rda.selsoil)
 RsquareAdj(hel.rda.selsoil)
 plot(hel.rda.selsoil)
@@ -1230,35 +1175,35 @@ all.pcnmvecs=all.pcnm1$vectors
 tree.hel.all.pcnm=cbind(tree.hel.soil.spec,all.pcnmvecs)
 names(tree.hel.all.pcnm)
 # Now run step 1, global analysis
-hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:29], tree.hel.all.pcnm[,65:103])
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:20], tree.hel.all.pcnm[,46:84])
 anova(hel.rda.all.fulpcnm)
 RsquareAdj(hel.rda.all.fulpcnm)
 global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
 # now run step 2, the selection part
-hel.rda.fulsoil.none = rda(tree.hel.all.pcnm[,10:29]~1)
-hel.rda.fulsoil = rda(tree.hel.all.pcnm[,10:29], tree.hel.all.pcnm[,60:103])
+hel.rda.fulsoil.none = rda(tree.hel.all.pcnm[,10:20]~1)
+hel.rda.fulsoil = rda(tree.hel.all.pcnm[,10:20], tree.hel.all.pcnm[,46:84])
 
-hel.rda.fulsoil.full=rda(tree.hel.all.pcnm[,10:29]~tree.hel.all.pcnm$PCNM1+tree.hel.all.pcnm$PCNM2+tree.hel.all.pcnm$PCNM3+tree.hel.all.pcnm$PCNM4+tree.hel.all.pcnm$PCNM5+tree.hel.all.pcnm$PCNM6+tree.hel.all.pcnm$PCNM7+tree.hel.all.pcnm$PCNM8+tree.hel.all.pcnm$PCNM9+tree.hel.all.pcnm$PCNM10+tree.hel.all.pcnm$PCNM11+tree.hel.all.pcnm$PCNM12+tree.hel.all.pcnm$PCNM13+tree.hel.all.pcnm$PCNM14+tree.hel.all.pcnm$PCNM15+tree.hel.all.pcnm$PCNM16+tree.hel.all.pcnm$PCNM17+tree.hel.all.pcnm$PCNM18+tree.hel.all.pcnm$PCNM19+tree.hel.all.pcnm$PCNM20+tree.hel.all.pcnm$PCNM21+tree.hel.all.pcnm$PCNM22+tree.hel.all.pcnm$PCNM23+tree.hel.all.pcnm$PCNM24+tree.hel.all.pcnm$PCNM25+tree.hel.all.pcnm$PCNM26+tree.hel.all.pcnm$PCNM27+tree.hel.all.pcnm$PCNM28+tree.hel.all.pcnm$PCNM29+tree.hel.all.pcnm$PCNM30+tree.hel.all.pcnm$PCNM31+tree.hel.all.pcnm$PCNM32+tree.hel.all.pcnm$PCNM33+tree.hel.all.pcnm$PCNM34+tree.hel.all.pcnm$PCNM35+tree.hel.all.pcnm$PCNM36+tree.hel.all.pcnm$PCNM37+tree.hel.all.pcnm$PCNM38+tree.hel.all.pcnm$PCNM39)
+hel.rda.fulsoil.full=rda(tree.hel.all.pcnm[,10:20]~tree.hel.all.pcnm$PCNM1+tree.hel.all.pcnm$PCNM2+tree.hel.all.pcnm$PCNM3+tree.hel.all.pcnm$PCNM4+tree.hel.all.pcnm$PCNM5+tree.hel.all.pcnm$PCNM6+tree.hel.all.pcnm$PCNM7+tree.hel.all.pcnm$PCNM8+tree.hel.all.pcnm$PCNM9+tree.hel.all.pcnm$PCNM10+tree.hel.all.pcnm$PCNM11+tree.hel.all.pcnm$PCNM12+tree.hel.all.pcnm$PCNM13+tree.hel.all.pcnm$PCNM14+tree.hel.all.pcnm$PCNM15+tree.hel.all.pcnm$PCNM16+tree.hel.all.pcnm$PCNM17+tree.hel.all.pcnm$PCNM18+tree.hel.all.pcnm$PCNM19+tree.hel.all.pcnm$PCNM20+tree.hel.all.pcnm$PCNM21+tree.hel.all.pcnm$PCNM22+tree.hel.all.pcnm$PCNM23+tree.hel.all.pcnm$PCNM24+tree.hel.all.pcnm$PCNM25+tree.hel.all.pcnm$PCNM26+tree.hel.all.pcnm$PCNM27+tree.hel.all.pcnm$PCNM28+tree.hel.all.pcnm$PCNM29+tree.hel.all.pcnm$PCNM30+tree.hel.all.pcnm$PCNM31+tree.hel.all.pcnm$PCNM32+tree.hel.all.pcnm$PCNM33+tree.hel.all.pcnm$PCNM34+tree.hel.all.pcnm$PCNM35+tree.hel.all.pcnm$PCNM36+tree.hel.all.pcnm$PCNM37+tree.hel.all.pcnm$PCNM38+tree.hel.all.pcnm$PCNM39)
 
 tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
 tree.sel
 # Let's store a model using the selected variables only
 names(tree.hel.all.pcnm)
-hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:43] ~ as.matrix(tree.hel.all.pcnm[,c(65:66,68,73:74,78,101)]))
+hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:43] ~ as.matrix(tree.hel.all.pcnm[,c(46:47,49,51:52,54)]))
 anova(hel.rda.all.selpcnm)
 RsquareAdj(hel.rda.all.selpcnm)
 
 # Now that we have these parsimonious models, NOW WE CAN PERFORM VARIANCE PARTITIONING!  Hurray!
 colnames(tree.hel.all.pcnm)
-varpart(tree.hel.all.pcnm[,10:29], tree.hel.all.pcnm[,c(43,42,60)], tree.hel.all.pcnm[,c(65:66,68,73:74,78,101)])
+varpart(tree.hel.all.pcnm[,10:20], tree.hel.all.pcnm[,c(24,23,27)], tree.hel.all.pcnm[,c(46:47,49,51:52,54)])
 # The variance explained by soil variables and spatial structure clearly overlap. 
 # It also appears that there is more independent spatial structure in the trees than independent structuring by soil.
 # Are the soil variables significant after accounting for spatial structure, and vice versa?
 # Let's see.
-hel.rda.all.partpcnm=rda(tree.hel.all.pcnm[,10:29], tree.hel.all.pcnm[,c(65:66,68,73:74,78,101)], tree.hel.all.pcnm[,c(43,42,60)])
+hel.rda.all.partpcnm=rda(tree.hel.all.pcnm[,10:20], tree.hel.all.pcnm[,c(46:47,49,51:52,54)], tree.hel.all.pcnm[,c(24,23,27)])
 anova(hel.rda.all.partpcnm)
 # Yes.
-hel.rda.all.partsoil=rda(tree.hel.all.pcnm[,10:29], tree.hel.all.pcnm[,c(43,42,60)], tree.hel.all.pcnm[,c(65:66,68,73:74,78,101)])
+hel.rda.all.partsoil=rda(tree.hel.all.pcnm[,10:20], tree.hel.all.pcnm[,c(24,23,27)], tree.hel.all.pcnm[,c(46:47,49,51:52,54)])
 anova(hel.rda.all.partsoil)
 # Also yes.  But only by p-value; that is really not much variance explained anymore.
 
@@ -1269,13 +1214,13 @@ anova(hel.rda.all.partsoil)
 # First the core plots
 tree.hel.core=tree.hel[tree.hel$EP=="Core",]
 rownames(tree.hel.core)
-tree.hel.core.rda.ecosys = rda(tree.hel.core[,10:43] ~ tree.hel.core[,3])
+tree.hel.core.rda.ecosys = rda(tree.hel.core[,10:20] ~ tree.hel.core[,3])
 anova(tree.hel.core.rda.ecosys)
 core.arsq=RsquareAdj(tree.hel.core.rda.ecosys)
 # Then the core+edge plots
 tree.hel.edge=tree.hel[tree.hel$EP=="Core"|tree.hel$EP=="Edge",]
 names(tree.hel.edge)
-tree.hel.edge.rda.ecosys = rda(tree.hel.edge[,10:43] ~ tree.hel.edge[,3])
+tree.hel.edge.rda.ecosys = rda(tree.hel.edge[,10:20] ~ tree.hel.edge[,3])
 anova(tree.hel.edge.rda.ecosys)
 edge.arsq=RsquareAdj(tree.hel.edge.rda.ecosys)
 # Then the permmutation test of the edge effect
@@ -1290,7 +1235,7 @@ for(i in 1:nperm){
   dat.ec.rand[dat.ec.rand$ecosys=="U",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="U",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="U",]))
   dat.ec.rand[dat.ec.rand$ecosys=="D",5]=sample(dat.ec.rand[dat.ec.rand$ecosys=="D",5],size=nrow(dat.ec.rand[dat.ec.rand$ecosys=="D",]))
   dat.core.rand=dat.ec.rand[dat.ec.rand$EP=="Core",]
-  datcore.rda.ecosys = rda(dat.core.rand[,10:42] ~ dat.core.rand[,3])
+  datcore.rda.ecosys = rda(dat.core.rand[,10:20] ~ dat.core.rand[,3])
   core.arsq.rand=RsquareAdj(datcore.rda.ecosys)
   res.vec[i]=core.arsq.rand$adj.r.squared/edge.arsq$adj.r.squared
 }
@@ -1301,12 +1246,12 @@ goodness(tree.hel.core.rda.ecosys)
 goodness(tree.hel.edge.rda.ecosys)
 
 ##Same idea as above, but Jaccard distance analysis by PCoA/distance-based RDA
-jac.core.dist=vegdist(tree.hel.core[,10:43],method="jaccard",binary=TRUE)
+jac.core.dist=vegdist(tree.hel.core[,10:20],method="jaccard",binary=TRUE)
 jac.core.pcoa=cmdscale(jac.core.dist,eig=TRUE,k=41,add=TRUE)
 jac.core.rda.ecosys = rda(jac.core.pcoa$points ~ tree.hel.core[,3])
 anova(jac.core.rda.ecosys)
 jac.core.arsq=RsquareAdj(jac.core.rda.ecosys)
-jac.edge.dist=vegdist(tree.hel.edge[,10:43],method="jaccard",binary=TRUE)
+jac.edge.dist=vegdist(tree.hel.edge[,10:20],method="jaccard",binary=TRUE)
 jac.edge.pcoa=cmdscale(jac.edge.dist,eig=TRUE,k=70,add=TRUE)
 jac.edge.pcoa.points=cbind(jac.edge.pcoa$points,tree.hel.edge)
 jac.edge.rda.ecosys = rda(jac.edge.pcoa.points[,1:70] ~ jac.edge.pcoa.points[,73])
@@ -1329,10 +1274,10 @@ for(i in 1:nperm){
 tiles=rank(rbind(res.vec,jac.edge.eff))
 1-tiles[nperm+1]/(nperm+1)
 ```
-```{r spec mortalirt}
+```{r spec mortality}
 #Mortality
-treedata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/Species Mortality Matrix.csv")
-soildata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
+treedata=read.csv("C:/Users/crc31/OneDrive/Documents/School/Research/Data/Trees/Species Mortality Matrix.csv")
+soildata=read.csv("C:/Users/crc31/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
 names(treedata)
 rownames(treedata)=treedata[,1]
 dim(treedata)
@@ -1369,28 +1314,13 @@ is.na(tree.hel.soil)
 tree.hel.soil=na.exclude(tree.hel.soil)
 
 #separate out specialists
-tree.hel.soil=tree.hel.soil[,c(1:9,12,15,18:19,22:23,25:26,29:31,34:35,37,39:76)]
+tree.hel.soil=tree.hel.soil[,c(1:9,11,14,20:22,24,29,32,35,39,41,52:76)]
 
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil[,10:27], tree.hel.soil[,37:61])
+hel.rda.fulsoil = rda(tree.hel.soil[,10:20], tree.hel.soil[,21:45])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
-# Here is the forward selection command and then constructing a model with selected variables.
-hel.rda.fulsoil.none = rda(tree.hel.soil[,10:27]~1)
-hel.rda.fulsoil = rda(tree.hel.soil[,10:27], tree.hel.soil[,37:61])
-
-hel.rda.fulsoil.full=rda(tree.hel.soil[,10:27]~tree.hel.soil$Ptot_long+tree.hel.soil$Po_long+tree.hel.soil$pH_long+tree.hel.soil$moist_long +tree.hel.soil$ps1_long+tree.hel.soil$ps2_long+tree.hel.soil$percc_long+tree.hel.soil$cton_long+tree.hel.soil$Ptot_nug+tree.hel.soil$Po_nug+tree.hel.soil$pH_nug+tree.hel.soil$moist_nug+tree.hel.soil$ps1_nug+tree.hel.soil$ps2_nug+tree.hel.soil$percc_nug+tree.hel.soil$pomc_nug+tree.hel.soil$cton_nug+tree.hel.soil$Ptot_short+tree.hel.soil$Po_short+tree.hel.soil$pH_short+tree.hel.soil$moist_short+tree.hel.soil$ps1_short+tree.hel.soil$percc_short+tree.hel.soil$pomc_short+tree.hel.soil$cton_short)
-
-tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
-tree.sel
-
-names(tree.hel.soil)
-hel.rda.selsoil = rda(tree.hel.soil[,10:27] ~ as.matrix(tree.hel.soil[,c(61,40)]))
-anova(hel.rda.selsoil)
-RsquareAdj(hel.rda.selsoil)
-plot(hel.rda.selsoil)
-# Cool analysis, but what a terrible plot.  Much better to get the scores and plot them in a real graphing program, or do some fancy graphing in R if that is your thing.
 
 #### Forward selection using PCNM vectors
 ## First we perform PCNM to get the vectors
@@ -1402,7 +1332,7 @@ tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs[,which(all.pcnm1$Moran_I[,2]<
 tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs)
 names(tree.hel.all.pcnm)
 ## Now run step 1, global analysis
-hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:27], tree.hel.all.pcnm[,3])
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:20], tree.hel.all.pcnm[,46:79])
 anova(hel.rda.all.fulpcnm)
 RsquareAdj(hel.rda.all.fulpcnm)
 global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
@@ -1415,7 +1345,7 @@ rownames(tree.hel.soil)=tree.hel.soil[,1]
 tree.hel.soil=na.exclude(tree.hel.soil)
 colnames(tree.hel.soil)
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil[,10:27], tree.hel.soil[,37:61])
+hel.rda.fulsoil = rda(tree.hel.soil[,10:20], tree.hel.soil[,21:45])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
@@ -1430,7 +1360,7 @@ all.pcnmvecs=all.pcnm1$vectors
 tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs)
 names(tree.hel.all.pcnm)
 # Now run step 1, global analysis
-hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,37:61])
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:20], tree.hel.all.pcnm[,46:64])
 anova(hel.rda.all.fulpcnm)
 RsquareAdj(hel.rda.all.fulpcnm)
 global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
@@ -1441,10 +1371,27 @@ rownames(tree.hel.soil)=tree.hel.soil[,1]
 tree.hel.soil=na.exclude(tree.hel.soil)
 colnames(tree.hel.soil)
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil[,10:24], tree.hel.soil[,37:61])
+hel.rda.fulsoil = rda(tree.hel.soil[,10:20], tree.hel.soil[,21:45])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+
+# Here is the forward selection command and then constructing a model with selected variables.
+hel.rda.fulsoil.none = rda(tree.hel.soil.spec[,10:20]~1)
+hel.rda.fulsoil = rda(tree.hel.soil.spec[,10:20], tree.hel.soil.spec[,21:45])
+
+hel.rda.fulsoil.full=rda(tree.hel.soil.spec[,10:20]~tree.hel.soil.spec$Ptot_long+tree.hel.soil.spec$Po_long+tree.hel.soil.spec$pH_long+tree.hel.soil.spec$moist_long +tree.hel.soil.spec$ps1_long+tree.hel.soil.spec$ps2_long+tree.hel.soil.spec$percc_long+tree.hel.soil.spec$cton_long+tree.hel.soil.spec$Ptot_nug+tree.hel.soil.spec$Po_nug+tree.hel.soil.spec$pH_nug+tree.hel.soil.spec$moist_nug+tree.hel.soil.spec$ps1_nug+tree.hel.soil.spec$ps2_nug+tree.hel.soil.spec$percc_nug+tree.hel.soil.spec$pomc_nug+tree.hel.soil.spec$cton_nug+tree.hel.soil.spec$Ptot_short+tree.hel.soil.spec$Po_short+tree.hel.soil.spec$pH_short+tree.hel.soil.spec$moist_short+tree.hel.soil.spec$ps1_short+tree.hel.soil.spec$percc_short+tree.hel.soil.spec$pomc_short+tree.hel.soil.spec$cton_short)
+
+tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
+tree.sel
+
+names(tree.hel.soil.spec)
+hel.rda.selsoil = rda(tree.hel.soil.spec[,10:20] ~ as.matrix(tree.hel.soil.spec[,c(23:24,27)]))
+anova(hel.rda.selsoil)
+RsquareAdj(hel.rda.selsoil)
+plot(hel.rda.selsoil)
+# Cool analysis, but what a terrible plot.  Much better to get the scores and plot them in a real graphing program, or do some fancy graphing in R if that is your thing.
+
 
 #### Forward selection using PCNM vectors
 # First we perform PCNM to get the vectors
@@ -1456,7 +1403,7 @@ all.pcnmvecs=all.pcnm1$vectors
 tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs)
 names(tree.hel.all.pcnm)
 # Now run step 1, global analysis
-hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,37:61])
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,37:61])
 anova(hel.rda.all.fulpcnm)
 RsquareAdj(hel.rda.all.fulpcnm)
 global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
@@ -1531,8 +1478,8 @@ goodness(jac.edge.rda.ecosys)
 ```
 ```{r spec recruitment}
 ##Recruitment
-treedata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/General transition graph files/Species Recruitment Matrix.csv")
-soildata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
+treedata=read.csv("C:/Users/crc31/OneDrive/Documents/School/Research/Data/Trees/General transition graph files/Species Recruitment Matrix.csv")
+soildata=read.csv("C:/Users/crc31/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
 names(treedata)
 dim(treedata)
 names(soildata)
@@ -1569,10 +1516,10 @@ tree.hel.soil=na.exclude(tree.hel.soil)
 dim(tree.hel.soil)
 
 #separate out the specialists
-tree.hel.soil=tree.hel.soil[,c(1:9,14,17,21:22,24,28:29,32:71)]
+tree.hel.soil=tree.hel.soil[,c(1:9,11,13,19:21,23,26,29,47:71)]
 
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil[,10:20], tree.hel.soil[,32:56])
+hel.rda.fulsoil = rda(tree.hel.soil[,10:17], tree.hel.soil[,18:42])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
@@ -1588,7 +1535,7 @@ all.pcnmvecs=all.pcnm1$vectors
 tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs)
 names(tree.hel.all.pcnm)
 # Now run step 1, global analysis
-hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:20], tree.hel.all.pcnm[,57:92])
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:17], tree.hel.all.pcnm[,43:78])
 anova(hel.rda.all.fulpcnm)
 RsquareAdj(hel.rda.all.fulpcnm)
 global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
@@ -1601,7 +1548,7 @@ rownames(tree.hel.soil)=tree.hel.soil[,1]
 tree.hel.soil=na.exclude(tree.hel.soil)
 colnames(tree.hel.soil)
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil[,10:20], tree.hel.soil[,32:56])
+hel.rda.fulsoil = rda(tree.hel.soil[,10:17], tree.hel.soil[,18:42])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
@@ -1616,7 +1563,7 @@ all.pcnmvecs=all.pcnm1$vectors
 tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs)
 names(tree.hel.all.pcnm)
 # Now run step 1, global analysis
-hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:24], tree.hel.all.pcnm[,58:76])
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:17], tree.hel.all.pcnm[,43:63])
 anova(hel.rda.all.fulpcnm)
 RsquareAdj(hel.rda.all.fulpcnm)
 global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
@@ -1627,10 +1574,25 @@ rownames(tree.hel.soil)=tree.hel.soil[,1]
 tree.hel.soil=na.exclude(tree.hel.soil)
 colnames(tree.hel.soil)
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil[,10:20], tree.hel.soil[,32:56])
+hel.rda.fulsoil = rda(tree.hel.soil[,10:17], tree.hel.soil[,18:42])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
+
+# Here is the forward selection command and then constructing a model with selected variables.
+hel.rda.fulsoil.none = rda(tree.hel.soil.spec[,10:17]~1)
+hel.rda.fulsoil = rda(tree.hel.soil.spec[,10:17], tree.hel.soil.spec[,18:42])
+
+hel.rda.fulsoil.full=rda(tree.hel.soil.spec[,10:17]~tree.hel.soil.spec$Ptot_long+tree.hel.soil.spec$Po_long+tree.hel.soil.spec$pH_long+tree.hel.soil.spec$moist_long +tree.hel.soil.spec$ps1_long+tree.hel.soil.spec$ps2_long+tree.hel.soil.spec$percc_long+tree.hel.soil.spec$cton_long+tree.hel.soil.spec$Ptot_nug+tree.hel.soil.spec$Po_nug+tree.hel.soil.spec$pH_nug+tree.hel.soil.spec$moist_nug+tree.hel.soil.spec$ps1_nug+tree.hel.soil.spec$ps2_nug+tree.hel.soil.spec$percc_nug+tree.hel.soil.spec$pomc_nug+tree.hel.soil.spec$cton_nug+tree.hel.soil.spec$Ptot_short+tree.hel.soil.spec$Po_short+tree.hel.soil.spec$pH_short+tree.hel.soil.spec$moist_short+tree.hel.soil.spec$ps1_short+tree.hel.soil.spec$percc_short+tree.hel.soil.spec$pomc_short+tree.hel.soil.spec$cton_short)
+
+tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
+tree.sel
+
+names(tree.hel.soil.spec)
+hel.rda.selsoil = rda(tree.hel.soil.spec[,10:17] ~ as.matrix(tree.hel.soil.spec[,c(21,27)]))
+anova(hel.rda.selsoil)
+RsquareAdj(hel.rda.selsoil)
+plot(hel.rda.selsoil)
 
 #### Forward selection using PCNM vectors
 # First we perform PCNM to get the vectors
@@ -1642,7 +1604,7 @@ all.pcnmvecs=all.pcnm1$vectors
 tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs)
 names(tree.hel.all.pcnm)
 # Now run step 1, global analysis
-hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:20], tree.hel.all.pcnm[,57:90])
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:17], tree.hel.all.pcnm[,43:76])
 anova(hel.rda.all.fulpcnm)
 RsquareAdj(hel.rda.all.fulpcnm)
 global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
@@ -1714,8 +1676,8 @@ goodness(jac.core.rda.ecosys)
 goodness(jac.edge.rda.ecosys)
 ```
 ```{r spec growth}
-treedata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Research/Data/Trees/Species Growth Matrix.csv")
-soildata=read.csv("C:/Users/Colleen/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
+treedata=read.csv("C:/Users/crc31/OneDrive/Documents/School/Research/Data/Trees/Species Growth Matrix.csv")
+soildata=read.csv("C:/Users/crc31/OneDrive/Documents/School/Grad School/SpatialStats/soil data May 08 for tree plots.csv")
 names(treedata)
 dim(treedata)
 names(soildata)
@@ -1748,27 +1710,26 @@ rownames(tree.hel.soil)=tree.hel.soil[,1]
 tree.hel.soil=na.exclude(tree.hel.soil)
 names(tree.hel.soil)
 dim(tree.hel.soil)
-rownames(tree.hel.soil)
 
 #separate out the specialists
-tree.hel.soil=tree.hel.soil[,c(1:9,12,15,17,21:22,24:25,28:30,33:34,36,38:78)]
+tree.hel.soil=tree.hel.soil[,c(1:9,11,14,19:21,25,28,31,34,38,40:42,45:78)]
 
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil[,10:28], tree.hel.soil[,39:63])
+hel.rda.fulsoil = rda(tree.hel.soil[,10:22], tree.hel.soil[,32:56])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 # Here is the forward selection command and then constructing a model with selected variables.
-hel.rda.fulsoil.none = rda(tree.hel.soil[,10:28]~1)
-hel.rda.fulsoil = rda(tree.hel.soil[,10:28], tree.hel.soil[,39:63])
+hel.rda.fulsoil.none = rda(tree.hel.soil[,10:22]~1)
+hel.rda.fulsoil = rda(tree.hel.soil[,10:22], tree.hel.soil[,32:56])
 
-hel.rda.fulsoil.full=rda(tree.hel.soil[,10:28]~tree.hel.soil$Ptot_long+tree.hel.soil$Po_long+tree.hel.soil$pH_long+tree.hel.soil$moist_long +tree.hel.soil$ps1_long+tree.hel.soil$ps2_long+tree.hel.soil$percc_long+tree.hel.soil$cton_long+tree.hel.soil$Ptot_nug+tree.hel.soil$Po_nug+tree.hel.soil$pH_nug+tree.hel.soil$moist_nug+tree.hel.soil$ps1_nug+tree.hel.soil$ps2_nug+tree.hel.soil$percc_nug+tree.hel.soil$pomc_nug+tree.hel.soil$cton_nug+tree.hel.soil$Ptot_short+tree.hel.soil$Po_short+tree.hel.soil$pH_short+tree.hel.soil$moist_short+tree.hel.soil$ps1_short+tree.hel.soil$percc_short+tree.hel.soil$pomc_short+tree.hel.soil$cton_short)
+hel.rda.fulsoil.full=rda(tree.hel.soil[,10:22]~tree.hel.soil$Ptot_long+tree.hel.soil$Po_long+tree.hel.soil$pH_long+tree.hel.soil$moist_long +tree.hel.soil$ps1_long+tree.hel.soil$ps2_long+tree.hel.soil$percc_long+tree.hel.soil$cton_long+tree.hel.soil$Ptot_nug+tree.hel.soil$Po_nug+tree.hel.soil$pH_nug+tree.hel.soil$moist_nug+tree.hel.soil$ps1_nug+tree.hel.soil$ps2_nug+tree.hel.soil$percc_nug+tree.hel.soil$pomc_nug+tree.hel.soil$cton_nug+tree.hel.soil$Ptot_short+tree.hel.soil$Po_short+tree.hel.soil$pH_short+tree.hel.soil$moist_short+tree.hel.soil$ps1_short+tree.hel.soil$percc_short+tree.hel.soil$pomc_short+tree.hel.soil$cton_short)
 
 tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
 tree.sel
 
 names(tree.hel.soil)
-hel.rda.selsoil = rda(tree.hel.soil[,10:28] ~ as.matrix(tree.hel.soil[,c(41:42)]))
+hel.rda.selsoil = rda(tree.hel.soil[,10:22] ~ as.matrix(tree.hel.soil[,c(36:37,51)]))
 anova(hel.rda.selsoil)
 RsquareAdj(hel.rda.selsoil)
 plot(hel.rda.selsoil)
@@ -1784,7 +1745,7 @@ all.pcnmvecs=all.pcnm1$vectors
 tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs)
 names(tree.hel.all.pcnm)
 # Now run step 1, global analysis
-hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:28], tree.hel.all.pcnm[,64:97])
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:22], tree.hel.all.pcnm[,57:90])
 anova(hel.rda.all.fulpcnm)
 RsquareAdj(hel.rda.all.fulpcnm)
 global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
@@ -1797,7 +1758,7 @@ rownames(tree.hel.soil)=tree.hel.soil[,1]
 tree.hel.soil=na.exclude(tree.hel.soil)
 colnames(tree.hel.soil)
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil[,10:28], tree.hel.soil[,39:63])
+hel.rda.fulsoil = rda(tree.hel.soil[,10:22], tree.hel.soil[,32:56])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
@@ -1812,23 +1773,23 @@ all.pcnmvecs=all.pcnm1$vectors
 tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs)
 names(tree.hel.all.pcnm)
 # Now run step 1, global analysis
-hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:28], tree.hel.all.pcnm[,64:81])
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:22], tree.hel.all.pcnm[,57:74])
 anova(hel.rda.all.fulpcnm)
 RsquareAdj(hel.rda.all.fulpcnm)
 global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
 
 names(tree.hel.all.pcnm)
 #Forward selection
-hel.rda.fulsoil.none = rda(tree.hel.all.pcnm[,10:28]~1)
-hel.rda.fulsoil = rda(tree.hel.all.pcnm[,10:28], tree.hel.all.pcnm[,64:81])
+hel.rda.fulsoil.none = rda(tree.hel.all.pcnm[,10:22]~1)
+hel.rda.fulsoil = rda(tree.hel.all.pcnm[,10:22], tree.hel.all.pcnm[,57:74])
 
-hel.rda.fulsoil.full=rda(tree.hel.soil[,10:28]~tree.hel.soil$Ptot_long+tree.hel.soil$Po_long+tree.hel.soil$pH_long+tree.hel.soil$moist_long +tree.hel.soil$ps1_long+tree.hel.soil$ps2_long+tree.hel.soil$percc_long+tree.hel.soil$cton_long+tree.hel.soil$Ptot_nug+tree.hel.soil$Po_nug+tree.hel.soil$pH_nug+tree.hel.soil$moist_nug+tree.hel.soil$ps1_nug+tree.hel.soil$ps2_nug+tree.hel.soil$percc_nug+tree.hel.soil$pomc_nug+tree.hel.soil$cton_nug+tree.hel.soil$Ptot_short+tree.hel.soil$Po_short+tree.hel.soil$pH_short+tree.hel.soil$moist_short+tree.hel.soil$ps1_short+tree.hel.soil$percc_short+tree.hel.soil$pomc_short+tree.hel.soil$cton_short)
+hel.rda.fulsoil.full=rda(tree.hel.soil[,10:22]~tree.hel.soil$Ptot_long+tree.hel.soil$Po_long+tree.hel.soil$pH_long+tree.hel.soil$moist_long +tree.hel.soil$ps1_long+tree.hel.soil$ps2_long+tree.hel.soil$percc_long+tree.hel.soil$cton_long+tree.hel.soil$Ptot_nug+tree.hel.soil$Po_nug+tree.hel.soil$pH_nug+tree.hel.soil$moist_nug+tree.hel.soil$ps1_nug+tree.hel.soil$ps2_nug+tree.hel.soil$percc_nug+tree.hel.soil$pomc_nug+tree.hel.soil$cton_nug+tree.hel.soil$Ptot_short+tree.hel.soil$Po_short+tree.hel.soil$pH_short+tree.hel.soil$moist_short+tree.hel.soil$ps1_short+tree.hel.soil$percc_short+tree.hel.soil$pomc_short+tree.hel.soil$cton_short)
 
 tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
 tree.sel
 ## Let's store a model using the selected variables only
 names(tree.hel.all.pcnm)
-hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:28] ~ as.matrix(tree.hel.all.pcnm[,c(41:42,63)]))
+hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:28] ~ 1)
 anova(hel.rda.all.selpcnm)
 RsquareAdj(hel.rda.all.selpcnm)
 
@@ -1838,21 +1799,21 @@ rownames(tree.hel.soil)=tree.hel.soil[,1]
 tree.hel.soil=na.exclude(tree.hel.soil)
 colnames(tree.hel.soil)
 # Here is the global analysis. Can proceed if significant.  Use adj. R square as additional stopping criterion.
-hel.rda.fulsoil = rda(tree.hel.soil[,10:28], tree.hel.soil[,39:63])
+hel.rda.fulsoil = rda(tree.hel.soil[,10:22], tree.hel.soil[,32:56])
 anova(hel.rda.fulsoil)
 RsquareAdj(hel.rda.fulsoil)
 global.thresh=RsquareAdj(hel.rda.fulsoil)$adj.r.squared
 
-hel.rda.fulsoil.none = rda(tree.hel.soil[,10:28]~1)
-hel.rda.fulsoil = rda(tree.hel.soil[,10:28], tree.hel.soil[,39:63])
+hel.rda.fulsoil.none = rda(tree.hel.soil[,10:22]~1)
+hel.rda.fulsoil = rda(tree.hel.soil[,10:22], tree.hel.soil[,33:56])
 
-hel.rda.fulsoil.full=rda(tree.hel.soil[,10:28]~tree.hel.soil$Ptot_long+tree.hel.soil$Po_long+tree.hel.soil$pH_long+tree.hel.soil$moist_long +tree.hel.soil$ps1_long+tree.hel.soil$ps2_long+tree.hel.soil$percc_long+tree.hel.soil$cton_long+tree.hel.soil$Ptot_nug+tree.hel.soil$Po_nug+tree.hel.soil$pH_nug+tree.hel.soil$moist_nug+tree.hel.soil$ps1_nug+tree.hel.soil$ps2_nug+tree.hel.soil$percc_nug+tree.hel.soil$pomc_nug+tree.hel.soil$cton_nug+tree.hel.soil$Ptot_short+tree.hel.soil$Po_short+tree.hel.soil$pH_short+tree.hel.soil$moist_short+tree.hel.soil$ps1_short+tree.hel.soil$percc_short+tree.hel.soil$pomc_short+tree.hel.soil$cton_short)
+hel.rda.fulsoil.full=rda(tree.hel.soil[,10:22]~tree.hel.soil$Ptot_long+tree.hel.soil$Po_long+tree.hel.soil$pH_long+tree.hel.soil$moist_long +tree.hel.soil$ps1_long+tree.hel.soil$ps2_long+tree.hel.soil$percc_long+tree.hel.soil$cton_long+tree.hel.soil$Ptot_nug+tree.hel.soil$Po_nug+tree.hel.soil$pH_nug+tree.hel.soil$moist_nug+tree.hel.soil$ps1_nug+tree.hel.soil$ps2_nug+tree.hel.soil$percc_nug+tree.hel.soil$pomc_nug+tree.hel.soil$cton_nug+tree.hel.soil$Ptot_short+tree.hel.soil$Po_short+tree.hel.soil$pH_short+tree.hel.soil$moist_short+tree.hel.soil$ps1_short+tree.hel.soil$percc_short+tree.hel.soil$pomc_short+tree.hel.soil$cton_short)
 
 tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin=0.05,R2scope=TRUE)
 tree.sel
 
 names(tree.hel.soil)
-hel.rda.selsoil = rda(tree.hel.soil[,10:28] ~ as.matrix(tree.hel.soil[,c(41:42)]))
+hel.rda.selsoil = rda(tree.hel.soil[,10:22] ~ as.matrix(tree.hel.soil[,c(36,51)]))
 anova(hel.rda.selsoil)
 RsquareAdj(hel.rda.selsoil)
 plot(hel.rda.selsoil)
@@ -1867,7 +1828,7 @@ all.pcnmvecs=all.pcnm1$vectors
 tree.hel.all.pcnm=cbind(tree.hel.soil,all.pcnmvecs)
 names(tree.hel.all.pcnm)
 # Now run step 1, global analysis
-hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:28], tree.hel.all.pcnm[,64:94])
+hel.rda.all.fulpcnm=rda(tree.hel.all.pcnm[,10:22], tree.hel.all.pcnm[,57:87])
 anova(hel.rda.all.fulpcnm)
 RsquareAdj(hel.rda.all.fulpcnm)
 global.thresh=RsquareAdj(hel.rda.all.fulpcnm)$adj.r.squared
