@@ -819,7 +819,7 @@ tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin
 tree.sel
 
 # Constructing a model with selected variables.
-hel.rda.selsoil = rda(tree.hel.soil.gen[,10:16] ~ as.matrix(tree.hel.soil.gen[,c(19,21:22,34)]))
+hel.rda.selsoil = rda(tree.hel.soil.gen[,10:16] ~ as.matrix(tree.hel.soil.gen[,c(21,34)]))
 anova(hel.rda.selsoil)
 RsquareAdj(hel.rda.selsoil)
 plot(hel.rda.selsoil)
@@ -849,23 +849,27 @@ tree.sel=ordiR2step(hel.rda.fulsoil.none,scope=formula(hel.rda.fulsoil.full),Pin
 tree.sel
 ## Let's store a model using the selected variables only
 names(tree.hel.all.pcnm)
-hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:16] ~ as.matrix(tree.hel.all.pcnm[,c(42,45,52)]))
+hel.rda.all.selpcnm = rda(tree.hel.all.pcnm[,10:16] ~ as.matrix(tree.hel.all.pcnm[,c(42,44:45,52)]))
 anova(hel.rda.all.selpcnm)
 RsquareAdj(hel.rda.all.selpcnm)
 
 # Now that we have these parsimonious models, NOW WE CAN PERFORM VARIANCE PARTITIONING!  Hurray!
 colnames(tree.hel.all.pcnm)
-varpart(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,c(19,21:22,34)], tree.hel.all.pcnm[,c(42,45,52)])
+varpart(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,c(42,44:45,52)], tree.hel.all.pcnm[,c(21,34)])
 # The variance explained by soil variables and spatial structure clearly overlap. 
 # It also appears that there is more independent spatial structure in the trees than independent structuring by soil.
 # Are the soil variables significant after accounting for spatial structure, and vice versa?
 # Let's see.
-hel.rda.all.partpcnm=rda(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,c(19,21:22,34)], tree.hel.all.pcnm[,c(42,45,52)])
+hel.rda.all.partpcnm=rda(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,c(21,34)], tree.hel.all.pcnm[,c(42,44:45,52)])
+anova(hel.rda.all.partpcnm)
+# Yes.
+
+hel.rda.all.partpcnm=rda(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,c(42,44:45,52)], tree.hel.all.pcnm[,c(21,34)])
 anova(hel.rda.all.partpcnm)
 # Yes.
 
 colnames(tree.hel.all.pcnm)
-varpart(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,c(42,45,52)], tree.hel.all.pcnm[,c(19,21:22,34)])
+varpart(tree.hel.all.pcnm[,10:16], tree.hel.all.pcnm[,c(42,44:45,52)], tree.hel.all.pcnm[,c(21,34)])
 names(tree.hel.all.pcnm)
 plot(hel.rda.all.partpcnm)
 
